@@ -1,5 +1,10 @@
 #pragma once
 
+#include "Events/Event.hpp"
+#include "Events/ApplicationEvent.hpp"
+#include "Events/KeyEvent.hpp"
+#include "Events/MouseEvent.hpp"
+
 namespace Radiant
 {
 	struct WindowSpecification
@@ -15,10 +20,16 @@ namespace Radiant
 	class Window
 	{
 	public:
+		using EventCallbackFn = std::function<void(Event&)>;
+
 		virtual ~Window() {};
 
 		virtual const std::string& GetTitle() const = 0;
 		virtual void SetTitle(const std::string& title) = 0;
+
+		virtual void OnUpdate() const = 0;
+
+		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 
 		static Ref<Window> Create(const WindowSpecification& specification);
 	};

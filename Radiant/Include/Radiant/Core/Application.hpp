@@ -17,7 +17,11 @@ namespace Radiant
 	public:
 		Application(const ApplicationSpecification& specification);
 
+		void OnEvent(Event& event);
+
 		void Run();
+	private:
+		bool OnWindowClose(WindowCloseEvent& e);
 	private:
 		Ref<Window> m_Window;
 

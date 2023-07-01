@@ -7,8 +7,8 @@ workspace "Luminova Studios"
 
     language "C++"
 	cppdialect "C++17"
-    targetdir "build/Bin/%{cfg.buildcfg}"
-	objdir "build/Intermediates/%{cfg.buildcfg}"
+    targetdir "build/Bin/%{cfg.buildcfg}/%{prj.name}"
+	objdir "build/Intermediates/%{cfg.buildcfg}/%{prj.name}"
 
 	externalanglebrackets "On"
 	externalwarnings "Off"
@@ -17,3 +17,7 @@ workspace "Luminova Studios"
 
 include "Radiant/"
 include "Sandbox/"
+
+group "ThirdParty"
+include "ThirdParty/GLFW/"
+group ""

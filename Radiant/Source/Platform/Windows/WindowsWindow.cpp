@@ -1,5 +1,7 @@
 #include "WindowsWindow.hpp"
 
+#include <Core/Events/ApplicationEvent.hpp>
+
 namespace Radiant
 {
 	static void GLFWErrorCallback(int error, const char* description)
@@ -37,8 +39,90 @@ namespace Radiant
 
 		m_Window = glfwCreateWindow((int)m_Specification.Width, (int)m_Specification.Height, m_Specification.Title.c_str(), nullptr, nullptr);
 		glfwMakeContextCurrent(m_Window);
+		glfwSetWindowUserPointer(m_Window, &m_Data);
 
-		//glfwSetWindowUserPointer(m_Window, &m_Data);
+		// Set GLFW callbacks
+		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
+			{
+				auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
+
+				WindowResizeEvent event((unsigned int)width, (unsigned int)height);
+				data.EventCallback(event);
+				data.Width = width;
+				data.Height = height;
+			});
+
+		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
+			{
+				auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
+
+				WindowCloseEvent event;
+				data.EventCallback(event);
+			});
+
+		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double x, double y)
+			{
+				auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
+				MouseMovedEvent event((float)x, (float)y);
+				data.EventCallback(event);
+			});
+
+		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+			{
+				auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
+
+				switch (action)
+				{
+				case GLFW_PRESS:
+				{
+					KeyPressedEvent event((KeyCode)key, 0);
+					data.EventCallback(event);
+					break;
+				}
+				case GLFW_RELEASE:
+				{
+					KeyReleasedEvent event((KeyCode)key);
+					data.EventCallback(event);
+					break;
+				}
+				case GLFW_REPEAT:
+				{
+					KeyPressedEvent event((KeyCode)key, 1);
+					data.EventCallback(event);
+					break;
+				}
+				}
+			});
+
+
+		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
+			{
+				auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
+
+				switch (action)
+				{
+				case GLFW_PRESS:
+				{
+					MouseButtonPressedEvent event((MouseButton)button);
+					data.EventCallback(event);
+					break;
+				}
+				case GLFW_RELEASE:
+				{
+					MouseButtonReleasedEvent event((MouseButton)button);
+					data.EventCallback(event);
+					break;
+				}
+				}
+			});
+
+		// Update window size to actual size
+		{
+			int width, height;
+			glfwGetWindowSize(m_Window, &width, &height);
+			m_Data.Width = width;
+			m_Data.Height = height;
+		}
 	}
 
 	WindowsWindow::~WindowsWindow()
@@ -54,6 +138,12 @@ namespace Radiant
 	void WindowsWindow::SetTitle(const std::string& title)
 	{
 
+	}
+
+	void WindowsWindow::OnUpdate() const
+	{
+		glfwPollEvents();
+		glfwSwapBuffers(m_Window);
 	}
 
 }
