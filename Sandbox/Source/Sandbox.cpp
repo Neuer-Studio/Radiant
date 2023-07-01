@@ -1,0 +1,1 @@
+#include <Radiant/EntryPoint.hpp>
