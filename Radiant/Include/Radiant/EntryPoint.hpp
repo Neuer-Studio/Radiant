@@ -1,13 +1,12 @@
 #pragma once
 
-#include "Core/Logger.hpp"
+extern Radiant::Application* Radiant::CreateApplication(int argc, char** argv);
 
-int main()
+int main(int arc, char** argv)
 {
 	Radiant::LogInit();
-	while (1)
-	{
-		RA_INFO("HELLO");
-	}
+	auto app = Radiant::CreateApplication(arc, argv);
+	app->Run();
+	delete app;
 	return 0;
 }

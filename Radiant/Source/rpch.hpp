@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -17,3 +19,5 @@
 #include <random>
 
 #include <limits>
+
+#include <Core/Core.hpp>
