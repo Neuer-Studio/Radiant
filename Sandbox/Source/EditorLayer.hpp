@@ -4,6 +4,7 @@
 
 #include <Radiant/Rendering/VertexBuffer.hpp>
 #include <Radiant/Rendering/Rendering.hpp>
+#include <Radiant/Rendering/Shader.hpp>
 
 namespace Radiant
 {
@@ -26,6 +27,7 @@ namespace Radiant
 			b = Memory::Buffer::Copy(v, 6 * 4);
 			VBO = VertexBuffer::Create(b);
 
+			sh = Shader::Create("Resources/Shaders/TestShader.rads");
 		}
 		virtual void OnDetach() 
 		{
@@ -36,6 +38,7 @@ namespace Radiant
 			Rendering::Clear();
 
 			VBO->Bind();
+			sh->Bind();
 			Rendering::Draw();
 		}
 
@@ -45,5 +48,6 @@ namespace Radiant
 		}
 	private:
 		Memory::Ref<VertexBuffer> VBO;
+		Memory::Ref<Shader> sh;
 	};
 }

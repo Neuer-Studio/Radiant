@@ -68,7 +68,7 @@ namespace Radiant
 	{
 		m_ImGuiLayer->Begin();
 		ImGui::Begin("Renderer");
-		
+		ImGui::ShowDemoWindow();
 		ImGui::End();
 
 		for (Layer* layer : m_LayerStack)
