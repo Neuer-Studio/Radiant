@@ -30,6 +30,7 @@ project "Radiant"
         "../ThirdParty/GLFW/include/",
         "../ThirdParty/Glad/include/",
         "../ThirdParty/ImGui/",
+        "../ThirdParty/glm/",
         
         "../ThirdParty/",
         VulkanSDKPath,

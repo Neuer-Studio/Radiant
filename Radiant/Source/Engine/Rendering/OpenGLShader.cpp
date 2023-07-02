@@ -4,6 +4,13 @@
 
 namespace Radiant
 {
+#define UNIFORM_LOGGING 1
+#if UNIFORM_LOGGING
+#define LOG_UNIFORM(...) RA_WARN(__VA_ARGS__)
+#else
+#define LOG_UNIFORM
+#endif
+
 	static GLenum ShaderTypeFromString(const std::string& type)
 	{
 		if (type == "vertex")
@@ -160,4 +167,60 @@ namespace Radiant
 				glUseProgram(id);
 			});
 	}
+
+	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
+	{
+		Rendering::Submit([=]() {
+			UploadUniformFloat3(name, value);
+			});
+	}
+
+	//====================== Unifrom ==========================
+
+	static void UploadUniformFloat(uint32_t location, float value)
+	{
+		glUniform1f(location, value);
+	}
+
+	static void UploadUniformFloat2(uint32_t location, const glm::vec2& value)
+	{
+		glUniform2f(location, value.x, value.y);
+	}
+
+	static void UploadUniformFloat3(uint32_t location, const glm::vec3& value)
+	{
+		glUniform3f(location, value.x, value.y, value.z);
+	}
+
+	void OpenGLShader::UploadUniformFloat(const std::string& name, float value)
+	{
+		glUseProgram(m_RenderingID);
+		auto location = glGetUniformLocation(m_RenderingID, name.c_str());
+		if (location != -1)
+			glUniform1f(location, value);
+		else
+			LOG_UNIFORM("Uniform '{0}' not found!", name);
+	}
+
+	void OpenGLShader::UploadUniformFloat2(const std::string& name, const glm::vec2& values)
+	{
+		glUseProgram(m_RenderingID);
+		auto location = glGetUniformLocation(m_RenderingID, name.c_str());
+		if (location != -1)
+			glUniform2f(location, values.x, values.y);
+		else
+			LOG_UNIFORM("Uniform '{0}' not found!", name);
+	}
+
+
+	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& values)
+	{
+		glUseProgram(m_RenderingID);
+		auto location = glGetUniformLocation(m_RenderingID, name.c_str());
+		if (location != -1)
+			glUniform3f(location, values.x, values.y, values.z);
+		else
+			LOG_UNIFORM("Uniform '{0}' not found!", name);
+	}
+
 }
