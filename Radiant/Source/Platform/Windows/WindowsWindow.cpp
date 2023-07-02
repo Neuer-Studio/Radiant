@@ -41,6 +41,10 @@ namespace Radiant
 		glfwMakeContextCurrent(m_Window);
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 
+		// Create Rendering Context
+		m_RendererContext = RenderingContext::Create(m_Window);
+		m_RendererContext->Init();
+
 		// Set GLFW callbacks
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
 			{
@@ -137,13 +141,13 @@ namespace Radiant
 
 	void WindowsWindow::SetTitle(const std::string& title)
 	{
-
+		m_Specification.Title = title;
 	}
 
 	void WindowsWindow::OnUpdate() const
 	{
 		glfwPollEvents();
-		glfwSwapBuffers(m_Window);
+		m_RendererContext->SwapBuffers();
 	}
 
 }

@@ -3,12 +3,21 @@
 #include <Radiant/Core/Application.hpp>
 #include <Radiant/EntryPoint.hpp>
 
+#include "EditorLayer.hpp"
+
 class Sandbox : public Radiant::Application
 {
 public:
 	Sandbox(const Radiant::ApplicationSpecification& props)
 		: Radiant::Application(props)
-	{}
+	{
+
+	}
+
+	void OnInit() override
+	{
+		PushLayer(new Radiant::EditorLayer());
+	}
 };
 
 Radiant::Application* Radiant::CreateApplication(int argc, char** argv)

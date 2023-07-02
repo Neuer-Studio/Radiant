@@ -2,7 +2,9 @@
 
 #include <Windows.h>
 
+#include <Rendering/RenderingContext.hpp>
 #include <Core/Window.hpp>
+
 #include <GLFW/glfw3.h>
 
 namespace Radiant
@@ -34,5 +36,6 @@ namespace Radiant
 
 		WindowData m_Data;
 		GLFWwindow* m_Window;
+		Memory::Ref<RenderingContext> m_RendererContext;
 	};
 }

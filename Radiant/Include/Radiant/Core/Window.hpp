@@ -17,7 +17,7 @@ namespace Radiant
 		bool VSync = true;
 	};
 
-	class Window
+	class Window : public Memory::RefCounted
 	{
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
@@ -31,6 +31,6 @@ namespace Radiant
 
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 
-		static Ref<Window> Create(const WindowSpecification& specification);
+		static Memory::Ref<Window> Create(const WindowSpecification& specification);
 	};
 }

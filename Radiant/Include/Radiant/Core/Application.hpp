@@ -3,6 +3,7 @@
 #include <string>
 
 #include "Window.hpp"
+#include "LayerStack.hpp"
 
 namespace Radiant
 { 
@@ -16,6 +17,14 @@ namespace Radiant
 	{
 	public:
 		Application(const ApplicationSpecification& specification);
+		virtual ~Application();
+
+		virtual void OnInit() {}
+		virtual void OnShutdown() {}
+		virtual void OnUpdate() {}
+
+		void PushLayer(Layer* layer);
+		void PopLayer(Layer* layer);
 
 		void OnEvent(Event& event);
 
@@ -23,7 +32,8 @@ namespace Radiant
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 	private:
-		Ref<Window> m_Window;
+		Memory::Ref<Window> m_Window;
+		LayerStack m_LayerStack;
 
 		bool m_Run;
 	};

@@ -35,5 +35,5 @@ namespace Radiant
 }
 
 #define RA_INFO(...) Radiant::LogInfo(__VA_ARGS__);
-
+#define RA_WARN(...) Radiant::LogWarn(__VA_ARGS__);
 #define RA_ERROR(...) Radiant::LogError(__VA_ARGS__);

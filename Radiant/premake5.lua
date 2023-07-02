@@ -1,3 +1,5 @@
+local VulkanSDKPath = os.getenv("VULKAN_SDK") .. "/include"
+
 project "Radiant"
     kind "StaticLib"
 
@@ -26,13 +28,15 @@ project "Radiant"
     includedirs {
         "../ThirdParty/spdlog/include/",
         "../ThirdParty/GLFW/include/",
+        "../ThirdParty/Glad/include/",
+        
         "../ThirdParty/",
+        VulkanSDKPath,
     }
 
     filter "configurations:Debug"
         defines { "RADIANT_CONFIG_DEBUG" }
         symbols "On"
-
 
     filter "configurations:Release"
         defines { "RADIANT_CONFIG_RELEASE" }

@@ -1,4 +1,5 @@
 #include <Core/Application.hpp>
+#include <Rendering/Rendering.hpp>	
 
 namespace Radiant
 {
@@ -12,6 +13,20 @@ namespace Radiant
 		m_Window = Window::Create(ws);
 
 		m_Window->SetEventCallback(BIND_FN(OnEvent));
+
+		Rendering::Init();
+		Rendering::WaitAndRender();
+	}
+
+	Application::~Application()
+	{
+		for (Layer* layer : m_LayerStack)
+		{
+			layer->OnDetach();
+			delete layer;
+		}
+
+		Rendering::WaitAndRender();
 	}
 
 	void Application::OnEvent(Event& event)
@@ -26,10 +41,29 @@ namespace Radiant
 		return true;
 	}
 
+	void Application::PushLayer(Layer* layer)
+	{
+		m_LayerStack.PushLayer(layer);
+		layer->OnAttach();
+	}
+
+	void Application::PopLayer(Layer* layer)
+	{
+		m_LayerStack.PopLayer(layer);
+		layer->OnDetach();
+	}
+
 	void Application::Run()
 	{
+		OnInit();
+		Rendering::WaitAndRender();
 		while (m_Run)
 		{
+			for (Layer* layer : m_LayerStack)
+				layer->OnUpdate();
+
+			Rendering::WaitAndRender();
+
 			m_Window->OnUpdate();
 		}
 	}
