@@ -13,6 +13,7 @@ workspace "Luminova Studios"
 	externalanglebrackets "On"
 	externalwarnings "Off"
 	warnings "Off"
+    staticruntime "On"
 
 
 include "Radiant/"
@@ -21,4 +22,5 @@ include "Sandbox/"
 group "ThirdParty"
 include "ThirdParty/GLFW/"
 include "ThirdParty/Glad/"
+include "ThirdParty/ImGui/"
 group ""

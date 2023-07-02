@@ -29,14 +29,21 @@ project "Radiant"
         "../ThirdParty/spdlog/include/",
         "../ThirdParty/GLFW/include/",
         "../ThirdParty/Glad/include/",
+        "../ThirdParty/ImGui/",
         
         "../ThirdParty/",
         VulkanSDKPath,
     }
 
+    links
+    {
+        "ImGui"
+    }
+
     filter "configurations:Debug"
         defines { "RADIANT_CONFIG_DEBUG" }
         symbols "On"
+        runtime "Debug"
 
     filter "configurations:Release"
         defines { "RADIANT_CONFIG_RELEASE" }

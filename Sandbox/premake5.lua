@@ -25,10 +25,12 @@ project "Sandbox"
         "Radiant",
         "GLFW",
         "Glad",
+        "ImGui",
     }
     filter "configurations:Debug"
         defines { "RADIANT_CONFIG_DEBUG" }
         symbols "On"
+        runtime "Debug"
             
     filter "configurations:Release"
     defines { "RADIANT_CONFIG_RELEASE" }

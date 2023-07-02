@@ -5,6 +5,7 @@
 #include "Events/KeyEvent.hpp"
 #include "Events/MouseEvent.hpp"
 
+struct GLFWwindow;
 namespace Radiant
 {
 	struct WindowSpecification
@@ -23,6 +24,10 @@ namespace Radiant
 		using EventCallbackFn = std::function<void(Event&)>;
 
 		virtual ~Window() {};
+
+		virtual GLFWwindow* GetNativeWindow() const = 0;
+		virtual std::size_t GetHeight() const = 0;
+		virtual std::size_t GetWidth() const = 0;
 
 		virtual const std::string& GetTitle() const = 0;
 		virtual void SetTitle(const std::string& title) = 0;

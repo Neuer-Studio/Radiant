@@ -2,8 +2,8 @@
 
 #include <Radiant/Memory/Buffer.hpp>
 
-#include <Rendering/VertexBuffer.hpp>
-#include <Rendering/Rendering.hpp>
+#include <Radiant/Rendering/VertexBuffer.hpp>
+#include <Radiant/Rendering/Rendering.hpp>
 
 namespace Radiant
 {
@@ -37,6 +37,11 @@ namespace Radiant
 
 			VBO->Bind();
 			Rendering::Draw();
+		}
+
+		virtual void OnImGuiRender() override
+		{
+
 		}
 	private:
 		Memory::Ref<VertexBuffer> VBO;

@@ -15,6 +15,11 @@ namespace Radiant
 		WindowsWindow(const WindowSpecification& specification);
 		~WindowsWindow() override;
 
+		virtual GLFWwindow* GetNativeWindow() const override { return m_Window; }
+
+		virtual std::size_t GetHeight() const override { return m_Data.Height; }
+		virtual std::size_t GetWidth() const override { return m_Data.Width; }
+
 		virtual const std::string& GetTitle() const override;
 		virtual void SetTitle(const std::string& title) override;
 

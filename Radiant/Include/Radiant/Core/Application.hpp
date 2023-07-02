@@ -4,6 +4,7 @@
 
 #include "Window.hpp"
 #include "LayerStack.hpp"
+#include <Radiant/ImGui/ImGuiLayer.hpp>
 
 namespace Radiant
 { 
@@ -27,15 +28,22 @@ namespace Radiant
 		void PopLayer(Layer* layer);
 
 		void OnEvent(Event& event);
+		void RenderImGui();
 
 		void Run();
+
+		static Application& Get() { return *s_Instance; }
+		Memory::Ref<Window> GetWindow() { return m_Window; }
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 	private:
 		Memory::Ref<Window> m_Window;
 		LayerStack m_LayerStack;
+		ImGuiLayer* m_ImGuiLayer;
 
 		bool m_Run;
+	private:
+		static Application* s_Instance;
 	};
 
 

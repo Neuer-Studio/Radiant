@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Radiant/Memory/Buffer.hpp>
-#include "Rendering/RenderingTypes.hpp"
+#include <Radiant/Rendering/RenderingTypes.hpp>
 
 namespace Radiant
 {
