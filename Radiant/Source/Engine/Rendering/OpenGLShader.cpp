@@ -53,6 +53,51 @@ namespace Radiant
 		return shaderSource;
 	}
 
+	static bool StartWith(const std::string& string, const std::string& start)
+	{
+		return string.compare(0, start.length(), start) == 0;
+	}
+
+	std::vector<std::string> ExtractUniformNames(const std::string& shaderCode)
+	{
+		std::vector<std::string> uniformNames;
+
+		std::string::size_type pos = shaderCode.find("uniform");
+		while (pos != std::string::npos)
+		{
+			std::string::size_type startPos = pos + 7; // Length of "uniform" 
+			std::string::size_type endPos = shaderCode.find(";", startPos);
+			if (endPos != std::string::npos)
+			{
+				std::string uniformDeclaration = shaderCode.substr(startPos, endPos - startPos);
+
+				uniformDeclaration = uniformDeclaration.substr(uniformDeclaration.find_first_not_of(" \t"));
+				uniformDeclaration = uniformDeclaration.substr(0, uniformDeclaration.find_last_not_of(" \t") + 1);
+
+				std::string::size_type spacePos = uniformDeclaration.find(" ");
+				if (spacePos != std::string::npos)
+				{
+					std::string uniformName = uniformDeclaration.substr(spacePos + 1);
+					uniformNames.push_back(uniformName);
+				}
+			}
+
+			pos = shaderCode.find("uniform", pos + 1);
+		}
+
+		return uniformNames;
+	}
+
+
+	void OpenGLShader::Parse()
+	{
+		auto& vertexSource = m_ShaderSource[GL_VERTEX_SHADER];
+		auto& fragmentSource = m_ShaderSource[GL_FRAGMENT_SHADER];
+
+		auto vertexUniforms = ExtractUniformNames(vertexSource);
+		auto fragmentUniforms = ExtractUniformNames(fragmentSource);
+	}
+
 	OpenGLShader::OpenGLShader(const std::filesystem::path& path)
 		: m_AssetPath(path)
 	{
@@ -157,6 +202,7 @@ namespace Radiant
 		m_ShaderSource = PreProcess(source);
 
 		CompileAndUploadShader();
+		Parse();
 	}
 
 	void OpenGLShader::Bind() const

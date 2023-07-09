@@ -12,7 +12,7 @@ namespace Radiant
 		{
 		case RenderingAPIType::OpenGL: return new OpenGLRendering();
 		}
-		RADIANT_VERIFY(false, "Unknown RendererAPI");
+		RADIANT_VERIFY(false, "Unknown RenderingAPI");
 		return nullptr;
 	}
 

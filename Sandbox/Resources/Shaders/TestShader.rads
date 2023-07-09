@@ -5,14 +5,19 @@
 
 layout(location = 0) in vec3 a_Position;
 
+uniform vec3 u_Color3;
+
 void main()
 {
-	gl_Position = vec4(a_Position, 1.0);
+	gl_Position = vec4(a_Position + u_Color3, 1.0);
 }
 #type fragment
 #version 430
 
 uniform vec3 u_Color;
+uniform vec3 u_Color2;
+
+uniform sampler2D u_Sampler;
 
 out vec4 o_Color;
 

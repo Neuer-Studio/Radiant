@@ -13,7 +13,7 @@ namespace Radiant
 			case RenderingAPIType::None:    return nullptr;
 			case RenderingAPIType::OpenGL:  return Memory::Ref<OpenGLContext>::Create(windowHandle);
 		}
-		RADIANT_VERIFY(false, "Unknown RendererAPI");
+		RADIANT_VERIFY(false, "Unknown RenderingAPI");
 		return nullptr;
 	}
 

@@ -5,7 +5,7 @@
 struct GLFWwindow;
 namespace Radiant
 {
-	class OpenGLContext : public RenderingContext
+	class OpenGLContext final : public RenderingContext
 	{
 	public:
 		OpenGLContext(GLFWwindow* windowHandle);

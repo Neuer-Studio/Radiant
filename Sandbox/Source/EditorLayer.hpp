@@ -5,6 +5,8 @@
 #include <Radiant/Rendering/VertexBuffer.hpp>
 #include <Radiant/Rendering/Rendering.hpp>
 #include <Radiant/Rendering/Shader.hpp>
+#include <Radiant/Rendering/Texture.hpp>
+#include <Radiant/Rendering/Pipeline.hpp>
 
 #include <Radiant/Rendering/Platform/OpenGL/OpenGLShader.hpp>
 
@@ -33,6 +35,14 @@ namespace Radiant
 			VBO = VertexBuffer::Create(b);
 
 			sh = Shader::Create("Resources/Shaders/TestShader.rads");
+			tex = Texture2D::Create("Resources/Textures/BRDF_LUT.tga");
+			VertexBufferLayout vertexLayout;
+			vertexLayout = {
+					{ ShaderDataType::Float3, "a_Position" },
+			};
+			PipelineSpecification pipelineSpecification;
+			pipelineSpecification.Layout = vertexLayout;
+			pip = Pipeline::Create(pipelineSpecification);
 		}
 		virtual void OnDetach() 
 		{
@@ -45,6 +55,7 @@ namespace Radiant
 			sh.As<OpenGLShader>()->SetFloat3("u_Color", color);
 			VBO->Bind();
 			sh->Bind();
+			pip->Bind();
 			Rendering::Draw();
 		}
 
@@ -57,6 +68,8 @@ namespace Radiant
 	private:
 		Memory::Ref<VertexBuffer> VBO;
 		Memory::Ref<Shader> sh;
+		Memory::Ref<Texture2D> tex;
+		Memory::Ref<Pipeline> pip;
 
 		glm::vec3 color;
 	};

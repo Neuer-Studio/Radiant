@@ -4,7 +4,7 @@
 
 namespace Radiant
 {
-	class OpenGLImGuiLayer : public ImGuiLayer
+	class OpenGLImGuiLayer final: public ImGuiLayer
 	{
 	public:
 		OpenGLImGuiLayer();

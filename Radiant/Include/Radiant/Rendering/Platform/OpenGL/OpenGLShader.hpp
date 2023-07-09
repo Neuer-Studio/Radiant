@@ -7,7 +7,7 @@
 
 namespace Radiant
 {
-	class OpenGLShader : public Shader
+	class OpenGLShader final : public Shader
 	{
 	public:
 		OpenGLShader(const std::filesystem::path& path);
@@ -24,6 +24,7 @@ namespace Radiant
 		void Load(const std::string& source);
 		void CompileAndUploadShader();
 	private:
+		void Parse();
 		void UploadUniformFloat(const std::string& name, float value);
 		void UploadUniformFloat2(const std::string& name, const glm::vec2& values);
 		void UploadUniformFloat3(const std::string& name, const glm::vec3& values);

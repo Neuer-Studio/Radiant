@@ -27,9 +27,6 @@ namespace Radiant
 
 				glBindBuffer(GL_ARRAY_BUFFER, m_RenderingID);
 				glBufferData(GL_ARRAY_BUFFER, m_Buffer.Size, m_Buffer.Data, OpenGLUsage(m_Usage));
-
-				glEnableVertexAttribArray(0);
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 			});
 	}
 

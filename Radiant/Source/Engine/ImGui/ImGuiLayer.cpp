@@ -14,7 +14,7 @@ namespace Radiant
 		case RenderingAPIType::None:    return nullptr;
 		case RenderingAPIType::OpenGL:  return new OpenGLImGuiLayer();
 		}
-		RADIANT_VERIFY(false, "Unknown RendererAPI");
+		RADIANT_VERIFY(false, "Unknown RenderingAPI");
 		return nullptr;
 	}
 
@@ -25,7 +25,7 @@ namespace Radiant
 		case RenderingAPIType::None:    return nullptr;
 		case RenderingAPIType::OpenGL:  return new OpenGLImGuiLayer(name);
 		}
-		RADIANT_VERIFY(false, "Unknown RendererAPI");
+		RADIANT_VERIFY(false, "Unknown RenderingAPI");
 		return nullptr;
 	}
 

@@ -5,7 +5,7 @@
 
 namespace Radiant
 {
-	class OpenGLIndexBuffer : public IndexBuffer
+	class OpenGLIndexBuffer final : public IndexBuffer
 	{
 	public:
 		OpenGLIndexBuffer(Memory::Buffer data);

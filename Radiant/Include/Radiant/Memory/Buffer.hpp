@@ -30,6 +30,15 @@ namespace Radiant::Memory
 			Size = size;
 		}
 
+		void Release()
+		{
+			if (Data)
+			{
+				delete[] Data;
+				Data = nullptr;
+			}
+		}
+
 		void ZeroInitialize()
 		{
 			if(Data)

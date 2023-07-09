@@ -4,7 +4,7 @@
 
 namespace Radiant
 {
-	class OpenGLRendering : public RenderingAPI
+	class OpenGLRendering final : public RenderingAPI
 	{
 	public:
 		virtual void Init() override;

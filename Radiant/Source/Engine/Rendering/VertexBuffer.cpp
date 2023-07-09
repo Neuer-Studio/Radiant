@@ -9,9 +9,9 @@ namespace Radiant
 		switch (RenderingAPI::GetAPI())
 		{
 			case RenderingAPIType::None:    return nullptr;
-			case RenderingAPIType::OpenGL:  return Memory::Ref<OpenGLVertexBuffer>(new OpenGLVertexBuffer(buffer, usage));
+			case RenderingAPIType::OpenGL:  return Memory::Ref<OpenGLVertexBuffer>::Create(buffer, usage);
 		}
-		RADIANT_VERIFY(false, "Unknown RendererAPI");
+		RADIANT_VERIFY(false, "Unknown RenderingAPI");
 		return nullptr;
 	}
 
@@ -20,9 +20,9 @@ namespace Radiant
 		switch (RenderingAPI::GetAPI())
 		{
 			case RenderingAPIType::None:    return nullptr;
-			case RenderingAPIType::OpenGL:  return Memory::Ref<OpenGLVertexBuffer>(new OpenGLVertexBuffer(size, usage));
+			case RenderingAPIType::OpenGL:  return Memory::Ref<OpenGLVertexBuffer>::Create(size, usage);
 		}
-		RADIANT_VERIFY(false, "Unknown RendererAPI");
+		RADIANT_VERIFY(false, "Unknown RenderingAPI");
 		return nullptr;
 	}
 }
