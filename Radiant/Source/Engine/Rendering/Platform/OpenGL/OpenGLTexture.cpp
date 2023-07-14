@@ -47,10 +47,7 @@ namespace Radiant
 		Rendering::Submit([image]() mutable
 			{
 				image->Invalidate();
-
-				auto& buffer = image->GetBuffer();
-				stbi_image_free(buffer.Data);
-				buffer = Memory::Buffer();
+				//stbi_image_free(buffer.Data); //TODO: Should free iamge data
 			});
 
 	}

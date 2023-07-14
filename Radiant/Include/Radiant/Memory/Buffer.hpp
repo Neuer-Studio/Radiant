@@ -36,6 +36,8 @@ namespace Radiant::Memory
 			{
 				delete[] Data;
 				Data = nullptr;
+
+				Size = 0;
 			}
 		}
 

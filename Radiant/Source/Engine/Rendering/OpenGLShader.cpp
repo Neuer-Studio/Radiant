@@ -201,8 +201,12 @@ namespace Radiant
 
 		m_ShaderSource = PreProcess(source);
 
-		CompileAndUploadShader();
 		Parse();
+
+		Rendering::Submit([=]()
+			{
+				CompileAndUploadShader();
+			});
 	}
 
 	void OpenGLShader::Bind() const
@@ -210,6 +214,8 @@ namespace Radiant
 		RendererID id = m_RenderingID;
 		Rendering::Submit([id]()
 			{
+				glUniform1i(glGetUniformLocation(id, "u_Sampler"), 0);
+				glUniform1i(glGetUniformLocation(id, "u_Sampler1"), 1);
 				glUseProgram(id);
 			});
 	}

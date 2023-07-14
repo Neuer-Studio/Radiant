@@ -25,20 +25,24 @@ namespace Radiant
 		virtual void OnAttach()
 		{
 			Memory::Buffer b;
-			float* v = new float[6]
+			float* v = new float[20]
 			{
-				0.0f, 0.5f,
-					-0.5f, -0.5f,
-					0.5f, -0.5f
+				 // positions          // texture coords
+				 0.5f,  0.5f, 0.0f,   1.0f, 1.0f,   // top right
+				 0.5f, -0.5f, 0.0f,   1.0f, 0.0f,   // bottom right
+				-0.5f, -0.5f, 0.0f,   0.0f, 0.0f,   // bottom left
+				-0.5f,  0.5f, 0.0f,   0.0f, 1.0f    // top left 
 			};
-			b = Memory::Buffer::Copy(v, 6 * 4);
+			b = Memory::Buffer::Copy(v, 20 * 4);
 			VBO = VertexBuffer::Create(b);
 
 			sh = Shader::Create("Resources/Shaders/TestShader.rads");
-			tex = Texture2D::Create("Resources/Textures/BRDF_LUT.tga");
+			tex = Texture2D::Create("Resources/Textures/Tetxure.jpg");
+			tex1 = Texture2D::Create("Resources/Textures/awesomeface.png");
 			VertexBufferLayout vertexLayout;
 			vertexLayout = {
 					{ ShaderDataType::Float3, "a_Position" },
+					{ ShaderDataType::Float2, "a_TexCoords" },
 			};
 			PipelineSpecification pipelineSpecification;
 			pipelineSpecification.Layout = vertexLayout;
@@ -52,10 +56,11 @@ namespace Radiant
 		{
 			Rendering::Clear();
 
-			sh.As<OpenGLShader>()->SetFloat3("u_Color", color);
+			tex->Bind(0);
+			tex1->Bind(1);
 			VBO->Bind();
-			sh->Bind();
 			pip->Bind();
+			sh->Bind();
 			Rendering::Draw();
 		}
 
@@ -69,6 +74,7 @@ namespace Radiant
 		Memory::Ref<VertexBuffer> VBO;
 		Memory::Ref<Shader> sh;
 		Memory::Ref<Texture2D> tex;
+		Memory::Ref<Texture2D> tex1;
 		Memory::Ref<Pipeline> pip;
 
 		glm::vec3 color;

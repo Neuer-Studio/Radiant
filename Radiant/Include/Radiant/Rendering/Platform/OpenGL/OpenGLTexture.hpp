@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Radiant/Rendering/Texture.hpp>
+#include <Radiant/Rendering/RenderingTypes.hpp>
 
 namespace Radiant
 { 
@@ -21,12 +22,12 @@ namespace Radiant
 		virtual const std::filesystem::path& GetPath() const { return m_FilePath; }
 
 		virtual uint32_t GetMipLevelCount() const { return m_MipCount; }
-	private:
+	public:
 		Memory::Ref<Image2D> m_Image;
 		std::filesystem::path m_FilePath;
 
 		uint32_t m_MipCount;
-
+		RendererID m_RenderingID = 0;
 		std::size_t m_Width;
 		std::size_t m_Height;
 	};

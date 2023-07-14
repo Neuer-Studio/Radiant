@@ -29,7 +29,7 @@ namespace Radiant
 		std::size_t m_Height;
 		Memory::Buffer m_ImageData;
 
-		RendererID m_RenderingID;
+		RendererID m_RenderingID = 0;
 	};
 		namespace Utils {
 
