@@ -58,14 +58,14 @@ namespace Radiant
 		return string.compare(0, start.length(), start) == 0;
 	}
 
-	std::vector<std::string> ExtractUniformNames(const std::string& shaderCode)
+	std::vector<std::string> ExtractSampler2DUniformNames(const std::string& shaderCode)
 	{
 		std::vector<std::string> uniformNames;
 
 		std::string::size_type pos = shaderCode.find("uniform");
 		while (pos != std::string::npos)
 		{
-			std::string::size_type startPos = pos + 7; // Length of "uniform" 
+			std::string::size_type startPos = pos + 7; // Length of "uniform"
 			std::string::size_type endPos = shaderCode.find(";", startPos);
 			if (endPos != std::string::npos)
 			{
@@ -77,8 +77,12 @@ namespace Radiant
 				std::string::size_type spacePos = uniformDeclaration.find(" ");
 				if (spacePos != std::string::npos)
 				{
-					std::string uniformName = uniformDeclaration.substr(spacePos + 1);
-					uniformNames.push_back(uniformName);
+					std::string uniformType = uniformDeclaration.substr(0, spacePos);
+					if (uniformType == "sampler2D")
+					{
+						std::string uniformName = uniformDeclaration.substr(spacePos + 1);
+						uniformNames.push_back(uniformName);
+					}
 				}
 			}
 
@@ -94,8 +98,24 @@ namespace Radiant
 		auto& vertexSource = m_ShaderSource[GL_VERTEX_SHADER];
 		auto& fragmentSource = m_ShaderSource[GL_FRAGMENT_SHADER];
 
-		auto vertexUniforms = ExtractUniformNames(vertexSource);
-		auto fragmentUniforms = ExtractUniformNames(fragmentSource);
+		auto vertexUniforms = ExtractSampler2DUniformNames(vertexSource);
+		auto fragmentUniforms = ExtractSampler2DUniformNames(fragmentSource);
+
+		std::size_t uIndex = 0;
+		for (auto name : fragmentUniforms) // NOTE: Now we are parsing only fragment uniforms
+		{
+			m_SamplerUniforms.Uniforms.push_back({ name, uIndex});
+			uIndex++;
+		}
+	}
+
+	void OpenGLShader::UploadSamplerUniforms()
+	{
+		glUseProgram(m_RenderingID);
+		for (const auto& uniform : m_SamplerUniforms.Uniforms)
+		{
+			glUniform1i(glGetUniformLocation(m_RenderingID, uniform.Name.c_str()), uniform.Position);
+		}
 	}
 
 	OpenGLShader::OpenGLShader(const std::filesystem::path& path)
@@ -206,6 +226,7 @@ namespace Radiant
 		Rendering::Submit([=]()
 			{
 				CompileAndUploadShader();
+				UploadSamplerUniforms();
 			});
 	}
 
@@ -214,11 +235,11 @@ namespace Radiant
 		RendererID id = m_RenderingID;
 		Rendering::Submit([id]()
 			{
-				glUniform1i(glGetUniformLocation(id, "u_Sampler"), 0);
-				glUniform1i(glGetUniformLocation(id, "u_Sampler1"), 1);
 				glUseProgram(id);
 			});
 	}
+
+	// ========================================================
 
 	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
 	{

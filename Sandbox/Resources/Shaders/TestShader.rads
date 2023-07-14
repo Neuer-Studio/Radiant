@@ -33,5 +33,4 @@ out vec4 o_Color;
 void main()
 {
     o_Color = mix(texture(u_Sampler, vs_Input.TexCoords), texture(u_Sampler1, vs_Input.TexCoords), 0.2);
-    
 }

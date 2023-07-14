@@ -36,5 +36,9 @@ namespace Radiant
 		std::string m_Name;
 
 		std::unordered_map<GLenum, std::string> m_ShaderSource;
+	private:
+		SamplerUniformBuffer m_SamplerUniforms;
+	private:
+		void UploadSamplerUniforms();
 	};
 }

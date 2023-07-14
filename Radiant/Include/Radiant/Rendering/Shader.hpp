@@ -6,6 +6,36 @@
 
 namespace Radiant
 {
+
+	enum class SamplerUniformType
+	{
+		None = 0, sampler1D = 1, sampler2D, sampler3D
+	};
+
+	// Uniforms
+	struct ShaderUniformDeclaration
+	{
+		std::string Name;
+		std::size_t Position;
+	};
+
+	struct UniformBuffer
+	{
+		std::vector<ShaderUniformDeclaration> Uniforms;
+	};
+
+	// Sampler Uniforms
+	struct ShaderSamplerUniformDeclaration
+	{
+		std::string Name;
+		std::size_t Position;
+	};
+
+	struct SamplerUniformBuffer
+	{
+		std::vector<ShaderSamplerUniformDeclaration> Uniforms;
+	};
+
 	class Shader : public Memory::RefCounted
 	{
 	public:
