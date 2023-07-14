@@ -11,7 +11,10 @@
 #include <Radiant/Rendering/Platform/OpenGL/OpenGLShader.hpp>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <imgui/imgui.h>
+#include <Radiant/Core/Camera.hpp>
 
 namespace Radiant
 {
@@ -47,6 +50,8 @@ namespace Radiant
 			PipelineSpecification pipelineSpecification;
 			pipelineSpecification.Layout = vertexLayout;
 			pip = Pipeline::Create(pipelineSpecification);
+
+			camera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), (float)1600.f, (float)1600.f, 10.1f, 10000.0f));
 		}
 		virtual void OnDetach() 
 		{
@@ -54,8 +59,10 @@ namespace Radiant
 		}
 		virtual void OnUpdate() override
 		{
+			camera.Update();
+			auto viewProjection = camera.GetProjectionMatrix() * camera.GetViewMatrix();
 			Rendering::Clear();
-
+			sh->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 			tex->Bind(0);
 			tex1->Bind(1);
 			VBO->Bind();
@@ -76,6 +83,8 @@ namespace Radiant
 		Memory::Ref<Texture2D> tex;
 		Memory::Ref<Texture2D> tex1;
 		Memory::Ref<Pipeline> pip;
+
+		Camera camera;
 
 		glm::vec3 color;
 	};

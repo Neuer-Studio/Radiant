@@ -3,7 +3,6 @@
 #include <Radiant/Rendering/Shader.hpp>
 
 #include <glad/glad.h>
-#include <glm/glm.hpp>
 
 namespace Radiant
 {
@@ -25,11 +24,14 @@ namespace Radiant
 		void CompileAndUploadShader();
 	private:
 		void Parse();
+		private:
 		void UploadUniformFloat(const std::string& name, float value);
 		void UploadUniformFloat2(const std::string& name, const glm::vec2& values);
 		void UploadUniformFloat3(const std::string& name, const glm::vec3& values);
+		void UploadUniformMat4(const std::string& name, const glm::mat4& values);
 	public:
-		void SetFloat3(const std::string& name, const glm::vec3& value) ;
+		virtual void SetFloat3(const std::string& name, const glm::vec3& value) override;
+		virtual void SetMat4(const std::string& name, const glm::mat4& value) override;
 	private:
 		RendererID m_RenderingID = 0;
 		std::filesystem::path m_AssetPath;

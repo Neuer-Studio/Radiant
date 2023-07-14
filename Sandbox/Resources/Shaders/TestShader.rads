@@ -6,6 +6,8 @@
 layout(location = 0) in vec3 a_Position;
 layout(location = 1) in vec2 a_TexCoords;
 
+uniform mat4 u_ViewProjection;
+
 out VertexOutput
 {
 	vec2 TexCoords;
@@ -14,7 +16,7 @@ out VertexOutput
 void main()
 {
     vs_Output.TexCoords = a_TexCoords;
-	gl_Position = vec4(a_Position, 1.0);
+	gl_Position = u_ViewProjection *  vec4( a_Position, 1.0);
 }
 
 #type fragment

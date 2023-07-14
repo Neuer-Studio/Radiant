@@ -3,6 +3,7 @@
 #include <filesystem>
 
 #include <Radiant/Rendering/RenderingAPI.hpp>
+#include <glm/glm.hpp>
 
 namespace Radiant
 {
@@ -27,6 +28,7 @@ namespace Radiant
 	// Sampler Uniforms
 	struct ShaderSamplerUniformDeclaration
 	{
+		SamplerUniformType Type;
 		std::string Name;
 		std::size_t Position;
 	};
@@ -48,6 +50,9 @@ namespace Radiant
 		virtual RendererID GetRendererID() const = 0;
 
 		static Memory::Ref<Shader> Create(const std::filesystem::path& path);
+	public:
+		virtual void SetFloat3(const std::string& name, const glm::vec3& value) = 0;
+		virtual void SetMat4(const std::string& name, const glm::mat4& value) = 0;
 	};
 
 }

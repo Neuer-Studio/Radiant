@@ -58,7 +58,7 @@ namespace Radiant
 		return string.compare(0, start.length(), start) == 0;
 	}
 
-	std::vector<std::string> ExtractSampler2DUniformNames(const std::string& shaderCode)
+	std::vector<std::string> ExtractUniformNames(const std::string& shaderCode, const std::string& findUniform)
 	{
 		std::vector<std::string> uniformNames;
 
@@ -78,7 +78,7 @@ namespace Radiant
 				if (spacePos != std::string::npos)
 				{
 					std::string uniformType = uniformDeclaration.substr(0, spacePos);
-					if (uniformType == "sampler2D")
+					if (uniformType == findUniform)
 					{
 						std::string uniformName = uniformDeclaration.substr(spacePos + 1);
 						uniformNames.push_back(uniformName);
@@ -98,13 +98,13 @@ namespace Radiant
 		auto& vertexSource = m_ShaderSource[GL_VERTEX_SHADER];
 		auto& fragmentSource = m_ShaderSource[GL_FRAGMENT_SHADER];
 
-		auto vertexUniforms = ExtractSampler2DUniformNames(vertexSource);
-		auto fragmentUniforms = ExtractSampler2DUniformNames(fragmentSource);
+		auto vertexSamplerUniforms = ExtractUniformNames(vertexSource, "sampler2D");
+		auto fragmentSamplerUniforms = ExtractUniformNames(fragmentSource, "sampler2D");
 
 		std::size_t uIndex = 0;
-		for (auto name : fragmentUniforms) // NOTE: Now we are parsing only fragment uniforms
+		for (auto name : fragmentSamplerUniforms) // NOTE: Now we are parsing only fragment uniforms
 		{
-			m_SamplerUniforms.Uniforms.push_back({ name, uIndex});
+			m_SamplerUniforms.Uniforms.push_back({ SamplerUniformType::sampler2D, name, uIndex});
 			uIndex++;
 		}
 	}
@@ -248,6 +248,13 @@ namespace Radiant
 			});
 	}
 
+	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
+	{
+		Rendering::Submit([=]() {
+			UploadUniformMat4(name, value);
+			});
+	}
+
 	//====================== Unifrom ==========================
 
 	static void UploadUniformFloat(uint32_t location, float value)
@@ -292,6 +299,16 @@ namespace Radiant
 		auto location = glGetUniformLocation(m_RenderingID, name.c_str());
 		if (location != -1)
 			glUniform3f(location, values.x, values.y, values.z);
+		else
+			LOG_UNIFORM("Uniform '{0}' not found!", name);
+	}
+
+	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& values)
+	{
+		glUseProgram(m_RenderingID);
+		auto location = glGetUniformLocation(m_RenderingID, name.c_str());
+		if (location != -1)
+			glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)&values);
 		else
 			LOG_UNIFORM("Uniform '{0}' not found!", name);
 	}
