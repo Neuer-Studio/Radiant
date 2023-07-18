@@ -26,14 +26,20 @@ namespace Radiant
 		s_RendererAPI->Init();
 	}
 
-	void Rendering::Draw()
+	void Rendering::DrawIndexed(std::size_t count)
 	{
-		s_RendererAPI->Draw();
+		Rendering::Submit([=]()
+			{
+				s_RendererAPI->DrawIndexed(count);
+			});
 	}
 
 	void Rendering::Clear()
 	{
-		s_RendererAPI->Clear();
+		Rendering::Submit([=]()
+			{
+				s_RendererAPI->Clear();
+			});
 	}
 
 	void Rendering::Submit(std::function<void()> func)

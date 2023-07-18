@@ -86,8 +86,8 @@ namespace Radiant
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate();
 
-			RenderImGui();
 			Rendering::WaitAndRender();
+			RenderImGui();
 
 			m_Window->OnUpdate();
 		}
