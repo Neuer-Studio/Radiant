@@ -8,16 +8,18 @@
 namespace Radiant
 {
 
-	enum class SamplerUniformType
+	enum class UniformType
 	{
-		None = 0, sampler1D = 1, sampler2D, sampler3D
+		None = 0, sampler1D = 1, sampler2D, sampler3D, // Sampler
+		Float, Float2, Float3 // Float 
 	};
 
 	// Uniforms
 	struct ShaderUniformDeclaration
 	{
+		UniformType Type;
 		std::string Name;
-		std::size_t Position;
+		uint32_t Position;
 	};
 
 	struct UniformBuffer
@@ -28,9 +30,9 @@ namespace Radiant
 	// Sampler Uniforms
 	struct ShaderSamplerUniformDeclaration
 	{
-		SamplerUniformType Type;
+		UniformType Type;
 		std::string Name;
-		std::size_t Position;
+		uint32_t Position;
 	};
 
 	struct SamplerUniformBuffer
