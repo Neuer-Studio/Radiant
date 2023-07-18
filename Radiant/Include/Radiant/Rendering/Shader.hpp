@@ -17,27 +17,14 @@ namespace Radiant
 	// Uniforms
 	struct ShaderUniformDeclaration
 	{
-		UniformType Type;
-		std::string Name;
-		uint32_t Position;
+		UniformType Type = UniformType::None;
+		std::string Name = "None";
+		uint32_t Position = -1;
 	};
 
 	struct UniformBuffer
 	{
 		std::vector<ShaderUniformDeclaration> Uniforms;
-	};
-
-	// Sampler Uniforms
-	struct ShaderSamplerUniformDeclaration
-	{
-		UniformType Type;
-		std::string Name;
-		uint32_t Position;
-	};
-
-	struct SamplerUniformBuffer
-	{
-		std::vector<ShaderSamplerUniformDeclaration> Uniforms;
 	};
 
 	class Shader : public Memory::RefCounted

@@ -142,10 +142,9 @@ namespace Radiant
 
 	void OpenGLShader::UploadSamplerUniforms()
 	{
-		glUseProgram(m_RenderingID);
 		for (const auto& uniform : m_SamplerUniforms.Uniforms)
 		{
-			glUniform1i(glGetUniformLocation(m_RenderingID, uniform.Name.c_str()), uniform.Position);
+			glUniform1i(GetUniformPosition(uniform.Name.c_str()), uniform.Position);
 		}
 	}
 
@@ -305,8 +304,7 @@ namespace Radiant
 
 	void OpenGLShader::UploadUniformFloat(const std::string& name, float value)
 	{
-		glUseProgram(m_RenderingID);
-		auto location = glGetUniformLocation(m_RenderingID, name.c_str());
+		auto location = GetRadiantUniformPosition(name);
 		if (location != -1)
 			glUniform1f(location, value);
 		else
@@ -315,8 +313,7 @@ namespace Radiant
 
 	void OpenGLShader::UploadUniformFloat2(const std::string& name, const glm::vec2& values)
 	{
-		glUseProgram(m_RenderingID);
-		auto location = glGetUniformLocation(m_RenderingID, name.c_str());
+		auto location = GetRadiantUniformPosition(name);
 		if (location != -1)
 			glUniform2f(location, values.x, values.y);
 		else
@@ -326,8 +323,7 @@ namespace Radiant
 
 	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& values)
 	{
-		glUseProgram(m_RenderingID);
-		auto location = glGetUniformLocation(m_RenderingID, name.c_str());
+		auto location = GetRadiantUniformPosition(name);
 		if (location != -1)
 			glUniform3f(location, values.x, values.y, values.z);
 		else
@@ -336,18 +332,38 @@ namespace Radiant
 
 	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& values)
 	{
-		glUseProgram(m_RenderingID);
-		auto location = GetUniformPosition(name.c_str());
+		auto location = GetRadiantUniformPosition(name);
 		if (location != -1)
 			glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)&values);
 		else
 			LOG_UNIFORM("Uniform '{0}' not found!", name);
 	}
 
-	uint32_t OpenGLShader::GetUniformPosition(const char* uniformName)
+	uint32_t OpenGLShader::GetUniformPosition(const std::string& uniformName)
 	{
 		glUseProgram(m_RenderingID);
-		return glGetUniformLocation(m_RenderingID, uniformName);
+		return glGetUniformLocation(m_RenderingID, uniformName.c_str());
 	}
 
+	uint32_t OpenGLShader::GetRadiantUniformPosition(const std::string& uniformName)
+	{
+		auto it = std::find_if(m_Unfiforms.Uniforms.begin(), m_Unfiforms.Uniforms.end(), [&](const ShaderUniformDeclaration& uniform) {
+			return uniform.Name == uniformName;
+			});
+
+		if (it != m_Unfiforms.Uniforms.end())
+		{
+			int index = std::distance(m_Unfiforms.Uniforms.begin(), it);
+			uint32_t position = m_Unfiforms.Uniforms[index].Position;
+			RADIANT_VERIFY(position >= 0);
+
+			return position;
+		}
+		else
+		{
+			RA_ERROR("[OpenGLShader] GetRadiantUniformPosition() calls GetUniformPosition(). Incorrect position parsing!");
+			return GetUniformPosition(uniformName.c_str());
+		}
+		return -1;
+	}
 }
