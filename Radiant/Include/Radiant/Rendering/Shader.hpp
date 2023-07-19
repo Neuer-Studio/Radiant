@@ -7,11 +7,16 @@
 
 namespace Radiant
 {
+	enum class ShaderType
+	{
+		None = 0, Fragment, Vertex
+	};
 
 	enum class UniformType
 	{
 		None = 0, sampler1D = 1, sampler2D, sampler3D, // Sampler
-		Float, Float2, Float3 // Float 
+		Float, Float2, Float3, Float4, // Float 
+		Mat2, Mat3, Mat4, // Mat
 	};
 
 	// Uniforms
@@ -24,7 +29,7 @@ namespace Radiant
 
 	struct UniformBuffer
 	{
-		std::vector<ShaderUniformDeclaration> Uniforms;
+		std::unordered_map<std::string, ShaderUniformDeclaration> Uniforms;
 	};
 
 	class Shader : public Memory::RefCounted
