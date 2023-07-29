@@ -53,13 +53,12 @@ namespace Radiant
 				 0.5f,  0.5f, 0.5f,  0.0f, 0.0f, 1.0f,
 				-0.5f,  0.5f, 0.5f,  0.0f, 0.0f, 1.0f,
 
-				// Back face (Fixed the order to counter-clockwise)
-				 0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+				// Back face (Note the clockwise order)
 				-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-				-0.5f,  0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+				 0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
 				 0.5f,  0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+				-0.5f,  0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
 			};
-
 			buf = Memory::Buffer::Copy(v, sizeof(v));
 
 		
@@ -121,15 +120,15 @@ namespace Radiant
 
 			m_CubeShader->Bind();
 
-			m_CubeShader->SetFloat3("u_Material.ambient", m_Material.ambient);
-			m_CubeShader->SetFloat3("u_Material.diffuse", m_Material.diffuse);
-			m_CubeShader->SetFloat3("u_Material.specular", m_Material.specular);
-			m_CubeShader->SetFloat("u_Material.shininess", m_Material.shininess);
+			m_CubeShader->SetFloat3("u_Material.ambient", m_Material.ambient, UniformScope::Struct);
+			m_CubeShader->SetFloat3("u_Material.diffuse", m_Material.diffuse, UniformScope::Struct);
+			m_CubeShader->SetFloat3("u_Material.specular", m_Material.specular, UniformScope::Struct);
+			m_CubeShader->SetFloat("u_Material.shininess", m_Material.shininess, UniformScope::Struct);
 
-			m_CubeShader->SetFloat3("u_Light.position", m_Light.position);
-			m_CubeShader->SetFloat3("u_Light.ambient", m_Light.ambient);
-			m_CubeShader->SetFloat3("u_Light.diffuse", m_Light.diffuse);
-			m_CubeShader->SetFloat3("u_Light.specular", m_Light.specular);
+			m_CubeShader->SetFloat3("u_Light.position", m_Light.position, UniformScope::Struct);
+			m_CubeShader->SetFloat3("u_Light.ambient", m_Light.ambient, UniformScope::Struct);
+			m_CubeShader->SetFloat3("u_Light.diffuse", m_Light.diffuse, UniformScope::Struct);
+			m_CubeShader->SetFloat3("u_Light.specular", m_Light.specular, UniformScope::Struct);
 
 			m_CubeShader->SetMat4("u_Model", modelMatrix);
 			m_CubeShader->SetMat4("u_View", viewMatrix);

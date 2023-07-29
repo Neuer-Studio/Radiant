@@ -25,21 +25,21 @@ namespace Radiant
 	private:
 		void Parse();
 	private:
-		void UploadUniformInt(const std::string& name, int value);
+		void UploadUniformInt(const std::string& name, int value, UniformScope type);
 
-		void UploadUniformFloat(const std::string& name, float value);
-		void UploadUniformFloat2(const std::string& name, const glm::vec2& values);
-		void UploadUniformFloat3(const std::string& name, const glm::vec3& values);
+		void UploadUniformFloat(const std::string& name, float value, UniformScope type);
+		void UploadUniformFloat2(const std::string& name, const glm::vec2& values, UniformScope type);
+		void UploadUniformFloat3(const std::string& name, const glm::vec3& values, UniformScope type);
 
-		void UploadUniformMat4(const std::string& name, const glm::mat4& values);
+		void UploadUniformMat4(const std::string& name, const glm::mat4& values, UniformScope type);
 	private:
 		int32_t GetUniformPosition(const std::string& uniformName);
-		int32_t GetRadiantUniformPosition(const std::string& uniformName, ShaderType type = ShaderType::None);
+		int32_t GetRadiantUniformPosition(const std::string& uniformName, UniformScope type);
 	public:
-		virtual void SetFloat(const std::string& name, float value) override;
-		virtual void SetFloat2(const std::string& name, const glm::vec2& value) override;
-		virtual void SetFloat3(const std::string& name, const glm::vec3& value) override;
-		virtual void SetMat4(const std::string& name, const glm::mat4& value) override;
+		virtual void SetFloat(const std::string& name, float value, UniformScope type = UniformScope::None) override;
+		virtual void SetFloat2(const std::string& name, const glm::vec2& value, UniformScope type = UniformScope::None) override;
+		virtual void SetFloat3(const std::string& name, const glm::vec3& value, UniformScope type = UniformScope::None) override;
+		virtual void SetMat4(const std::string& name, const glm::mat4& value, UniformScope type = UniformScope::None) override;
 	private:
 		RendererID m_RenderingID = 0;
 		std::filesystem::path m_AssetPath;
@@ -50,6 +50,10 @@ namespace Radiant
 		UniformBuffer m_SamplerUniforms;
 		UniformBuffer m_FragmentUnfiforms;
 		UniformBuffer m_VertexUnfiforms;
+
+		StructBuffer m_StructUnfiforms;
+		UniformBuffer m_FragmentStructUnfiforms;
+		UniformBuffer m_VertexStructUnfiforms;
 	private:
 		void UploadSamplerUniforms();
 	};

@@ -15,30 +15,32 @@ namespace Radiant
 
 	static struct UniformsSpecification
 	{
-		UniformType Type;
+		GLSLType Type;
 		std::string UniformName;
 	};
 
 	namespace Utils
 	{
-		static UniformType OpenGLUniformTypeToRaiantUniformType(const std::string& uniform)
+		static GLSLType OpenGLUniformTypeToRaiantUniformType(const std::string& uniform)
 		{
 			if (uniform == "sampler2D")
-				return UniformType::sampler2D;
+				return GLSLType::sampler2D;
 			if (uniform == "sampler3D")
-				return UniformType::sampler3D;
+				return GLSLType::sampler3D;
 
+			if (uniform == "float")
+				return GLSLType::Float;
 			if (uniform == "vec2")
-				return UniformType::Float2;
+				return GLSLType::Float2;
 			if (uniform == "vec3")
-				return UniformType::Float3;
+				return GLSLType::Float3;
 			if (uniform == "vec4")
-				return UniformType::Float4;
+				return GLSLType::Float4;
 
 			if (uniform == "mat4")
-				return UniformType::Mat4;
+				return GLSLType::Mat4;
 
-			return UniformType::None;
+			return GLSLType::None;
 		}
 
 
@@ -108,10 +110,13 @@ namespace Radiant
 					std::string::size_type spacePos = uniformDeclaration.find(" ");
 					if (spacePos != std::string::npos)
 					{
-						UniformType uniformType = OpenGLUniformTypeToRaiantUniformType(uniformDeclaration.substr(0, spacePos));
+						GLSLType uniformType = OpenGLUniformTypeToRaiantUniformType(uniformDeclaration.substr(0, spacePos));
 
-						std::string uniformName = uniformDeclaration.substr(spacePos + 1);
-						uniformSpecification.push_back({ uniformType, uniformName });
+						if (uniformType != GLSLType::None)
+						{
+							std::string uniformName = uniformDeclaration.substr(spacePos + 1);
+							uniformSpecification.push_back({ uniformType, uniformName });
+						}
 					}
 				}
 
@@ -120,7 +125,103 @@ namespace Radiant
 
 			return uniformSpecification;
 		}
+
+		static ShaderStructDeclaration ParseStruct(const std::string& block)
+		{
+			ShaderStructDeclaration result;
+
+			size_t structStart = block.find("struct");
+			size_t nameStart = block.find_first_not_of(" \t", structStart + 6);
+			size_t nameEnd = block.find_first_of(" \t\n\r{", nameStart);
+
+			result.StructName = block.substr(nameStart, nameEnd - nameStart);
+
+			size_t braceStart = block.find('{', nameEnd);
+			size_t braceEnd = block.find('}', braceStart);
+
+			std::string fieldsBlock = block.substr(braceStart + 1, braceEnd - braceStart - 1);
+
+			size_t fieldStart = 0;
+			while (fieldStart != std::string::npos && fieldStart < fieldsBlock.size())
+			{
+				size_t fieldEnd = fieldsBlock.find(';', fieldStart);
+				if (fieldEnd == std::string::npos)
+					break;
+
+				std::string fieldStr = fieldsBlock.substr(fieldStart, fieldEnd - fieldStart);
+
+				fieldStr.erase(fieldStr.begin(), std::find_if(fieldStr.begin(), fieldStr.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+				fieldStr.erase(std::find_if(fieldStr.rbegin(), fieldStr.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), fieldStr.end());
+
+				size_t typeEnd = fieldStr.find_last_of(" \t");
+				if (typeEnd == std::string::npos)
+					break;
+
+				std::string typeStr = fieldStr.substr(0, typeEnd);
+
+				size_t nameStart = fieldStr.find_first_not_of(" \t\r\n", typeEnd);
+				if (nameStart == std::string::npos)
+					break;
+
+				std::string name = fieldStr.substr(nameStart);
+
+				result.Fields.push_back({ OpenGLUniformTypeToRaiantUniformType(typeStr), name });
+
+				fieldStart = fieldEnd + 1;
+			}
+
+			return result;
+		}
+
+		/*
+		* std::string = Uniform Name
+		* ShaderStructDeclaration = Sturct declaration (fields)
+		*/
+		static std::unordered_map<std::string, ShaderStructDeclaration> ExtractShaderStruct(const std::string& shaderCode)
+		{
+			std::unordered_map<std::string, ShaderStructDeclaration> structsMap;
+
+			std::vector<ShaderStructDeclaration> structsDecl;
+
+			size_t pos = 0;
+			while ((pos = shaderCode.find("struct", pos)) != std::string::npos)
+			{
+				size_t braceEnd = shaderCode.find('}', pos);
+				std::string structBlock = shaderCode.substr(pos, braceEnd - pos + 1);
+
+				structsDecl.push_back(ParseStruct(structBlock));
+				pos = braceEnd + 1;
+			}
+
+			pos = 0;
+			while ((pos = shaderCode.find("uniform", pos)) != std::string::npos)
+			{
+				size_t nameStart = shaderCode.find_first_not_of(" \t", pos + 7);
+				size_t nameEnd = shaderCode.find_first_of(" \t;", nameStart);
+				std::string uniformName = shaderCode.substr(nameStart, nameEnd - nameStart);
+				
+				nameStart = nameEnd + 1;
+				nameEnd = shaderCode.find(";", nameStart);
+
+				std::string varName = shaderCode.substr(nameStart, nameEnd - nameStart);
+
+				for (const auto& decl : structsDecl)
+				{
+					if (decl.StructName == uniformName)
+					{
+						structsMap[varName] = decl;
+						break;
+					}
+				}
+
+				pos = nameEnd + 1;
+			}
+
+			return structsMap;
+		}
 	}
+
+	// ================================== Utils end ==========================
 
 	void OpenGLShader::Parse()
 	{
@@ -134,11 +235,11 @@ namespace Radiant
 			int32_t uIndex = 0;
 			for (auto name : fragmentUniforms)
 			{
-				UniformType Type = fragmentUniforms[uIndex].Type;
+				GLSLType Type = fragmentUniforms[uIndex].Type;
 				std::string Name = fragmentUniforms[uIndex].UniformName;
 
 				// Extract samplers
-				if(Type == UniformType::sampler1D || Type == UniformType::sampler2D || Type == UniformType::sampler3D)
+				if(Type == GLSLType::sampler1D || Type == GLSLType::sampler2D || Type == GLSLType::sampler3D)
 				{
 					m_SamplerUniforms.Uniforms[Name] = { Type, Name, uIndex };
 				}
@@ -159,7 +260,7 @@ namespace Radiant
 			uint32_t uIndex = 0;
 			for (auto name : vertexUniforms)
 			{
-				UniformType Type = vertexUniforms[uIndex].Type;
+				GLSLType Type = vertexUniforms[uIndex].Type;
 				std::string Name = vertexUniforms[uIndex].UniformName;
 
 				m_VertexUnfiforms.Uniforms[Name] = { Type, Name, GetUniformPosition(Name.c_str()) };
@@ -169,6 +270,24 @@ namespace Radiant
 			}
 		}
 
+		auto m_StructUnfiforms = Utils::ExtractShaderStruct(fragmentSource);
+
+		// Parsing struct uniforms
+		{
+			for (auto& [name, structDecl] : m_StructUnfiforms)
+			{
+				for (auto& field : structDecl.Fields)
+				{
+					std::string GLSLName = name + "." + field.Name;
+					field.Position = GetUniformPosition(GLSLName);
+					field.GLSLName = GLSLName;
+
+					m_FragmentStructUnfiforms.Uniforms[GLSLName] = { field.Type, GLSLName, field.Position };
+
+				}
+			}
+		}
+		
 	}
 
 	void OpenGLShader::UploadSamplerUniforms()
@@ -302,57 +421,57 @@ namespace Radiant
 
 	// ========================================================
 
-	void OpenGLShader::SetFloat(const std::string& name, float value)
+	void OpenGLShader::SetFloat(const std::string& name, float value, UniformScope type)
 	{
 		Rendering::Submit([=]() {
-			UploadUniformFloat(name, value);
+			UploadUniformFloat(name, value, type);
 			});
 	}
 
-	void OpenGLShader::SetFloat2(const std::string& name, const glm::vec2& value)
+	void OpenGLShader::SetFloat2(const std::string& name, const glm::vec2& value, UniformScope type)
 	{
 		Rendering::Submit([=]() {
-			UploadUniformFloat2(name, value);
+			UploadUniformFloat2(name, value, type);
 			});
 	}
 
-	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
+	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value, UniformScope type)
 	{
 		Rendering::Submit([=]() {
-			UploadUniformFloat3(name, value);
+			UploadUniformFloat3(name, value, type);
 			});
 	}
 
-	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
+	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value, UniformScope type)
 	{
 		Rendering::Submit([=]() {
-			UploadUniformMat4(name, value);
+			UploadUniformMat4(name, value, type);
 			});
 	}
 
 	//====================== Unifrom ==========================
 
-	void OpenGLShader::UploadUniformInt(const std::string& name, int value)
+	void OpenGLShader::UploadUniformInt(const std::string& name, int value, UniformScope type)
 	{
-		auto location = GetRadiantUniformPosition(name);
+		auto location = GetRadiantUniformPosition(name, type);
 		if (location != -1)
 			glUniform1i(location, value);
 		else
 			LOG_UNIFORM("Uniform '{0}' not found!", name);
 	}
 
-	void OpenGLShader::UploadUniformFloat(const std::string& name, float value)
+	void OpenGLShader::UploadUniformFloat(const std::string& name, float value, UniformScope type)
 	{
-		auto location = GetRadiantUniformPosition(name);
+		auto location = GetRadiantUniformPosition(name, type);
 		if (location != -1)
 			glUniform1f(location, value);
 		else
 			LOG_UNIFORM("Uniform '{0}' not found!", name);
 	}
 
-	void OpenGLShader::UploadUniformFloat2(const std::string& name, const glm::vec2& values)
+	void OpenGLShader::UploadUniformFloat2(const std::string& name, const glm::vec2& values, UniformScope type)
 	{
-		auto location = GetRadiantUniformPosition(name);
+		auto location = GetRadiantUniformPosition(name, type);
 		if (location != -1)
 			glUniform2f(location, values.x, values.y);
 		else
@@ -360,18 +479,18 @@ namespace Radiant
 	}
 
 
-	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& values)
+	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& values, UniformScope type)
 	{
-		auto location = GetRadiantUniformPosition(name);
+		auto location = GetRadiantUniformPosition(name, type);
 		if (location != -1)
 			glUniform3f(location, values.x, values.y, values.z);
 		else
 			LOG_UNIFORM("Uniform '{0}' not found!", name);
 	}
 
-	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& values)
+	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& values, UniformScope type)
 	{
-		auto location = GetRadiantUniformPosition(name);
+		auto location = GetRadiantUniformPosition(name, type);
 		if (location != -1)
 			glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)&values);
 		else
@@ -384,7 +503,9 @@ namespace Radiant
 		return glGetUniformLocation(m_RenderingID, uniformName.c_str());
 	}
 
-	int32_t OpenGLShader::GetRadiantUniformPosition(const std::string& uniformName, ShaderType type)
+	// ========================================================================
+
+	int32_t OpenGLShader::GetRadiantUniformPosition(const std::string& uniformName, UniformScope type)
 	{
 		auto findUniformPosition = [=](const std::string& name, UniformBuffer& buffer) -> int32_t
 		{
@@ -399,7 +520,7 @@ namespace Radiant
 		};
 
 		switch (type) {
-		case ShaderType::None: 
+		case UniformScope::None:
 		{
 			
 			int32_t position = findUniformPosition(uniformName, m_FragmentUnfiforms);
@@ -418,11 +539,13 @@ namespace Radiant
 			return -1;
 #endif
 		}
-		case ShaderType::Fragment:
+		case UniformScope::Fragment:
 			return findUniformPosition(uniformName, m_FragmentUnfiforms);
 
-		case ShaderType::Vertex:
+		case UniformScope::Vertex:
 			return findUniformPosition(uniformName, m_VertexUnfiforms);
+		case UniformScope::Struct:		
+			return findUniformPosition(uniformName, m_FragmentStructUnfiforms);
 
 		default:
 			return -1;
