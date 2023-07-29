@@ -8,19 +8,20 @@ namespace Radiant
 	class OpenGLIndexBuffer final : public IndexBuffer
 	{
 	public:
-		OpenGLIndexBuffer(Memory::Buffer data);
-		OpenGLIndexBuffer(std::size_t size);
-		virtual ~OpenGLIndexBuffer() override;
+		OpenGLIndexBuffer(void* data, uint32_t size);
+		OpenGLIndexBuffer(uint32_t size);
 
-		virtual void SetData(Memory::Buffer buffer, std::size_t offset = 0) override;
+		~OpenGLIndexBuffer();
+
+		virtual void SetData(void* data, uint32_t size, uint32_t offset) override;
 		virtual void Bind() const override;
 
-		virtual std::size_t GetCount() const override;
-		virtual std::size_t GetSize() const override;
+		virtual uint32_t GetSize() const { return m_Size; }
+		virtual uint32_t GetCount() const { return m_Size / sizeof(uint32_t); }
 	private:
-		Memory::Buffer m_Buffer;
-		std::size_t m_Size;
+		uint32_t m_Size = 0;
+		RendererID m_RenderingID = 0;
 
-		RendererID m_RenderingID;
+		Memory::Buffer m_LocalData;
 	};
 }

@@ -11,7 +11,7 @@ namespace Radiant
 		virtual void Shutdown() override;
 
 		// NOTE: Tempory wile we don't have a rendering scene
-		virtual void Draw() override;
+		virtual void DrawIndexed(uint32_t count) override;
 		virtual void Clear() override;
 	};
 }

@@ -18,7 +18,7 @@ namespace Radiant
 		virtual void Shutdown() = 0;
 
 		// NOTE: Tempory wile we don't have a rendering scene
-		virtual void Draw() = 0;
+		virtual void DrawIndexed(uint32_t count) = 0;
 		virtual void Clear() = 0;
 		//==============================
 

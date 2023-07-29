@@ -33,9 +33,11 @@ namespace Radiant
 
 		void UploadUniformMat4(const std::string& name, const glm::mat4& values);
 	private:
-		uint32_t GetUniformPosition(const std::string& uniformName);
-		uint32_t GetRadiantUniformPosition(const std::string& uniformName);
+		int32_t GetUniformPosition(const std::string& uniformName);
+		int32_t GetRadiantUniformPosition(const std::string& uniformName, ShaderType type = ShaderType::None);
 	public:
+		virtual void SetFloat(const std::string& name, float value) override;
+		virtual void SetFloat2(const std::string& name, const glm::vec2& value) override;
 		virtual void SetFloat3(const std::string& name, const glm::vec3& value) override;
 		virtual void SetMat4(const std::string& name, const glm::mat4& value) override;
 	private:
@@ -46,7 +48,8 @@ namespace Radiant
 		std::unordered_map<GLenum, std::string> m_ShaderSource;
 	private:
 		UniformBuffer m_SamplerUniforms;
-		UniformBuffer m_Unfiforms;
+		UniformBuffer m_FragmentUnfiforms;
+		UniformBuffer m_VertexUnfiforms;
 	private:
 		void UploadSamplerUniforms();
 	};

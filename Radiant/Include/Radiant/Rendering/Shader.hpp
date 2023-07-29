@@ -24,7 +24,7 @@ namespace Radiant
 	{
 		UniformType Type = UniformType::None;
 		std::string Name = "None";
-		uint32_t Position = -1;
+		int32_t Position = -1;
 	};
 
 	struct UniformBuffer
@@ -45,6 +45,8 @@ namespace Radiant
 
 		static Memory::Ref<Shader> Create(const std::filesystem::path& path);
 	public:
+		virtual void SetFloat(const std::string& name, float value) = 0;
+		virtual void SetFloat2(const std::string& name, const glm::vec2& valu) = 0;
 		virtual void SetFloat3(const std::string& name, const glm::vec3& value) = 0;
 		virtual void SetMat4(const std::string& name, const glm::mat4& value) = 0;
 	};

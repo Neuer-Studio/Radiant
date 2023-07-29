@@ -56,8 +56,6 @@ namespace Radiant
 				glGenVertexArrays(1, &vertexArrayRendererID);
 				glBindVertexArray(vertexArrayRendererID);
 
-
-
 				glBindVertexArray(0);
 			});
 	}
@@ -96,6 +94,5 @@ namespace Radiant
 				}
 			});
 	}
-
 
 }

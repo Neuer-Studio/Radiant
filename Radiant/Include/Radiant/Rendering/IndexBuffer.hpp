@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Memory/Buffer.hpp"
+#include <Radiant/Memory/Buffer.hpp>
 
 namespace Radiant
 {
@@ -9,13 +9,13 @@ namespace Radiant
 	public:
 		virtual ~IndexBuffer() {}
 
-		virtual void SetData(Memory::Buffer buffer, std::size_t offset = 0) = 0;
+		virtual void SetData(void* data, uint32_t size, uint32_t offset = 0) = 0;
 		virtual void Bind() const = 0;
 
-		virtual std::size_t GetCount() const = 0;
-		virtual std::size_t GetSize() const = 0;
+		virtual uint32_t GetSize() const = 0;
+		virtual uint32_t GetCount() const = 0;
 
-		static Memory::Ref<IndexBuffer> Create(Memory::Buffer data);
-		static Memory::Ref<IndexBuffer> Create(std::size_t size);
+		static Memory::Ref<IndexBuffer> Create(void* data, uint32_t size);
+		static Memory::Ref<IndexBuffer> Create(uint32_t size);
 	};
 }

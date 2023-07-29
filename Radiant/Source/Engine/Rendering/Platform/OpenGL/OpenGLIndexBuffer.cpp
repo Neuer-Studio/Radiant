@@ -5,29 +5,35 @@
 
 namespace Radiant
 {
-
-	OpenGLIndexBuffer::OpenGLIndexBuffer(Memory::Buffer data)
-		: m_Buffer(data), m_Size(data.Size)
+	OpenGLIndexBuffer::OpenGLIndexBuffer(void* data, uint32_t size)
+		: m_Size(size)
 	{
-		Memory::Ref<OpenGLIndexBuffer> instance(this);
+		m_LocalData = Memory::Buffer::Copy(data, size);
+		Memory::Ref<OpenGLIndexBuffer> instance = this;
 		Rendering::Submit([instance]() mutable
 			{
 				glGenBuffers(1, &instance->m_RenderingID);
 
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, instance->m_RenderingID);
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, instance->m_Buffer.Size, instance->m_Buffer.Data, GL_STATIC_DRAW);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, instance->m_LocalData.Size, instance->m_LocalData.Data, GL_STATIC_DRAW);
 			}
 		);
 	}
 
-	OpenGLIndexBuffer::OpenGLIndexBuffer(std::size_t size)
+	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t size)
+		: m_Size(size)
 	{
-		RADIANT_VERIFY(false);
+		Memory::Ref<OpenGLIndexBuffer> instance = this;
+		Rendering::Submit([instance]() mutable
+			{
+				glGenBuffers(1, &instance->m_RenderingID);
+			}
+		);
 	}
 
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
 	{
-		Memory::Ref<OpenGLIndexBuffer> instance (this);
+		Memory::Ref<OpenGLIndexBuffer> instance = this;
 		Rendering::Submit([instance]() mutable
 			{
 				glDeleteBuffers(1, &instance->m_RenderingID);
@@ -35,29 +41,28 @@ namespace Radiant
 		);
 	}
 
-	void OpenGLIndexBuffer::SetData(Memory::Buffer buffer, std::size_t offset /*= 0*/)
-	{
-		RADIANT_VERIFY(false);
-	}
+	void OpenGLIndexBuffer::Bind() const {
 
-	void OpenGLIndexBuffer::Bind() const
-	{
 		RendererID id = m_RenderingID;
 		Rendering::Submit([id]() mutable
 			{
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
 			}
 		);
+
 	}
 
-	std::size_t OpenGLIndexBuffer::GetCount() const
+	void OpenGLIndexBuffer::SetData(void* data, uint32_t size, uint32_t offset)
 	{
-		return m_Size / sizeof(std::size_t);
-	}
+		m_LocalData = Memory::Buffer::Copy(data, size);
+		m_Size = size;
 
-	std::size_t OpenGLIndexBuffer::GetSize() const
-	{
-		return m_Size;
+		Memory::Ref<OpenGLIndexBuffer> instance = this;
+		Rendering::Submit([instance]() mutable
+			{
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, instance->m_RenderingID);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, instance->m_LocalData.Size, instance->m_LocalData.Data, GL_STATIC_DRAW);
+			}
+		);
 	}
-
 }

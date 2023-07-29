@@ -26,6 +26,11 @@ namespace Radiant {
 	void OpenGLRendering::Init()
 	{
 		RA_INFO("[OpenGLRendering] Init OpenGLRendering");
+		
+		glDebugMessageCallback(OpenGLLogMessage, nullptr);
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
 	}
 
 	void OpenGLRendering::Shutdown()
@@ -33,9 +38,9 @@ namespace Radiant {
 
 	}
 
-	void OpenGLRendering::Draw()
+	void OpenGLRendering::DrawIndexed(uint32_t count)
 	{
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 	}
 
 	void OpenGLRendering::Clear()

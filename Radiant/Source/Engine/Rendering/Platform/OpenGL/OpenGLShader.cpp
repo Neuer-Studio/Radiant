@@ -19,117 +19,119 @@ namespace Radiant
 		std::string UniformName;
 	};
 
-	static UniformType OpenGLUniformTypeToRaiantUniformType(const std::string& uniform)
+	namespace Utils
 	{
-		if (uniform == "sampler2D")
-			return UniformType::sampler2D;
-		if (uniform == "sampler3D")
-			return UniformType::sampler3D;
-
-		if (uniform == "vec2")
-			return UniformType::Float2;
-		if (uniform == "vec3")
-			return UniformType::Float3;
-		if (uniform == "vec4")
-			return UniformType::Float4;
-
-		if (uniform == "mat4")
-			return UniformType::Mat4;
-
-		return UniformType::None;
-	}
-	
-
-	static GLenum ShaderTypeFromString(const std::string& type)
-	{
-		if (type == "vertex")
-			return GL_VERTEX_SHADER;
-		if (type == "fragment" || type == "pixel")
-			return GL_FRAGMENT_SHADER;
-		if (type == "compute")
-			return GL_COMPUTE_SHADER;
-
-		return GL_NONE;
-	}
-
-	static std::unordered_map<GLenum, std::string> PreProcess(const std::string& source)
-	{
-		std::unordered_map<GLenum, std::string> shaderSource;
-		const char* tokenType = "#type";
-		const std::size_t sizeTokenType = strlen(tokenType);
-		std::size_t pos = source.find(tokenType, 0);
-
-		while (pos != std::string::npos)
+		static UniformType OpenGLUniformTypeToRaiantUniformType(const std::string& uniform)
 		{
-			std::size_t eol = source.find_first_of("\r\n", pos);
-			RADIANT_VERIFY(eol != std::string::npos, "Syntax error");
-			std::size_t begin = pos + sizeTokenType + 1;
-			std::string type = source.substr(begin, eol - begin);
-			RADIANT_VERIFY(type == "vertex" || type == "fragment" || type == "pixel" || type == "compute", "Invalid shader type specified");
+			if (uniform == "sampler2D")
+				return UniformType::sampler2D;
+			if (uniform == "sampler3D")
+				return UniformType::sampler3D;
 
-			std::size_t nextLinePos = source.find_first_not_of("\r\n", eol);
-			pos = source.find(tokenType, nextLinePos);
-			auto shaderType = ShaderTypeFromString(type);
+			if (uniform == "vec2")
+				return UniformType::Float2;
+			if (uniform == "vec3")
+				return UniformType::Float3;
+			if (uniform == "vec4")
+				return UniformType::Float4;
 
-			shaderSource[shaderType] = source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));
+			if (uniform == "mat4")
+				return UniformType::Mat4;
 
-			if (shaderType == GL_COMPUTE_SHADER)
-			{
-				RADIANT_VERIFY(false);
-			}
+			return UniformType::None;
 		}
 
-		return shaderSource;
-	}
 
-	static bool StartWith(const std::string& string, const std::string& start)
-	{
-		return string.compare(0, start.length(), start) == 0;
-	}
-
-	std::vector<UniformsSpecification> ExtractUniformNames(const std::string& shaderCode)
-	{
-		std::vector<UniformsSpecification> uniformSpecification;
-
-		std::string::size_type pos = shaderCode.find("uniform");
-		while (pos != std::string::npos)
+		static GLenum ShaderTypeFromString(const std::string& type)
 		{
-			std::string::size_type startPos = pos + 7; // Length of "uniform"
-			std::string::size_type endPos = shaderCode.find(";", startPos);
-			if (endPos != std::string::npos)
+			if (type == "vertex")
+				return GL_VERTEX_SHADER;
+			if (type == "fragment" || type == "pixel")
+				return GL_FRAGMENT_SHADER;
+			if (type == "compute")
+				return GL_COMPUTE_SHADER;
+
+			return GL_NONE;
+		}
+
+		static std::unordered_map<GLenum, std::string> PreProcess(const std::string& source)
+		{
+			std::unordered_map<GLenum, std::string> shaderSource;
+			const char* tokenType = "#type";
+			const std::size_t sizeTokenType = strlen(tokenType);
+			std::size_t pos = source.find(tokenType, 0);
+
+			while (pos != std::string::npos)
 			{
-				std::string uniformDeclaration = shaderCode.substr(startPos, endPos - startPos);
+				std::size_t eol = source.find_first_of("\r\n", pos);
+				RADIANT_VERIFY(eol != std::string::npos, "Syntax error");
+				std::size_t begin = pos + sizeTokenType + 1;
+				std::string type = source.substr(begin, eol - begin);
+				RADIANT_VERIFY(type == "vertex" || type == "fragment" || type == "pixel" || type == "compute", "Invalid shader type specified");
 
-				uniformDeclaration = uniformDeclaration.substr(uniformDeclaration.find_first_not_of(" \t"));
-				uniformDeclaration = uniformDeclaration.substr(0, uniformDeclaration.find_last_not_of(" \t") + 1);
+				std::size_t nextLinePos = source.find_first_not_of("\r\n", eol);
+				pos = source.find(tokenType, nextLinePos);
+				auto shaderType = ShaderTypeFromString(type);
 
-				std::string::size_type spacePos = uniformDeclaration.find(" ");
-				if (spacePos != std::string::npos)
+				shaderSource[shaderType] = source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));
+
+				if (shaderType == GL_COMPUTE_SHADER)
 				{
-					UniformType uniformType = OpenGLUniformTypeToRaiantUniformType(uniformDeclaration.substr(0, spacePos));
-					
-					std::string uniformName = uniformDeclaration.substr(spacePos + 1);
-					uniformSpecification.push_back({uniformType, uniformName});
+					RADIANT_VERIFY(false);
 				}
 			}
 
-			pos = shaderCode.find("uniform", pos + 1);
+			return shaderSource;
 		}
 
-		return uniformSpecification;
-	}
+		static bool StartWith(const std::string& string, const std::string& start)
+		{
+			return string.compare(0, start.length(), start) == 0;
+		}
 
+		static std::vector<UniformsSpecification> ExtractUniformNames(const std::string& shaderCode)
+		{
+			std::vector<UniformsSpecification> uniformSpecification;
+
+			std::string::size_type pos = shaderCode.find("uniform");
+			while (pos != std::string::npos)
+			{
+				std::string::size_type startPos = pos + 7; // Length of "uniform"
+				std::string::size_type endPos = shaderCode.find(";", startPos);
+				if (endPos != std::string::npos)
+				{
+					std::string uniformDeclaration = shaderCode.substr(startPos, endPos - startPos);
+
+					uniformDeclaration = uniformDeclaration.substr(uniformDeclaration.find_first_not_of(" \t"));
+					uniformDeclaration = uniformDeclaration.substr(0, uniformDeclaration.find_last_not_of(" \t") + 1);
+
+					std::string::size_type spacePos = uniformDeclaration.find(" ");
+					if (spacePos != std::string::npos)
+					{
+						UniformType uniformType = OpenGLUniformTypeToRaiantUniformType(uniformDeclaration.substr(0, spacePos));
+
+						std::string uniformName = uniformDeclaration.substr(spacePos + 1);
+						uniformSpecification.push_back({ uniformType, uniformName });
+					}
+				}
+
+				pos = shaderCode.find("uniform", pos + 1);
+			}
+
+			return uniformSpecification;
+		}
+	}
 
 	void OpenGLShader::Parse()
 	{
 		auto& vertexSource = m_ShaderSource[GL_VERTEX_SHADER];
 		auto& fragmentSource = m_ShaderSource[GL_FRAGMENT_SHADER];
 
-		auto fragmentUniforms = ExtractUniformNames(fragmentSource);
+		auto fragmentUniforms = Utils::ExtractUniformNames(fragmentSource);
 
 		// Parsing Fragment shader
 		{ 
-			uint32_t uIndex = 0;
+			int32_t uIndex = 0;
 			for (auto name : fragmentUniforms)
 			{
 				UniformType Type = fragmentUniforms[uIndex].Type;
@@ -150,7 +152,7 @@ namespace Radiant
 			}
 		}
 
-		auto vertexUniforms = ExtractUniformNames(vertexSource);
+		auto vertexUniforms = Utils::ExtractUniformNames(vertexSource);
 
 		// Parsing Vertex shader
 		{
@@ -278,7 +280,7 @@ namespace Radiant
 	{
 		RADIANT_VERIFY(!m_RenderingID);
 
-		m_ShaderSource = PreProcess(source);
+		m_ShaderSource = Utils::PreProcess(source);
 
 		Rendering::Submit([=]()
 			{
@@ -299,6 +301,20 @@ namespace Radiant
 	}
 
 	// ========================================================
+
+	void OpenGLShader::SetFloat(const std::string& name, float value)
+	{
+		Rendering::Submit([=]() {
+			UploadUniformFloat(name, value);
+			});
+	}
+
+	void OpenGLShader::SetFloat2(const std::string& name, const glm::vec2& value)
+	{
+		Rendering::Submit([=]() {
+			UploadUniformFloat2(name, value);
+			});
+	}
 
 	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
 	{
@@ -362,90 +378,54 @@ namespace Radiant
 			LOG_UNIFORM("Uniform '{0}' not found!", name);
 	}
 
-	uint32_t OpenGLShader::GetUniformPosition(const std::string& uniformName)
+	int32_t OpenGLShader::GetUniformPosition(const std::string& uniformName)
 	{
 		glUseProgram(m_RenderingID);
 		return glGetUniformLocation(m_RenderingID, uniformName.c_str());
 	}
 
-	uint32_t OpenGLShader::GetRadiantUniformPosition(const std::string& uniformName, ShaderType type)
+	int32_t OpenGLShader::GetRadiantUniformPosition(const std::string& uniformName, ShaderType type)
 	{
-		// If the type is 'None', we should search in all shaders.
-		if (type == ShaderType::None)
+		auto findUniformPosition = [=](const std::string& name, UniformBuffer& buffer) -> int32_t
 		{
-			auto it = m_FragmentUnfiforms.Uniforms.find(uniformName);
-
-			if (it != m_FragmentUnfiforms.Uniforms.end())
+			auto it = buffer.Uniforms.find(name);
+			if (it != buffer.Uniforms.end()) 
 			{
-				uint32_t position = it->second.Position;
+				int32_t position = it->second.Position;
 				RADIANT_VERIFY(position >= 0);
 				return position;
 			}
-			else
-			{
-				it = m_VertexUnfiforms.Uniforms.find(uniformName);
-				if (it != m_VertexUnfiforms.Uniforms.end())
-				{
-					uint32_t position = it->second.Position;
-					RADIANT_VERIFY(position >= 0);
-					return position;
-				}
-				else
-				{
-#ifdef OPENGL_SEARCH
-					RA_ERROR("[OpenGLShader] GetRadiantUniformPosition() calls GetUniformPosition(). Incorrect position parsing!");
-					return GetUniformPosition(uniformName.c_str());
-#else
-					return -1;
-#endif
-				}
-			}
-		}
+			return -1; 
+		};
 
-		// If the type is 'Fragment', we should ONLY look for it in the fragment shader.
-		else if (type == ShaderType::Fragment)
+		switch (type) {
+		case ShaderType::None: 
 		{
-			auto it = m_FragmentUnfiforms.Uniforms.find(uniformName);
-
-			if (it != m_FragmentUnfiforms.Uniforms.end())
-			{
-				uint32_t position = it->second.Position;
-				RADIANT_VERIFY(position >= 0);
+			
+			int32_t position = findUniformPosition(uniformName, m_FragmentUnfiforms);
+			if (position >= 0)
 				return position;
-			}
-			else
-			{
-#ifdef OPENGL_SEARCH
-				RA_ERROR("[OpenGLShader] GetRadiantUniformPosition() calls GetUniformPosition(). Incorrect position parsing!");
-				return GetUniformPosition(uniformName.c_str());
-#else
-				return -1;
-#endif
-			}
-		}
 
-		// If the type is 'Vertex', we should ONLY look for it in the fragment shader.
-		else if (type == ShaderType::Vertex)
-		{
-			auto it = m_VertexUnfiforms.Uniforms.find(uniformName);
-
-			if (it != m_VertexUnfiforms.Uniforms.end())
-			{
-				uint32_t position = it->second.Position;
-				RADIANT_VERIFY(position >= 0);
+			position = findUniformPosition(uniformName, m_VertexUnfiforms);
+			if (position >= 0)
 				return position;
-			}
-			else
-			{
-#ifdef OPENGL_SEARCH
-				RA_ERROR("[OpenGLShader] GetRadiantUniformPosition() calls GetUniformPosition(). Incorrect position parsing!");
-				return GetUniformPosition(uniformName.c_str());
-#else
-				return -1;
-#endif
-			}
-		}
 
-		return -1;
+#ifdef OPENGL_SEARCH
+			
+			RA_ERROR("[OpenGLShader] GetRadiantUniformPosition() calls GetUniformPosition(). Incorrect position parsing!");
+			return GetUniformPosition(uniformName.c_str());
+#else
+			return -1;
+#endif
+		}
+		case ShaderType::Fragment:
+			return findUniformPosition(uniformName, m_FragmentUnfiforms);
+
+		case ShaderType::Vertex:
+			return findUniformPosition(uniformName, m_VertexUnfiforms);
+
+		default:
+			return -1;
+		}
 	}
 }

@@ -4,6 +4,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
+#include <imgui/imgui.h>
+
 #define M_PI 3.14159f
 
 namespace Radiant
@@ -15,7 +17,7 @@ namespace Radiant
 		m_RotationSpeed = 0.002f;
 		m_ZoomSpeed = 0.2f;
 
-		m_Position = { -100, 100, 100 };
+		m_Position = { -10, 10, 10 };
 		m_Rotation = glm::vec3(90.0f, 0.0f, 0.0f);
 
 		m_FocalPoint = glm::vec3(0.0f);
@@ -98,5 +100,15 @@ namespace Radiant
 	glm::quat Camera::GetOrientation()
 	{
 		return glm::quat(glm::vec3(-m_Pitch, -m_Yaw, 0.0f));
+	}
+
+	void Camera::OnImGuiRendering() 
+	{
+		ImGui::Begin("Camera");
+		ImGui::Text("Position");
+		ImGui::DragFloat("X", &m_FocalPoint.x, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::DragFloat("Y", &m_FocalPoint.y, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::DragFloat("Y", &m_FocalPoint.z, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::End();
 	}
 }

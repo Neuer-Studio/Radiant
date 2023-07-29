@@ -25,6 +25,7 @@ namespace Radiant
 		glm::vec3 GetRightDirection();
 		glm::vec3 GetForwardDirection();
 		const glm::vec3& GetPosition() const { return m_Position; }
+		void OnImGuiRendering();
 	private:
 		void MousePan(const glm::vec2& delta);
 		void MouseRotate(const glm::vec2& delta);
