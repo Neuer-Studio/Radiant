@@ -97,7 +97,7 @@ namespace Radiant
 				glEnableVertexAttribArray(1);
 				glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, Normals));
 			});
-
+		glEnable(GL_DEPTH_TEST);
 		Rendering::DrawIndexed(m_IndexBuffer->GetCount());
 	}
 }

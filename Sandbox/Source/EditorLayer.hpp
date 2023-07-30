@@ -76,8 +76,6 @@ namespace Radiant
 			glm::mat4 viewMatrix = m_Camera.GetViewMatrix();
 			glm::mat4 projectionMatrix = m_Camera.GetProjectionMatrix();
 
-			
-
 			m_CubeShader->Bind();
 
 			m_CubeShader->SetFloat3("u_Material.ambient", m_Material.ambient, UniformScope::Struct);
@@ -93,6 +91,9 @@ namespace Radiant
 			m_CubeShader->SetMat4("u_Model", modelMatrix);
 			m_CubeShader->SetMat4("u_View", viewMatrix);
 			m_CubeShader->SetMat4("u_Projection", projectionMatrix);
+
+			auto b = m_CubeShader->HasBufferUniform("u_Material.ambient", UniformTarget::Struct);
+			auto b1 = m_CubeShader->GetBufferUniform("u_Material.ambient", UniformTarget::Struct);
 
 			m_Mesh->Render();
 		}

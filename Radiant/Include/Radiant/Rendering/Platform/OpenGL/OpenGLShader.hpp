@@ -40,6 +40,9 @@ namespace Radiant
 		virtual void SetFloat2(const std::string& name, const glm::vec2& value, UniformScope type = UniformScope::None) override;
 		virtual void SetFloat3(const std::string& name, const glm::vec3& value, UniformScope type = UniformScope::None) override;
 		virtual void SetMat4(const std::string& name, const glm::mat4& value, UniformScope type = UniformScope::None) override;
+	public:
+		virtual bool HasBufferUniform(const std::string& uniformName, UniformTarget type) const override;
+		virtual ShaderUniformDeclaration GetBufferUniform(const std::string& uniformName, UniformTarget type) const override;
 	private:
 		RendererID m_RenderingID = 0;
 		std::filesystem::path m_AssetPath;
@@ -48,7 +51,7 @@ namespace Radiant
 		std::unordered_map<GLenum, std::string> m_ShaderSource;
 	private:
 		UniformBuffer m_SamplerUniforms;
-		UniformBuffer m_FragmentUnfiforms;
+		UniformBuffer m_FragmentUniforms;
 		UniformBuffer m_VertexUnfiforms;
 
 		StructBuffer m_StructUnfiforms;

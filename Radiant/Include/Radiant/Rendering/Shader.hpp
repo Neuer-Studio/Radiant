@@ -7,9 +7,14 @@
 
 namespace Radiant
 {
-	enum class UniformScope
+	enum class UniformScope // NOTE: Use for set a value for uniforms
 	{
 		None = 0, Fragment, Vertex, Struct
+	};
+
+	enum class UniformTarget // NOTE: Use for get a buffer
+	{
+		None = 0, Fragment, Vertex, Sampler, Struct
 	};
 
 	enum class GLSLType
@@ -22,6 +27,8 @@ namespace Radiant
 	// Uniforms
 	struct ShaderUniformDeclaration
 	{
+		// NOTE: Do we need to use ShaderType to determine the buffer type?
+
 		GLSLType Type = GLSLType::None; // Uniform Type
 		std::string Name = "None"; // Uniform name
 		int32_t Position = -1; // Location in GLSL
@@ -72,6 +79,8 @@ namespace Radiant
 		virtual void SetFloat2(const std::string& name, const glm::vec2& value, UniformScope type = UniformScope::None) = 0;
 		virtual void SetFloat3(const std::string& name, const glm::vec3& value, UniformScope type = UniformScope::None) = 0;
 		virtual void SetMat4(const std::string& name, const glm::mat4& value, UniformScope type = UniformScope::None) = 0;
+	public:
+		virtual bool HasBufferUniform(const std::string& uniformName, UniformTarget type) const = 0;
+		virtual ShaderUniformDeclaration GetBufferUniform(const std::string& uniformName, UniformTarget type) const = 0;
 	};
-
 }

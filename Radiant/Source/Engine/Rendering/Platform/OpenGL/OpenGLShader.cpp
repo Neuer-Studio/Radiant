@@ -246,7 +246,7 @@ namespace Radiant
 
 				// Extract regular uniforms
 				else 
-					m_FragmentUnfiforms.Uniforms[Name] = { Type, Name, GetUniformPosition(Name.c_str()) };
+					m_FragmentUniforms.Uniforms[Name] = { Type, Name, GetUniformPosition(Name.c_str()) };
 
 				uIndex++;
 
@@ -270,11 +270,11 @@ namespace Radiant
 			}
 		}
 
-		auto m_StructUnfiforms = Utils::ExtractShaderStruct(fragmentSource);
+		m_StructUnfiforms.Uniforms= Utils::ExtractShaderStruct(fragmentSource);
 
 		// Parsing struct uniforms
 		{
-			for (auto& [name, structDecl] : m_StructUnfiforms)
+			for (auto& [name, structDecl] : m_StructUnfiforms.Uniforms)
 			{
 				for (auto& field : structDecl.Fields)
 				{
@@ -419,6 +419,66 @@ namespace Radiant
 			});
 	}
 
+	bool OpenGLShader::HasBufferUniform(const std::string& uniformName, UniformTarget type) const
+	{
+		switch (type)
+		{
+			case UniformTarget::None: // NOTE: does not search in sampler buffer
+				return (m_FragmentUniforms.Uniforms.count(uniformName) > 0) ||
+					(m_VertexUnfiforms.Uniforms.count(uniformName) > 0);
+
+			case UniformTarget::Fragment:
+				return m_FragmentUniforms.Uniforms.count(uniformName) > 0();
+
+			case UniformTarget::Vertex:
+				return m_VertexUnfiforms.Uniforms.count(uniformName) > 0();
+
+			case UniformTarget::Sampler:
+				return m_SamplerUniforms.Uniforms.count(uniformName) > 0();
+
+			case UniformTarget::Struct:
+				return (m_FragmentStructUnfiforms.Uniforms.count(uniformName) > 0()) ||
+					(m_VertexStructUnfiforms.Uniforms.count(uniformName) > 0());
+		}
+
+		return false;
+	}
+
+
+	ShaderUniformDeclaration OpenGLShader::GetBufferUniform(const std::string& uniformName, UniformTarget type) const
+	{
+		switch (type)
+		{
+		case UniformTarget::None:
+			return {};
+
+		case UniformTarget::Fragment:
+			if (m_FragmentUniforms.Uniforms.count(uniformName) > 0)
+				return m_FragmentUniforms.Uniforms.at(uniformName);
+			break;
+
+		case UniformTarget::Vertex:
+			if (m_VertexUnfiforms.Uniforms.count(uniformName) > 0)
+				return m_VertexUnfiforms.Uniforms.at(uniformName);
+			break;
+
+		case UniformTarget::Sampler:
+			if (m_SamplerUniforms.Uniforms.count(uniformName) > 0)
+				return m_SamplerUniforms.Uniforms.at(uniformName);
+			break;
+
+		case UniformTarget::Struct:
+			if (m_FragmentStructUnfiforms.Uniforms.count(uniformName) > 0)
+				return m_FragmentStructUnfiforms.Uniforms.at(uniformName);
+			else if (m_VertexStructUnfiforms.Uniforms.count(uniformName) > 0)
+				return m_VertexStructUnfiforms.Uniforms.at(uniformName);
+			break;
+		}
+
+		return {};
+	}
+
+
 	// ========================================================
 
 	void OpenGLShader::SetFloat(const std::string& name, float value, UniformScope type)
@@ -523,7 +583,7 @@ namespace Radiant
 		case UniformScope::None:
 		{
 			
-			int32_t position = findUniformPosition(uniformName, m_FragmentUnfiforms);
+			int32_t position = findUniformPosition(uniformName, m_FragmentUniforms);
 			if (position >= 0)
 				return position;
 
@@ -540,7 +600,7 @@ namespace Radiant
 #endif
 		}
 		case UniformScope::Fragment:
-			return findUniformPosition(uniformName, m_FragmentUnfiforms);
+			return findUniformPosition(uniformName, m_FragmentUniforms);
 
 		case UniformScope::Vertex:
 			return findUniformPosition(uniformName, m_VertexUnfiforms);
