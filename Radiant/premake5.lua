@@ -34,6 +34,7 @@ project "Radiant"
         "../ThirdParty/Glad/include/",
         "../ThirdParty/ImGui/",
         "../ThirdParty/glm/",
+        "../ThirdParty/assimp/include/",
         "../ThirdParty/stb/include/",
         
         "../ThirdParty/",
@@ -42,7 +43,8 @@ project "Radiant"
 
     links
     {
-        "ImGui"
+        "ImGui",
+        "../ThirdParty/assimp/bin/Debug/assimp-vc142-mtd.lib"
     }
 
     filter "configurations:Debug"

@@ -16,6 +16,7 @@
 #include <imgui/imgui.h>
 #include <Radiant/Core/Camera.hpp>
 #include <Radiant/Rendering/IndexBuffer.hpp>
+#include <Radiant/Rendering/Mesh.hpp>
 
 namespace Radiant
 {
@@ -44,46 +45,7 @@ namespace Radiant
 
 		virtual void OnAttach()
 		{
-			Memory::Buffer buf;
-			float v[]
-			{
-				// Front face
-				-0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 1.0f,
-				 0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 1.0f,
-				 0.5f,  0.5f, 0.5f,  0.0f, 0.0f, 1.0f,
-				-0.5f,  0.5f, 0.5f,  0.0f, 0.0f, 1.0f,
-
-				// Back face (Note the clockwise order)
-				-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-				 0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-				 0.5f,  0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-				-0.5f,  0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-			};
-			buf = Memory::Buffer::Copy(v, sizeof(v));
-
-		
-			m_CubeVertex = VertexBuffer::Create(buf);
-
-			static uint32_t indices[] = {
-				0, 1, 2, 2, 3, 0, // Передняя грань
-				1, 5, 6, 6, 2, 1, // Правая грань
-				7, 6, 5, 5, 4, 7, // Задняя грань
-				4, 0, 3, 3, 7, 4, // Левая грань
-				4, 5, 1, 1, 0, 4, // Нижняя грань
-				3, 2, 6, 6, 7, 3  // Верхняя грань
-			};
-
-			m_CubeIndex = IndexBuffer::Create(indices, sizeof(indices));
-
-			VertexBufferLayout vertexLayout;
-			vertexLayout = {
-					{ ShaderDataType::Float3, "a_Position" },
-					{ ShaderDataType::Float3, "a_Normals" },
-			};
-			PipelineSpecification pipelineSpecification;
-			pipelineSpecification.Layout = vertexLayout;
-
-			m_Pipline = Pipeline::Create(pipelineSpecification);
+			m_Mesh = (new Mesh("Resources/Meshes/Cube1m.fbx"));
 
 			m_CubeShader = Shader::Create("Resources/Shaders/Colors.rads");
 
@@ -114,9 +76,7 @@ namespace Radiant
 			glm::mat4 viewMatrix = m_Camera.GetViewMatrix();
 			glm::mat4 projectionMatrix = m_Camera.GetProjectionMatrix();
 
-			m_Pipline->Bind(); /* Bind first */
-			m_CubeVertex->Bind();
-			m_CubeIndex->Bind();
+			
 
 			m_CubeShader->Bind();
 
@@ -133,8 +93,8 @@ namespace Radiant
 			m_CubeShader->SetMat4("u_Model", modelMatrix);
 			m_CubeShader->SetMat4("u_View", viewMatrix);
 			m_CubeShader->SetMat4("u_Projection", projectionMatrix);
-			Rendering::DrawIndexed(m_CubeIndex->GetCount());
 
+			m_Mesh->Render();
 		}
 
 		virtual void OnImGuiRender() override
@@ -148,10 +108,8 @@ namespace Radiant
 			ImGui::End();
 		}
 	private:
-		Memory::Ref<VertexBuffer> m_CubeVertex;
-		Memory::Ref<IndexBuffer> m_CubeIndex;
+		Memory::Ref<Mesh> m_Mesh;
 		Memory::Ref<Shader> m_CubeShader;
-		Memory::Ref<Pipeline> m_Pipline;
 
 		Material m_Material; // Информация о материале
 		Light m_Light;       // Информация об источнике света
