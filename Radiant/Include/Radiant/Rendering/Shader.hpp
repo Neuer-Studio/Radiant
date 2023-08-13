@@ -7,17 +7,12 @@
 
 namespace Radiant
 {
-	enum class UniformScope // NOTE: Use for set a value for uniforms
-	{
-		None = 0, Fragment, Vertex, Struct
-	};
-
 	enum class UniformTarget // NOTE: Use for get a buffer
 	{
-		None = 0, Fragment, Vertex, Sampler, Struct
+		None = 0, Fragment, Vertex, Sampler, VertexStruct, FragmentStruct
 	};
 
-	enum class GLSLType
+	enum class RadiantType
 	{
 		None = 0, sampler1D = 1, sampler2D, sampler3D, // Sampler
 		Float, Float2, Float3, Float4, // Float 
@@ -29,9 +24,13 @@ namespace Radiant
 	{
 		// NOTE: Do we need to use ShaderType to determine the buffer type?
 
-		GLSLType Type = GLSLType::None; // Uniform Type
+		RadiantType Type = RadiantType::None; // Uniform Type
+		UniformTarget Target = UniformTarget::None;
 		std::string Name = "None"; // Uniform name
 		int32_t Position = -1; // Location in GLSL
+		//NOTE: 256 is max data size in glm (glm::dvec4)
+		std::byte Value[256] = { std::byte(0) }; // Value in GLSL
+		bool isChanged = false;
 	};
 
 	struct UniformBuffer
@@ -47,10 +46,11 @@ namespace Radiant
 
 		struct SFields
 		{
-			GLSLType Type; // Filed type
+			RadiantType Type; // Filed type
 			std::string Name; // Filed name
 			std::string GLSLName; // Name of full field ('mystruct.field')
 			int32_t Position = -1; // Location in GLSL
+			std::byte* Value = nullptr; // Value in GLSL
 		};
 		std::vector<SFields> Fields; // list of fields
 	};
@@ -67,7 +67,7 @@ namespace Radiant
 	public:
 		virtual ~Shader() {}
 		
-		virtual void Bind() const = 0;
+		virtual void Bind() = 0;
 
 		virtual const std::string& GetName() const = 0;
 		virtual const std::filesystem::path& GetPath() const = 0;
@@ -75,12 +75,9 @@ namespace Radiant
 
 		static Memory::Ref<Shader> Create(const std::filesystem::path& path);
 	public:
-		virtual void SetFloat(const std::string& name, float value, UniformScope type = UniformScope::None) = 0;
-		virtual void SetFloat2(const std::string& name, const glm::vec2& value, UniformScope type = UniformScope::None) = 0;
-		virtual void SetFloat3(const std::string& name, const glm::vec3& value, UniformScope type = UniformScope::None) = 0;
-		virtual void SetMat4(const std::string& name, const glm::mat4& value, UniformScope type = UniformScope::None) = 0;
+		virtual bool SetValue(const std::string& name, const std::byte* value, UniformTarget type) = 0;
 	public:
 		virtual bool HasBufferUniform(const std::string& uniformName, UniformTarget type) const = 0;
-		virtual ShaderUniformDeclaration GetBufferUniform(const std::string& uniformName, UniformTarget type) const = 0;
+		virtual ShaderUniformDeclaration& GetBufferUniform(const std::string& uniformName, UniformTarget type) = 0;
 	};
 }

@@ -76,24 +76,24 @@ namespace Radiant
 			glm::mat4 viewMatrix = m_Camera.GetViewMatrix();
 			glm::mat4 projectionMatrix = m_Camera.GetProjectionMatrix();
 
+			m_CubeShader->SetValue("u_Material.ambient", (std::byte*)&m_Material.ambient, UniformTarget::FragmentStruct);
+			m_CubeShader->SetValue("u_Material.diffuse", (std::byte*)&m_Material.diffuse, UniformTarget::FragmentStruct);
+			m_CubeShader->SetValue("u_Material.specular", (std::byte*)&m_Material.specular, UniformTarget::FragmentStruct);
+			m_CubeShader->SetValue("u_Material.shininess", (std::byte*)&m_Material.shininess, UniformTarget::FragmentStruct);
+			m_CubeShader->SetValue("u_Model", (std::byte*)&modelMatrix, UniformTarget::Vertex);
+			m_CubeShader->SetValue("u_View", (std::byte*)&viewMatrix, UniformTarget::Vertex);
+			m_CubeShader->SetValue("u_Projection", (std::byte*)&projectionMatrix, UniformTarget::Vertex);
+
+			m_CubeShader->SetValue("u_Light.position", (std::byte*)&m_Light.position, UniformTarget::FragmentStruct);
+			m_CubeShader->SetValue("u_Light.ambient", (std::byte*)&m_Light.ambient, UniformTarget::FragmentStruct);
+			m_CubeShader->SetValue("u_Light.diffuse", (std::byte*)&m_Light.diffuse, UniformTarget::FragmentStruct);
+			m_CubeShader->SetValue("u_Light.specular", (std::byte*)&m_Light.specular, UniformTarget::FragmentStruct);
+
+			m_CubeShader->SetValue("u_Model", (std::byte*)&modelMatrix, UniformTarget::Vertex);
+			m_CubeShader->SetValue("u_View", (std::byte*)&viewMatrix, UniformTarget::Vertex);
+			m_CubeShader->SetValue("u_Projection", (std::byte*)&projectionMatrix, UniformTarget::Vertex);
+
 			m_CubeShader->Bind();
-
-			m_CubeShader->SetFloat3("u_Material.ambient", m_Material.ambient, UniformScope::Struct);
-			m_CubeShader->SetFloat3("u_Material.diffuse", m_Material.diffuse, UniformScope::Struct);
-			m_CubeShader->SetFloat3("u_Material.specular", m_Material.specular, UniformScope::Struct);
-			m_CubeShader->SetFloat("u_Material.shininess", m_Material.shininess, UniformScope::Struct);
-
-			m_CubeShader->SetFloat3("u_Light.position", m_Light.position, UniformScope::Struct);
-			m_CubeShader->SetFloat3("u_Light.ambient", m_Light.ambient, UniformScope::Struct);
-			m_CubeShader->SetFloat3("u_Light.diffuse", m_Light.diffuse, UniformScope::Struct);
-			m_CubeShader->SetFloat3("u_Light.specular", m_Light.specular, UniformScope::Struct);
-
-			m_CubeShader->SetMat4("u_Model", modelMatrix);
-			m_CubeShader->SetMat4("u_View", viewMatrix);
-			m_CubeShader->SetMat4("u_Projection", projectionMatrix);
-
-			auto b = m_CubeShader->HasBufferUniform("u_Material.ambient", UniformTarget::Struct);
-			auto b1 = m_CubeShader->GetBufferUniform("u_Material.ambient", UniformTarget::Struct);
 
 			m_Mesh->Render();
 		}
