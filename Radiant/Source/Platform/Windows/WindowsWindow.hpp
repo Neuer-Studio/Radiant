@@ -23,6 +23,8 @@ namespace Radiant
 		virtual const std::string& GetTitle() const override;
 		virtual void SetTitle(const std::string& title) override;
 
+		virtual bool IsWindowMaximized() const override;
+
 		virtual void OnUpdate() const override;
 
 		virtual void SetEventCallback(const EventCallbackFn& callback) { m_Data.EventCallback = callback; };

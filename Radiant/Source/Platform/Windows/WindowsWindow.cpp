@@ -144,6 +144,11 @@ namespace Radiant
 		m_Specification.Title = title;
 	}
 
+	bool WindowsWindow::IsWindowMaximized() const
+	{
+		return (bool)glfwGetWindowAttrib(m_Window, GLFW_MAXIMIZED);
+	}
+
 	void WindowsWindow::OnUpdate() const
 	{
 		glfwPollEvents();

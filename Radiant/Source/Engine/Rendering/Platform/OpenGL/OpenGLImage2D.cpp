@@ -10,6 +10,13 @@ namespace Radiant
 		
 	}
 
+	OpenGLImage2D::OpenGLImage2D(ImageFormat format, std::size_t width, std::size_t height, const void *data)
+		: m_Format(format), m_Width(width), m_Height(height)
+	{
+		if (data)
+			m_ImageData = Memory::Buffer::Copy(data, Utils::GetImageMemorySize(format, width, height));
+	}
+
 	OpenGLImage2D::~OpenGLImage2D()
 	{
 		Release();
@@ -20,38 +27,41 @@ namespace Radiant
 		if (m_RenderingID)
 			Release();
 
-		bool srgb = m_Format == ImageFormat::RGB;
+		glCreateTextures(GL_TEXTURE_2D, 1, &m_RenderingID);
+		GLenum internalFormat = Utils::OpenGLImageInternalFormat(m_Format);
+		uint32_t mipCount = Utils::CalculateMipCount(m_Width, m_Height);
+		glTextureStorage2D(m_RenderingID, mipCount, internalFormat, m_Width, m_Height);
 
-		glGenTextures(1, &m_RenderingID);
-		glBindTexture(GL_TEXTURE_2D, m_RenderingID);
+		if (m_ImageData)
+		{
+			GLenum format = Utils::OpenGLImageFormat(m_Format);
+			GLenum dataType = Utils::OpenGLFormatDataType(m_Format);
+			glTextureSubImage2D(m_RenderingID, 0, 0, 0, m_Width, m_Height, format, dataType, m_ImageData.Data);
+			glGenerateTextureMipmap(m_RenderingID); // TODO: optional
+		}
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		// set texture filtering parameters
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glCreateSamplers(1, &m_SamplerRenderingID);
+		glSamplerParameteri(m_SamplerRenderingID, GL_TEXTURE_MIN_FILTER, m_ImageData ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+		glSamplerParameteri(m_SamplerRenderingID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glSamplerParameteri(m_SamplerRenderingID, GL_TEXTURE_WRAP_R, GL_REPEAT);
+		glSamplerParameteri(m_SamplerRenderingID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glSamplerParameteri(m_SamplerRenderingID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		GLenum internalFormat = Utils::OpenGLImageFormat(m_Format);
-		GLenum format = Utils::OpenGLImageInternalFormat(m_Format);
-		GLenum type = internalFormat == GL_RGBA16F ? GL_FLOAT : GL_UNSIGNED_BYTE;
 
-		RADIANT_VERIFY(m_ImageData);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_ImageData.Data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	
 	void OpenGLImage2D::Release()
 	{
+		m_ImageData.Release();
 		if (m_RenderingID)
 		{
-			glDeleteTextures(1, &m_RenderingID);
-			m_RenderingID = 0;
-
-			m_ImageData.Release();
+			RendererID rendererID = m_RenderingID;
+			Rendering::Submit([rendererID]()
+				{
+					glDeleteTextures(1, &rendererID);
+				});
 		}
+
 	}
 
 }

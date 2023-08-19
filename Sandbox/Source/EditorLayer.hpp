@@ -17,6 +17,7 @@
 #include <Radiant/Core/Camera.hpp>
 #include <Radiant/Rendering/IndexBuffer.hpp>
 #include <Radiant/Rendering/Mesh.hpp>
+#include <Radiant/Rendering/Framebuffer.hpp>
 
 namespace Radiant
 {
@@ -45,6 +46,11 @@ namespace Radiant
 
 		virtual void OnAttach()
 		{
+			FramebufferSpecification spec;
+			spec.Width = Application::Get().GetWindow()->GetWidth();
+			spec.Height = Application::Get().GetWindow()->GetHeight();
+			m_Framebuffer = Framebuffer::Create(spec);
+
 			m_Mesh = (new Mesh("Resources/Meshes/Cube1m.fbx"));
 
 			m_CubeShader = Shader::Create("Resources/Shaders/Colors.rads");
@@ -69,6 +75,7 @@ namespace Radiant
 
 		virtual void OnUpdate() override
 		{
+			m_Framebuffer->Bind();
 			m_Camera.Update();
 			Rendering::Clear();
 
@@ -96,15 +103,71 @@ namespace Radiant
 			m_CubeShader->Bind();
 
 			m_Mesh->Render();
+			m_Framebuffer->Unbind();
 		}
 
 		virtual void OnImGuiRender() override
 		{
-			ImGui::Begin("Cube");
+			// ImGui + Dockspace Setup ------------------------------------------------------------------------------
+			ImGuiIO& io = ImGui::GetIO();
+			ImGuiStyle& style = ImGui::GetStyle();
+			auto boldFont = io.Fonts->Fonts[0];
 
-			ImGui::DragFloat3("Cube Position", &m_CubePosition.x);
-			ImGui::DragFloat3("Lights Dir", &m_Light.position.x);
-			//ImGui::DragFloat3("Cube Position", &m_CubePosition.x);
+			if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) || (ImGui::IsMouseClicked(ImGuiMouseButton_Right)))
+			{
+			}
+
+			io.ConfigWindowsResizeFromEdges = io.BackendFlags & ImGuiBackendFlags_HasMouseCursors;
+
+			// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+			// because it would be confusing to have two docking targets within each others.
+			ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_MenuBar;
+
+			ImGuiViewport* viewport = ImGui::GetMainViewport();
+			ImGui::SetNextWindowPos(viewport->Pos);
+			ImGui::SetNextWindowSize(viewport->Size);
+			ImGui::SetNextWindowViewport(viewport->ID);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+			window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+			bool isMaximized = Application::Get().GetWindow()->IsWindowMaximized();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, isMaximized ? ImVec2(6.0f, 6.0f) : ImVec2(1.0f, 1.0f));
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 3.0f);
+			ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
+			ImGui::Begin("DockSpace Demo", nullptr, window_flags);
+			ImGui::PopStyleColor(); // MenuBarBg
+			ImGui::PopStyleVar(2);
+
+			ImGui::PopStyleVar(2);
+
+			// Dockspace
+			float minWinSizeX = style.WindowMinSize.x;
+			style.WindowMinSize.x = 370.0f;
+			ImGui::DockSpace(ImGui::GetID("MyDockspace"));
+			style.WindowMinSize.x = minWinSizeX;
+
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+			ImGui::Begin("Viewport");
+			{
+				auto viewportOffset = ImGui::GetCursorPos(); // includes tab bar
+				auto viewportSize = ImGui::GetContentRegionAvail();
+
+				ImGui::Image((void*)m_Framebuffer->GetRendererID(), viewportSize, { 0, 1 }, { 1, 0 });
+
+
+				static int counter = 0;
+				auto windowSize = ImGui::GetWindowSize();
+				ImVec2 minBound = ImGui::GetWindowPos();
+				minBound.x += viewportOffset.x;
+				minBound.y += viewportOffset.y;
+
+			}
+
+			ImGui::End();
+			ImGui::PopStyleVar();
 
 			ImGui::End();
 		}
@@ -118,5 +181,7 @@ namespace Radiant
 		glm::vec3 m_CubePosition { 1.f };
 
 		Camera m_Camera;
+
+		Memory::Ref<Framebuffer> m_Framebuffer;
 	};
 }

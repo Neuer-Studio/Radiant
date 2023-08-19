@@ -6,7 +6,7 @@ namespace Radiant::Memory
 {
 	struct Buffer
 	{
-		std::byte* Data;
+		void* Data;
 		std::size_t Size;
 
 		Buffer()
@@ -15,7 +15,7 @@ namespace Radiant::Memory
 
 		}
 
-		Buffer(std::byte* data, std::size_t size)
+		Buffer(void* data, std::size_t size)
 			: Data(data), Size(size)
 		{
 
@@ -25,6 +25,9 @@ namespace Radiant::Memory
 		{
 			delete[] Data;
 			Data = nullptr;
+
+			if (size == 0)
+				return;
 
 			Data = new std::byte[size];
 			Size = size;
@@ -56,10 +59,10 @@ namespace Radiant::Memory
 		inline void Write(void* data, std::size_t size, std::size_t offset = 0)
 		{
 			RADIANT_VERIFY(size + offset <= Size, "Buffer overflow!");
-			memcpy(Data + offset, data, size);
+			memcpy((std::byte*)Data + offset, data, size);
 		}
 
-		static Buffer Copy(void* data, std::size_t size)
+		static Buffer Copy(const void* data, std::size_t size)
 		{
 			Buffer buffer;
 			buffer.Allocate(size);

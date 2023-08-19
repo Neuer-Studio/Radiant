@@ -21,18 +21,21 @@ namespace Radiant
 		virtual void Release() = 0;
 		virtual void Invalidate() = 0;
 
-		virtual std::size_t GetWidth() const = 0;
-		virtual std::size_t GetHeight() const = 0;
+		virtual uint32_t GetWidth() const = 0;
+		virtual uint32_t GetHeight() const = 0;
 
 		virtual ImageFormat GetFormat() const = 0;
 
 		virtual Memory::Buffer GetBuffer() const = 0;
+
+		virtual uint64_t GetImageID() const = 0;
 	};
 
 	class Image2D : public Image
 	{
 	public:
 		static Memory::Ref<Image2D> Create(ImageFormat format, std::size_t width, std::size_t height, Memory::Buffer buffer);
+		static Memory::Ref<Image2D> Create(ImageFormat format, std::size_t width, std::size_t height, const void* buffer = nullptr);
 	};
 
 	namespace Utils
