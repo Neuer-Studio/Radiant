@@ -26,11 +26,11 @@ namespace Radiant
 		s_RendererAPI->Init();
 	}
 
-	void Rendering::DrawIndexed(std::size_t count)
+	void Rendering::DrawIndexed(std::size_t count, bool depthTest)
 	{
 		Rendering::Submit([=]()
 			{
-				s_RendererAPI->DrawIndexed(count);
+				s_RendererAPI->DrawIndexed(count, depthTest);
 			});
 	}
 

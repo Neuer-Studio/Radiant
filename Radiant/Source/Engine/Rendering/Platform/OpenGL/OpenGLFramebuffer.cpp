@@ -68,7 +68,7 @@ namespace Radiant
 
 	void OpenGLFramebuffer::Unbind() const
 	{
-		Rendering::Submit([this]()
+		Rendering::Submit([=]()
 			{
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			});

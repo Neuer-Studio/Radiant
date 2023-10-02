@@ -10,7 +10,7 @@ namespace Radiant
 		static void Init();
 
 		// NOTE: Tempory wile we don't have a rendering scene
-		static void DrawIndexed(std::size_t count);
+		static void DrawIndexed(std::size_t count, bool depthTest = false);
 		static void Clear();
 		//==============================
 

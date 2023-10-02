@@ -38,9 +38,15 @@ namespace Radiant {
 
 	}
 
-	void OpenGLRendering::DrawIndexed(uint32_t count)
+	void OpenGLRendering::DrawIndexed(uint32_t count, bool depthTest)
 	{
+		if (!depthTest)
+			glDisable(GL_DEPTH_TEST);
+
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+
+		if (!depthTest)
+			glEnable(GL_DEPTH_TEST);
 	}
 
 	void OpenGLRendering::Clear()
