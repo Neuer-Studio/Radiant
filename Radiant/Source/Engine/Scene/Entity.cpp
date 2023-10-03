@@ -2,6 +2,12 @@
 
 namespace Radiant
 {
+	Entity::Entity(const std::string& name)
+		: m_Name(name), m_UUID()
+	{
+
+	}
+
 	Entity::~Entity()
 	{
 		for (auto comp : m_Components)
