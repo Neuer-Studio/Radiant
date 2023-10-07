@@ -18,6 +18,7 @@
 #include <Radiant/Rendering/IndexBuffer.hpp>
 #include <Radiant/Rendering/Mesh.hpp>
 #include <Radiant/Rendering/Framebuffer.hpp>
+#include <Radiant/Scene/Entity.hpp>
 
 namespace Radiant
 {
@@ -44,6 +45,11 @@ namespace Radiant
 			: Layer("EditorLayer")
 		{}
 
+		~EditorLayer()
+		{
+			delete m_ManagerScene;
+		}
+
 		virtual void OnAttach()
 		{
 			FramebufferSpecification spec;
@@ -66,6 +72,12 @@ namespace Radiant
 			m_Light.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
 			m_Light.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
 			m_Light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+
+			m_ManagerScene = new SceneManager("Debug name"); //NOTE(Danya): Should be shared 
+			m_TestScene = m_ManagerScene->Create("Debug name");
+			auto em = m_TestScene->CreateEntity();
+			em->AddComponent(CreateNewComponent<MeshComponent>());
+			em->GetComponent<MeshComponent>()->Mesh = m_Mesh;
 		}
 
 		virtual void OnDetach()
@@ -75,13 +87,15 @@ namespace Radiant
 
 		virtual void OnUpdate() override
 		{
-			m_Framebuffer->Bind();
+			m_Framebuffer->Bind(); //NOTE(Danya): Should be in scenerendering, shader the same
 			m_Camera.Update();
 			Rendering::Clear();
 
 			glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), m_CubePosition);
 			glm::mat4 viewMatrix = m_Camera.GetViewMatrix();
 			glm::mat4 projectionMatrix = m_Camera.GetProjectionMatrix();
+
+			//NOTE(Danya): Should be in scenerendering ---------------------
 
 			m_CubeShader->SetValue("u_Material.ambient", (std::byte*)&m_Material.ambient, UniformTarget::FragmentStruct);
 			m_CubeShader->SetValue("u_Material.diffuse", (std::byte*)&m_Material.diffuse, UniformTarget::FragmentStruct);
@@ -102,7 +116,10 @@ namespace Radiant
 
 			m_CubeShader->Bind();
 
-			m_Mesh->Render();
+			// ---------------------
+
+			m_TestScene->UpdateScene(SceneType::Editor);
+			
 			m_Framebuffer->Unbind();
 		}
 
@@ -172,8 +189,8 @@ namespace Radiant
 			ImGui::End();
 		}
 	private:
-		Memory::Ref<Mesh> m_Mesh;
-		Memory::Ref<Shader> m_CubeShader;
+		Memory::Shared<Mesh> m_Mesh;
+		Memory::Shared<Shader> m_CubeShader;
 
 		Material m_Material; // Информация о материале
 		Light m_Light;       // Информация об источнике света
@@ -182,6 +199,8 @@ namespace Radiant
 
 		Camera m_Camera;
 
-		Memory::Ref<Framebuffer> m_Framebuffer;
+		Memory::Shared<Framebuffer> m_Framebuffer;
+		SceneManager* m_ManagerScene;
+		Memory::Shared<Scene> m_TestScene;
 	};
 }

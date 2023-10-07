@@ -5,12 +5,12 @@
 
 namespace Radiant
 {
-	Memory::Ref<Pipeline> Pipeline::Create(const PipelineSpecification& spec)
+	Memory::Shared<Pipeline> Pipeline::Create(const PipelineSpecification& spec)
 	{
 		switch (RenderingAPI::GetAPI())
 		{
 		case RenderingAPIType::None:    return nullptr;
-		case RenderingAPIType::OpenGL:  return Memory::Ref<OpenGLPipeline>::Create(spec);
+		case RenderingAPIType::OpenGL:  return Memory::Shared<OpenGLPipeline>::Create(spec);
 		}
 		RADIANT_VERIFY(false, "Unknown RendererAPI");
 		return nullptr;

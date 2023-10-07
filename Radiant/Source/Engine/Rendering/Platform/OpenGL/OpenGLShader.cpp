@@ -425,7 +425,7 @@ namespace Radiant
 	void OpenGLShader::Bind()
 	{
 		RendererID id = m_RenderingID;
-		Memory::Ref<OpenGLShader> instance = this;
+		Memory::Shared<OpenGLShader> instance = this;
 		Rendering::Submit([id]()
 			{
 				glUseProgram(id);

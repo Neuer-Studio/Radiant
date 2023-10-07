@@ -5,6 +5,7 @@
 
 #include <Radiant/Rendering/VertexBuffer.hpp>
 #include <Radiant/Rendering/IndexBuffer.hpp>
+#include <Radiant/Rendering/Pipeline.hpp>
 
 namespace Assimp
 {
@@ -29,12 +30,14 @@ namespace Radiant
 		Mesh(const std::string& filename);
 		~Mesh() {}
 
-		void Render();
+		Memory::Shared<Pipeline> GetPipeline() { return m_Pipeline; }
+		void Update();
 	private:
 		std::vector<Vertex> m_Vertices;
 		std::vector<Index> m_Indices;
 
-		Memory::Ref<VertexBuffer> m_VertexBuffer;
-		Memory::Ref<IndexBuffer> m_IndexBuffer;
+		Memory::Shared<Pipeline> m_Pipeline;
+		Memory::Shared<VertexBuffer> m_VertexBuffer;
+		Memory::Shared<IndexBuffer> m_IndexBuffer;
 	};
 }

@@ -4,9 +4,9 @@
 
 namespace Radiant
 {
-	Memory::Ref<Framebuffer> Framebuffer::Create(const FramebufferSpecification& spec)
+	Memory::Shared<Framebuffer> Framebuffer::Create(const FramebufferSpecification& spec)
 	{
-		Memory::Ref<Framebuffer> result = nullptr;
+		Memory::Shared<Framebuffer> result = nullptr;
 
 		switch (RenderingAPI::GetAPI())
 		{

@@ -23,8 +23,8 @@ namespace Radiant
 
 		virtual RendererID GetRendererID() const override { return m_ColorAttachment; } //NOTE: Temp
 
-		virtual Memory::Ref<Image2D> GetImage() const override { return {}; }
-		virtual Memory::Ref<Image2D> GetDepthImage() const override { return {}; }
+		virtual Memory::Shared<Image2D> GetImage() const override { return {}; }
+		virtual Memory::Shared<Image2D> GetDepthImage() const override { return {}; }
 	private:
 		FramebufferSpecification m_Specification;
 		RendererID m_ColorAttachment, m_DepthAttachment;

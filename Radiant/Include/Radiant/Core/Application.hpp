@@ -33,11 +33,11 @@ namespace Radiant
 		void Run();
 
 		static Application& Get() { return *s_Instance; }
-		Memory::Ref<Window> GetWindow() { return m_Window; }
+		Memory::Shared<Window> GetWindow() { return m_Window; }
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 	private:
-		Memory::Ref<Window> m_Window;
+		Memory::Shared<Window> m_Window;
 		LayerStack m_LayerStack;
 		ImGuiLayer* m_ImGuiLayer;
 

@@ -73,7 +73,7 @@ namespace Radiant
 		virtual const std::filesystem::path& GetPath() const = 0;
 		virtual RendererID GetRendererID() const = 0;
 
-		static Memory::Ref<Shader> Create(const std::filesystem::path& path);
+		static Memory::Shared<Shader> Create(const std::filesystem::path& path);
 	public:
 		virtual bool SetValue(const std::string& name, const std::byte* value, UniformTarget type) = 0;
 	public:

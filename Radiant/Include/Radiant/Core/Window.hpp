@@ -38,6 +38,6 @@ namespace Radiant
 
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 
-		static Memory::Ref<Window> Create(const WindowSpecification& specification);
+		static Memory::Shared<Window> Create(const WindowSpecification& specification);
 	};
 }

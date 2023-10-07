@@ -9,7 +9,7 @@ namespace Radiant
 		: m_Size(size)
 	{
 		m_LocalData = Memory::Buffer::Copy(data, size);
-		Memory::Ref<OpenGLIndexBuffer> instance = this;
+		Memory::Shared<OpenGLIndexBuffer> instance = this;
 		Rendering::Submit([instance]() mutable
 			{
 				glGenBuffers(1, &instance->m_RenderingID);
@@ -23,7 +23,7 @@ namespace Radiant
 	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t size)
 		: m_Size(size)
 	{
-		Memory::Ref<OpenGLIndexBuffer> instance = this;
+		Memory::Shared<OpenGLIndexBuffer> instance = this;
 		Rendering::Submit([instance]() mutable
 			{
 				glGenBuffers(1, &instance->m_RenderingID);
@@ -33,7 +33,7 @@ namespace Radiant
 
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
 	{
-		Memory::Ref<OpenGLIndexBuffer> instance = this;
+		Memory::Shared<OpenGLIndexBuffer> instance = this;
 		Rendering::Submit([instance]() mutable
 			{
 				glDeleteBuffers(1, &instance->m_RenderingID);
@@ -57,7 +57,7 @@ namespace Radiant
 		m_LocalData = Memory::Buffer::Copy(data, size);
 		m_Size = size;
 
-		Memory::Ref<OpenGLIndexBuffer> instance = this;
+		Memory::Shared<OpenGLIndexBuffer> instance = this;
 		Rendering::Submit([instance]() mutable
 			{
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, instance->m_RenderingID);

@@ -84,7 +84,7 @@ namespace Radiant
 		m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), m_Indices.size() * sizeof(Index));
 	}
 
-	void Mesh::Render()
+	void Mesh::Update()
 	{
 		m_VertexBuffer->Bind();
 		m_IndexBuffer->Bind();
@@ -97,7 +97,6 @@ namespace Radiant
 				glEnableVertexAttribArray(1);
 				glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, Normals));
 			});
-		glEnable(GL_DEPTH_TEST);
 		Rendering::DrawIndexed(m_IndexBuffer->GetCount());
 	}
 }

@@ -6,12 +6,12 @@
 namespace Radiant
 {
 	
-	Memory::Ref<RenderingContext> RenderingContext::Create(GLFWwindow* windowHandle)
+	Memory::Shared<RenderingContext> RenderingContext::Create(GLFWwindow* windowHandle)
 	{
 		switch (RenderingAPI::GetAPI())
 		{
 			case RenderingAPIType::None:    return nullptr;
-			case RenderingAPIType::OpenGL:  return Memory::Ref<OpenGLContext>::Create(windowHandle);
+			case RenderingAPIType::OpenGL:  return Memory::Shared<OpenGLContext>::Create(windowHandle);
 		}
 		RADIANT_VERIFY(false, "Unknown RenderingAPI");
 		return nullptr;

@@ -43,6 +43,6 @@ namespace Radiant
 
 		WindowData m_Data;
 		GLFWwindow* m_Window;
-		Memory::Ref<RenderingContext> m_RendererContext;
+		Memory::Shared<RenderingContext> m_RendererContext;
 	};
 }

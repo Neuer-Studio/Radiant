@@ -16,15 +16,15 @@ namespace Radiant
 	public:
 		virtual ~Material() = default;
 
-		virtual Memory::Ref<Shader> GetShader() = 0;
+		virtual Memory::Shared<Shader> GetShader() = 0;
 		virtual void Bind() const = 0;
 
-		void Set(const std::string& name, const Memory::Ref<Texture>& texture);
+		void Set(const std::string& name, const Memory::Shared<Texture>& texture);
 	public:
 		uint32_t GetFlags() const { return m_MaterialFlags; }
 		void SetFlag(MaterialFlag flag) { m_MaterialFlags |= (uint32_t)flag; }
 	public:
-		static Memory::Ref<Material> Create(const Memory::Ref<Shader>& shader);
+		static Memory::Shared<Material> Create(const Memory::Shared<Shader>& shader);
 	protected:
 		uint32_t m_MaterialFlags;
 	};

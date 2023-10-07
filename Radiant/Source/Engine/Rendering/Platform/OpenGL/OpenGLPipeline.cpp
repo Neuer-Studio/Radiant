@@ -45,7 +45,7 @@ namespace Radiant
 	{
 		RADIANT_VERIFY(m_Specification.Layout.GetElements().size(), "Layout is empty!");
 
-		Memory::Ref<OpenGLPipeline> instance = this;
+		Memory::Shared<OpenGLPipeline> instance = this;
 		Rendering::Submit([instance]() mutable
 			{
 				auto& vertexArrayRendererID = instance->m_RendererID;
@@ -62,7 +62,7 @@ namespace Radiant
 
 	void OpenGLPipeline::Bind() const
 	{
-		const Memory::Ref<const OpenGLPipeline> instance = this;
+		const Memory::Shared<const OpenGLPipeline> instance = this;
 		Rendering::Submit([instance]()
 			{
 				glBindVertexArray(instance->m_RendererID);

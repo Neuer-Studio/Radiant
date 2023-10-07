@@ -7,6 +7,11 @@ namespace Radiant
 	class SceneManager;
 	class Entity;
 
+	enum class SceneType
+	{
+		None = 0, Editor, RunTime
+	};
+
 	class Scene : public Memory::RefCounted
 	{
 	public:
@@ -16,6 +21,8 @@ namespace Radiant
 		void AddEntity(const Entity* entity);
 		Entity* CreateEntity(const std::string& name = "Debug Name");
 		Entity* GetEntityByUUID(uint64_t uuid);
+
+		void UpdateScene(SceneType type);
 	private:
 		std::vector<Entity*> m_Entitys;
 		std::string m_SceneName;
@@ -28,10 +35,12 @@ namespace Radiant
 	{
 	public:
 		SceneManager(const std::string& name);
-		Memory::Ref<Scene> Create(const std::string& SceneName = "Debug Name");
-		void SetActiveScene(const Memory::Ref<Scene>& scene) { m_ActiveScene = scene; }
+		Memory::Shared<Scene> Create(const std::string& SceneName = "Debug Name"); // Create a new scene
+		void SetActiveScene(const Memory::Shared<Scene>& scene) { m_ActiveScene = scene; }
+		Memory::Shared<Scene> GetSceneByName(const std::string& name);
 	private:
 		std::string m_ManagerName;
-		Memory::Ref<Scene> m_ActiveScene;
+		Memory::Shared<Scene> m_ActiveScene;
+		std::vector<Memory::Shared<Scene>> m_ScenePool;
 	};
 }

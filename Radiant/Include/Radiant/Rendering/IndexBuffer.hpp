@@ -15,7 +15,7 @@ namespace Radiant
 		virtual uint32_t GetSize() const = 0;
 		virtual uint32_t GetCount() const = 0;
 
-		static Memory::Ref<IndexBuffer> Create(void* data, uint32_t size);
-		static Memory::Ref<IndexBuffer> Create(uint32_t size);
+		static Memory::Shared<IndexBuffer> Create(void* data, uint32_t size);
+		static Memory::Shared<IndexBuffer> Create(uint32_t size);
 	};
 }

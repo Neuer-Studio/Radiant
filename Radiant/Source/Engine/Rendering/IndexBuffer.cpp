@@ -4,23 +4,23 @@
 
 namespace Radiant
 {
-	Memory::Ref<IndexBuffer> IndexBuffer::Create(void* data, uint32_t size)
+	Memory::Shared<IndexBuffer> IndexBuffer::Create(void* data, uint32_t size)
 	{
 		switch (RenderingAPI::GetAPI())
 		{
 		case RenderingAPIType::None:    return nullptr;
-		case RenderingAPIType::OpenGL:  return Memory::Ref<OpenGLIndexBuffer>::Create(data, size);
+		case RenderingAPIType::OpenGL:  return Memory::Shared<OpenGLIndexBuffer>::Create(data, size);
 		}
 		RADIANT_VERIFY(false, "Unknown RenderingAPI");
 		return nullptr;
 	}
 
-	Memory::Ref<IndexBuffer> IndexBuffer::Create(uint32_t size)
+	Memory::Shared<IndexBuffer> IndexBuffer::Create(uint32_t size)
 	{
 		switch (RenderingAPI::GetAPI())
 		{
 		case RenderingAPIType::None:    return nullptr;
-		case RenderingAPIType::OpenGL:  return Memory::Ref<OpenGLIndexBuffer>::Create(size);
+		case RenderingAPIType::OpenGL:  return Memory::Shared<OpenGLIndexBuffer>::Create(size);
 		}
 		RADIANT_VERIFY(false, "Unknown RenderingAPI");
 		return nullptr;

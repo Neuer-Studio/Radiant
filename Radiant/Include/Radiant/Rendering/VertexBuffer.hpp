@@ -115,7 +115,7 @@ namespace Radiant
 		virtual std::size_t GetCount() const = 0;
 		virtual std::size_t GetSize() const = 0;
 
-		static Memory::Ref<VertexBuffer> Create(Memory::Buffer data, VertexBufferUsage usage = VertexBufferUsage::Static);
-		static Memory::Ref<VertexBuffer> Create(std::size_t size, VertexBufferUsage usage = VertexBufferUsage::Dynamic);
+		static Memory::Shared<VertexBuffer> Create(Memory::Buffer data, VertexBufferUsage usage = VertexBufferUsage::Static);
+		static Memory::Shared<VertexBuffer> Create(std::size_t size, VertexBufferUsage usage = VertexBufferUsage::Dynamic);
 	};
 }

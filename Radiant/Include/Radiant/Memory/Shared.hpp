@@ -23,20 +23,20 @@ namespace Radiant::Memory
 	};
 
 	template<typename T>
-	class Ref
+	class Shared
 	{
 	public:
-		Ref()
+		Shared()
 			: m_Instance(nullptr)
 		{
 		}
 
-		Ref(std::nullptr_t n)
+		Shared(std::nullptr_t n)
 			: m_Instance(nullptr)
 		{
 		}
 
-		Ref(T* instance)
+		Shared(T* instance)
 			: m_Instance(instance)
 		{
 			static_assert(std::is_base_of<RefCounted, T>::value, "Class is not RefCounted!");
@@ -45,38 +45,38 @@ namespace Radiant::Memory
 		}
 
 		template<typename T2>
-		Ref(const Ref<T2>& other)
+		Shared(const Shared<T2>& other)
 		{
 			m_Instance = (T*)other.m_Instance;
 			IncRef();
 		}
 
 		template<typename T2>
-		Ref(Ref<T2>&& other)
+		Shared(Shared<T2>&& other)
 		{
 			m_Instance = (T*)other.m_Instance;
 			other.m_Instance = nullptr;
 		}
 
-		~Ref()
+		~Shared()
 		{
 			DecRef();
 		}
 
-		Ref(const Ref<T>& other)
+		Shared(const Shared<T>& other)
 			: m_Instance(other.m_Instance)
 		{
 			IncRef();
 		}
 
-		Ref& operator=(std::nullptr_t)
+		Shared& operator=(std::nullptr_t)
 		{
 			DecRef();
 			m_Instance = nullptr;
 			return *this;
 		}
 
-		Ref& operator=(const Ref<T>& other)
+		Shared& operator=(const Shared<T>& other)
 		{
 			other.IncRef();
 			DecRef();
@@ -86,7 +86,7 @@ namespace Radiant::Memory
 		}
 
 		template<typename T2>
-		Ref& operator=(const Ref<T2>& other)
+		Shared& operator=(const Shared<T2>& other)
 		{
 			other.IncRef();
 			DecRef();
@@ -96,7 +96,7 @@ namespace Radiant::Memory
 		}
 
 		template<typename T2>
-		Ref& operator=(Ref<T2>&& other)
+		Shared& operator=(Shared<T2>&& other)
 		{
 			DecRef();
 
@@ -114,8 +114,8 @@ namespace Radiant::Memory
 		T& operator*() { return *m_Instance; }
 		const T& operator*() const { return *m_Instance; }
 
-		T* Raw() { return  m_Instance; }
-		const T* Raw() const { return  m_Instance; }
+		T* Ptr() { return  m_Instance; }
+		const T* Ptr() const { return  m_Instance; }
 
 		void Reset(T* instance = nullptr)
 		{
@@ -124,15 +124,15 @@ namespace Radiant::Memory
 		}
 
 		template<typename T2>
-		Ref<T2> As() const
+		Shared<T2> As() const
 		{
-			return Ref<T2>(*this);
+			return Shared<T2>(*this);
 		}
 
 		template<typename... Args>
-		static Ref<T> Create(Args&&... args)
+		static Shared<T> Create(Args&&... args)
 		{
-			return Ref<T>(new T(std::forward<Args>(args)...));
+			return Shared<T>(new T(std::forward<Args>(args)...));
 		}
 	private:
 		void IncRef() const
@@ -154,7 +154,7 @@ namespace Radiant::Memory
 		}
 
 		template<class T2>
-		friend class Ref;
+		friend class Shared;
 		T* m_Instance;
 	};
 

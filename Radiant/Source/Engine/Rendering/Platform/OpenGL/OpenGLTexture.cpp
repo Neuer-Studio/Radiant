@@ -54,7 +54,7 @@ namespace Radiant
 
 	OpenGLTexture2D::~OpenGLTexture2D()
 	{
-		Memory::Ref<Image2D> image = m_Image;
+		Memory::Shared<Image2D> image = m_Image;
 		Rendering::Submit([image]() mutable {
 			image->Release();
 			});
@@ -63,7 +63,7 @@ namespace Radiant
 
 	void OpenGLTexture2D::Bind(uint32_t slot) const
 	{
-		Memory::Ref<OpenGLImage2D> image = m_Image.As<OpenGLImage2D>();
+		Memory::Shared<OpenGLImage2D> image = m_Image.As<OpenGLImage2D>();
 		Rendering::Submit([slot, image]() {
 			glBindTextureUnit(slot, image->GetRenderingID());
 			});

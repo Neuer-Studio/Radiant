@@ -3,30 +3,36 @@
 namespace Radiant
 {
 	Entity::Entity(const std::string& name)
-		: m_Name(name), m_UUID()
+		: m_OwnerScene(nullptr), m_Name(name), m_UUID()
 	{
 
 	}
 
 	Entity::~Entity()
 	{
-		for (auto comp : m_Components)
-			delete comp.second;
+	
 	}
 
-	void Entity::AddComponent(Component* component)
+	void Entity::AddComponent(Memory::Shared<Component> component)
 	{
 		//TODO(Danya): Add a RADIANT_VERIFY
 		m_Components[component->GetType()] = component;
 	}
 
-	void Entity::RemoveComponent(Component* component)
+	void Entity::RemoveComponent(Memory::Shared<Component> component)
 	{
 		auto it = m_Components.find(component->GetType());
 		if (it != m_Components.end())
 		{
-			delete it->second; 
+			delete it->second.Ptr();
 			m_Components.erase(it); 
 		}
 	}
+
+	bool Entity::HasComponent(ComponentType type)
+	{
+		auto it = m_Components.find(type);
+		return it != m_Components.end();
+	}
+
 }

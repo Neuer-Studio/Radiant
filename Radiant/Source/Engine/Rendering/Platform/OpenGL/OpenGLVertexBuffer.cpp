@@ -38,7 +38,7 @@ namespace Radiant
 
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
 	{
-		Memory::Ref<OpenGLVertexBuffer> instance(this);
+		Memory::Shared<OpenGLVertexBuffer> instance(this);
 		Rendering::Submit([instance]() mutable
 			{
 				glDeleteBuffers(1, &instance->m_RenderingID);

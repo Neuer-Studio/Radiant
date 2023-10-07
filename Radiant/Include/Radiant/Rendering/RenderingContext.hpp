@@ -13,6 +13,6 @@ namespace Radiant
 		virtual void Init() = 0;
 		virtual void SwapBuffers() const = 0;
 
-		static Memory::Ref<RenderingContext> Create(GLFWwindow* windowHandle);
+		static Memory::Shared<RenderingContext> Create(GLFWwindow* windowHandle);
 	};
 }

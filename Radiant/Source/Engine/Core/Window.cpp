@@ -4,7 +4,7 @@
 
 namespace Radiant
 {
-	Memory::Ref<Window> Window::Create(const WindowSpecification& specification)
+	Memory::Shared<Window> Window::Create(const WindowSpecification& specification)
 	{
 #if defined(RADIANT_PLATFORM_WINDOWS)
 		return new WindowsWindow(specification);

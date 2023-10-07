@@ -23,7 +23,7 @@ namespace Radiant
 
 		virtual void Bind() const= 0;
 
-		static Memory::Ref<Pipeline> Create(const PipelineSpecification& spec);
+		static Memory::Shared<Pipeline> Create(const PipelineSpecification& spec);
 	};
 
 }

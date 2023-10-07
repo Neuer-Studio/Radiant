@@ -40,20 +40,20 @@ namespace Radiant
 
 		virtual RendererID GetRendererID() const = 0;
 
-		virtual Memory::Ref<Image2D> GetImage() const = 0;
-		virtual Memory::Ref<Image2D> GetDepthImage() const = 0;
+		virtual Memory::Shared<Image2D> GetImage() const = 0;
+		virtual Memory::Shared<Image2D> GetDepthImage() const = 0;
 
-		static Memory::Ref<Framebuffer> Create(const FramebufferSpecification& spec);
+		static Memory::Shared<Framebuffer> Create(const FramebufferSpecification& spec);
 	};
 
 	class FramebufferPool final
 	{
 	public:
-		static void Add(Memory::Ref<Framebuffer> framebuffer);
+		static void Add(Memory::Shared<Framebuffer> framebuffer);
 
-		static const std::vector<Memory::Ref<Framebuffer>>& GetAll() { return m_Pool; }
+		static const std::vector<Memory::Shared<Framebuffer>>& GetAll() { return m_Pool; }
 	private:
-		static std::vector<Memory::Ref<Framebuffer>> m_Pool;
+		static std::vector<Memory::Shared<Framebuffer>> m_Pool;
 	};
 
 }
