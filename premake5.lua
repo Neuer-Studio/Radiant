@@ -1,6 +1,6 @@
 -- Config file for Radiant Engine
 
-workspace "Luminova Studios"
+workspace "Neuer Studio"
     configurations { "Debug", "Release" }
     architecture "x64"
     startproject "Sanxbox"
