@@ -19,6 +19,7 @@
 #include <Radiant/Rendering/Mesh.hpp>
 #include <Radiant/Rendering/Framebuffer.hpp>
 #include <Radiant/Scene/Entity.hpp>
+#include <Radiant/ImGui/Editor/Panels/PanelOutliner.hpp>
 
 namespace Radiant
 {
@@ -48,6 +49,7 @@ namespace Radiant
 		~EditorLayer()
 		{
 			delete m_ManagerScene;
+			delete m_Outliner;
 		}
 
 		virtual void OnAttach()
@@ -78,6 +80,7 @@ namespace Radiant
 			auto em = m_TestScene->CreateEntity();
 			em->AddComponent(CreateNewComponent<MeshComponent>());
 			em->GetComponent<MeshComponent>()->Mesh = m_Mesh;
+			m_Outliner = new PanelOutliner(m_TestScene);
 		}
 
 		virtual void OnDetach()
@@ -160,6 +163,8 @@ namespace Radiant
 
 			ImGui::PopStyleVar(2);
 
+			m_Outliner->DrawComponentsUI();
+
 			// Dockspace
 			float minWinSizeX = style.WindowMinSize.x;
 			style.WindowMinSize.x = 370.0f;
@@ -186,14 +191,16 @@ namespace Radiant
 			ImGui::End();
 			ImGui::PopStyleVar();
 
+			m_Outliner->DrawImGuiUI();
 			ImGui::End();
+
 		}
 	private:
 		Memory::Shared<Mesh> m_Mesh;
 		Memory::Shared<Shader> m_CubeShader;
 
-		Material m_Material; // Информация о материале
-		Light m_Light;       // Информация об источнике света
+		Material m_Material;
+		Light m_Light;
 
 		glm::vec3 m_CubePosition { 1.f };
 
@@ -202,5 +209,7 @@ namespace Radiant
 		Memory::Shared<Framebuffer> m_Framebuffer;
 		SceneManager* m_ManagerScene;
 		Memory::Shared<Scene> m_TestScene;
+
+		PanelOutliner* m_Outliner;
 	};
 }

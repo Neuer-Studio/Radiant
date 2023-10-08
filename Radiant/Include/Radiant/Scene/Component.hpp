@@ -15,7 +15,7 @@ namespace Radiant
 	struct Component : public Memory::RefCounted
 	{
 	protected:
-		virtual ComponentType GetType() = 0;
+		virtual const ComponentType GetType() const = 0;
 
 		friend Entity;
 	};
@@ -34,7 +34,7 @@ namespace Radiant
 
 		static ComponentType StaticGetType() { return ComponentType::Transform; }
 	protected:
-		virtual ComponentType GetType() override { return StaticGetType(); }
+		virtual const ComponentType GetType() const override { return StaticGetType(); }
 	};
 
 	struct MeshComponent : public Component
@@ -43,7 +43,7 @@ namespace Radiant
 
 		static ComponentType StaticGetType() { return ComponentType::Mesh; }
 	protected:
-		virtual ComponentType GetType() override { return StaticGetType(); }
+		virtual const ComponentType GetType() const override { return StaticGetType(); }
 
 		friend Entity;
 	};

@@ -10,8 +10,8 @@ namespace Radiant
 	public:
 		Entity(const std::string& name);
 		~Entity();
-		void AddComponent(Memory::Shared<Component> component);
-		void RemoveComponent(Memory::Shared<Component> component);
+		void AddComponent(const Memory::Shared<Component>& component);
+		void RemoveComponent(const Memory::Shared<Component>& component);
 		bool HasComponent(ComponentType type);
 		template <typename T>
 		Memory::Shared<T> GetComponent() { return m_Components[T::StaticGetType()]; }
