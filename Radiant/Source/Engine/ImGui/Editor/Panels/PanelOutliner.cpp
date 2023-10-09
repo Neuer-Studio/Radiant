@@ -1,5 +1,7 @@
 #include <Radiant/ImGui/Editor/Panels/PanelOutliner.hpp>
 #include <imgui/imgui.h>
+#include <Radiant/Scene/Entity.hpp>
+#include <Radiant/Scene/Component.hpp>
 
 namespace Radiant
 {
@@ -16,6 +18,11 @@ namespace Radiant
 	void PanelOutliner::DrawImGuiUI()
 	{
 		ImGui::Begin("Outliner");
+
+		auto& sceneEntities = m_Context->GetEntityList();
+		for (const auto& e : sceneEntities)
+			ImGui::Button(e->m_Name.c_str());
+
 		ImGui::End();
 	}
 
@@ -37,7 +44,7 @@ namespace Radiant
 
 				if (ImGui::MenuItem("Empty Entity"))
 				{
-					decltype(auto) newEntity = m_Context->CreateEntity("Empty Entity");
+					Entity* newEntity = m_Context->CreateEntity("Empty Entity");
 				}
 
 				ImGui::Spacing();

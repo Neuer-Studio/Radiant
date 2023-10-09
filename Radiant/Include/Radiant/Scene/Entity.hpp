@@ -5,11 +5,13 @@
 
 namespace Radiant
 {
+	class PanelOutliner;
 	class Entity
 	{
 	public:
 		Entity(const std::string& name);
 		~Entity();
+
 		void AddComponent(const Memory::Shared<Component>& component);
 		void RemoveComponent(const Memory::Shared<Component>& component);
 		bool HasComponent(ComponentType type);
@@ -22,5 +24,6 @@ namespace Radiant
 		std::string m_Name;
 
 		friend Scene;
+		friend PanelOutliner;
 	};
 }
