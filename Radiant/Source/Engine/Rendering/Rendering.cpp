@@ -3,6 +3,13 @@
 
 namespace Radiant
 {
+	struct RenderingData
+	{
+		Memory::Shared<RenderingPass> ActiveRenderingPass;
+	};
+
+	static RenderingData* s_Data = nullptr;
+
 	static Memory::CommandBuffer* s_CommandBuffer = nullptr;
 	static RenderingAPI* s_RendererAPI = nullptr;
 
@@ -24,6 +31,24 @@ namespace Radiant
 		s_CommandBuffer = new Memory::CommandBuffer();
 
 		s_RendererAPI->Init();
+		s_Data = new RenderingData();
+	}
+
+	void Rendering::BeginRenderingPass(const Memory::Shared<RenderingPass>& pass)
+	{
+		RADIANT_VERIFY(pass, "Render pass cannot be null!");
+		s_Data->ActiveRenderingPass = pass;
+
+		pass->GetSpecification().TargetFramebuffer->Bind();
+
+	}
+
+	void Rendering::EndRenderingPass()
+	{
+		RADIANT_VERIFY(s_Data->ActiveRenderingPass, "No active render pass! Have you called Renderer::EndRenderPass twice?");
+
+		s_Data->ActiveRenderingPass->GetSpecification().TargetFramebuffer->Unbind();
+		s_Data->ActiveRenderingPass = nullptr;
 	}
 
 	void Rendering::DrawIndexed(std::size_t count, bool depthTest)

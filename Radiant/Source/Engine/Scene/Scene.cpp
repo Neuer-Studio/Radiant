@@ -41,6 +41,18 @@ namespace Radiant
 		}
 		return nullptr;
 	}
+	
+	Entity* Scene::GetEntityByComponentType(ComponentType type)
+	{
+		for (auto e : m_Entitys)
+		{
+			if (e->HasComponent(type))
+				return e;
+		}
+
+		RADIANT_VERIFY(false, "Scene doest have the component.");
+		return nullptr;
+	}
 
 	void Scene::UpdateScene(SceneType type) // TODO(Danya): Update scene render 
 	{

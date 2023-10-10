@@ -6,6 +6,7 @@ namespace Radiant
 {
 	class SceneManager;
 	class Entity;
+	enum class ComponentType;
 
 	enum class SceneType
 	{
@@ -21,6 +22,7 @@ namespace Radiant
 		void AddEntity(const Entity* entity);
 		Entity* CreateEntity(const std::string& name = "Debug Name");
 		Entity* GetEntityByUUID(uint64_t uuid);
+		Entity* GetEntityByComponentType(ComponentType type);
 
 		std::vector<Entity*> GetEntityList() { return m_Entitys; }
 

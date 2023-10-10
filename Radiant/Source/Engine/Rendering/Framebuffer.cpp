@@ -10,8 +10,8 @@ namespace Radiant
 
 		switch (RenderingAPI::GetAPI())
 		{
-		case RenderingAPIType::None:		return nullptr;
-		case RenderingAPIType::OpenGL:	result = new OpenGLFramebuffer(spec);
+		case RenderingAPIType::None:	return nullptr;
+		case RenderingAPIType::OpenGL:	result = Memory::Shared<OpenGLFramebuffer>::Create(spec);
 		}
 		//FramebufferPool::Add(result);
 		return result;

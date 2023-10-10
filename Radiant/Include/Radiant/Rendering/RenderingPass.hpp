@@ -6,7 +6,7 @@ namespace Radiant
 {
 	struct RenderingPassSpecification
 	{
-		Memory::Shared<Framebuffer> Framebuffer;
+		Memory::Shared<Framebuffer> TargetFramebuffer;
 	};
 
 	class RenderingPass : public Memory::RefCounted

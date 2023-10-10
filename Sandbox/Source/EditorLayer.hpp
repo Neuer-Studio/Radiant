@@ -90,40 +90,7 @@ namespace Radiant
 
 		virtual void OnUpdate() override
 		{
-			m_Framebuffer->Bind(); //NOTE(Danya): Should be in scenerendering, shader the same
-			m_Camera.Update();
-			Rendering::Clear();
 
-			glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), m_CubePosition);
-			glm::mat4 viewMatrix = m_Camera.GetViewMatrix();
-			glm::mat4 projectionMatrix = m_Camera.GetProjectionMatrix();
-
-			//NOTE(Danya): Should be in scenerendering ---------------------
-
-			m_CubeShader->SetValue("u_Material.ambient", (std::byte*)&m_Material.ambient, UniformTarget::FragmentStruct);
-			m_CubeShader->SetValue("u_Material.diffuse", (std::byte*)&m_Material.diffuse, UniformTarget::FragmentStruct);
-			m_CubeShader->SetValue("u_Material.specular", (std::byte*)&m_Material.specular, UniformTarget::FragmentStruct);
-			m_CubeShader->SetValue("u_Material.shininess", (std::byte*)&m_Material.shininess, UniformTarget::FragmentStruct);
-			m_CubeShader->SetValue("u_Model", (std::byte*)&modelMatrix, UniformTarget::Vertex);
-			m_CubeShader->SetValue("u_View", (std::byte*)&viewMatrix, UniformTarget::Vertex);
-			m_CubeShader->SetValue("u_Projection", (std::byte*)&projectionMatrix, UniformTarget::Vertex);
-
-			m_CubeShader->SetValue("u_Light.position", (std::byte*)&m_Light.position, UniformTarget::FragmentStruct);
-			m_CubeShader->SetValue("u_Light.ambient", (std::byte*)&m_Light.ambient, UniformTarget::FragmentStruct);
-			m_CubeShader->SetValue("u_Light.diffuse", (std::byte*)&m_Light.diffuse, UniformTarget::FragmentStruct);
-			m_CubeShader->SetValue("u_Light.specular", (std::byte*)&m_Light.specular, UniformTarget::FragmentStruct);
-
-			m_CubeShader->SetValue("u_Model", (std::byte*)&modelMatrix, UniformTarget::Vertex);
-			m_CubeShader->SetValue("u_View", (std::byte*)&viewMatrix, UniformTarget::Vertex);
-			m_CubeShader->SetValue("u_Projection", (std::byte*)&projectionMatrix, UniformTarget::Vertex);
-
-			m_CubeShader->Bind();
-
-			// ---------------------
-
-			m_TestScene->UpdateScene(SceneType::Editor);
-			
-			m_Framebuffer->Unbind();
 		}
 
 		virtual void OnImGuiRender() override
