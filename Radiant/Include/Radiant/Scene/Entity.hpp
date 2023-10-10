@@ -12,7 +12,6 @@ namespace Radiant
 		Entity(const std::string& name = "Unnamed Entity");
 		~Entity();
 
-
 		const std::string& GetName() const { return m_Name; }
 
 		void AddComponent(const Memory::Shared<Component>& component);
