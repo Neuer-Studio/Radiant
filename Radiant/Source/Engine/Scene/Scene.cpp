@@ -13,7 +13,7 @@ namespace Radiant
 
 	Scene::~Scene()
 	{
-		//Note(Danya): Delete Entitys
+		//TODO(Danya): Delete Entitys
 	}
 
 	void Scene::AddEntity(const Entity* entity)
@@ -42,7 +42,7 @@ namespace Radiant
 		return nullptr;
 	}
 
-	void Scene::UpdateScene(SceneType type)
+	void Scene::UpdateScene(SceneType type) // TODO(Danya): Update scene render 
 	{
 		for (const auto e : m_Entitys)
 		{

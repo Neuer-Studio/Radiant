@@ -52,7 +52,7 @@ namespace Radiant
 			}
 		}
 
-		static bool DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
+		static bool DrawVec3UI(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
 		{
 			bool modified = false;
 
@@ -284,7 +284,7 @@ namespace Radiant
 
 		DrawComponentUI(ComponentType::Transform, "Transform", m_SelectedEntity, [=](Memory::Shared<Component>& component) mutable
 			{
-				DrawVec3Control("Translation", component.As<TransformComponent>()->Position);
+				DrawVec3UI("Translation", component.As<TransformComponent>()->Position);
 			});
 
 		/* New Component */
