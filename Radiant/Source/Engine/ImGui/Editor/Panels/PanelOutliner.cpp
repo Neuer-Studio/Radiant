@@ -1,10 +1,58 @@
 #include <Radiant/ImGui/Editor/Panels/PanelOutliner.hpp>
-#include <imgui/imgui.h>
 #include <Radiant/Scene/Entity.hpp>
 #include <Radiant/Scene/Component.hpp>
 
+#include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
+
 namespace Radiant
 {
+	namespace
+	{
+		template <typename UIFunction>
+		static void DrawComponentUI(ComponentType type, const std::string& name, Entity* entity, UIFunction uiFunction)
+		{
+			const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
+			if (entity->HasComponent(type))
+			{
+				ImGui::PushID(name.c_str());
+				auto component = entity->GetComponent(type).Ptr();
+				ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
+
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+				float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+				ImGui::Separator();
+				bool open = ImGui::TreeNodeEx("##dummy_id", treeNodeFlags, name.c_str());
+				ImGui::PopStyleVar();
+				ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
+				if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
+				{
+					ImGui::OpenPopup("ComponentSettings");
+				}
+
+				bool removeComponent = false;
+				if (ImGui::BeginPopup("ComponentSettings"))
+				{
+					if (ImGui::MenuItem("Remove component"))
+						removeComponent = true;
+
+					ImGui::EndPopup();
+				}
+
+				if (open)
+				{
+					uiFunction(component);
+					ImGui::TreePop();
+				}
+
+				if (removeComponent)
+					entity->RemoveComponent(type);
+
+				ImGui::PopID();
+			}
+		}
+	}
+
 	PanelOutliner::PanelOutliner(const Memory::Shared<Scene>& context)
 		: m_Context(context), m_SelectedEntity(nullptr)
 	{
@@ -149,6 +197,13 @@ namespace Radiant
 		ImGui::Text(TextUUID.c_str());
 		ImGui::Unindent(contentRegionAvailable.x * 0.05f);
 		ImGui::PopItemWidth();
+
+
+		DrawComponentUI(ComponentType::Transform, "Transform", m_SelectedEntity, [=](Memory::Shared<Component> component) mutable
+			{
+			});
+
+		/* New Component */
 
 		ImGui::Dummy(ImVec2(0, 20));
 

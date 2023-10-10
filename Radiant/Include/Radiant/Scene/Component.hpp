@@ -32,18 +32,24 @@ namespace Radiant
 
 		glm::vec3 Position;
 
-		static ComponentType StaticGetType() { return ComponentType::Transform; }
 	protected:
-		virtual const ComponentType GetType() const override { return StaticGetType(); }
+		virtual const ComponentType GetType() const override { return ComponentType::Transform; }
 	};
 
 	struct MeshComponent : public Component
 	{
 		Memory::Shared<Radiant::Mesh> Mesh;
 
-		static ComponentType StaticGetType() { return ComponentType::Mesh; }
 	protected:
-		virtual const ComponentType GetType() const override { return StaticGetType(); }
+		virtual const ComponentType GetType() const override { return  ComponentType::Mesh; }
+
+		friend Entity;
+	};
+
+	struct MaterialComponent : public Component
+	{
+	protected:
+		virtual const ComponentType GetType() const override { return ComponentType::Mesh;  }
 
 		friend Entity;
 	};

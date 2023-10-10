@@ -19,14 +19,9 @@ namespace Radiant
 		m_Components[component->GetType()] = component;
 	}
 
-	void Entity::RemoveComponent(const Memory::Shared<Component>& component)
+	void Entity::RemoveComponent(ComponentType type)
 	{
-		auto it = m_Components.find(component->GetType());
-		if (it != m_Components.end())
-		{
-			delete it->second.Ptr();
-			m_Components.erase(it); 
-		}
+		m_Components.erase(type); 
 	}
 
 	bool Entity::HasComponent(ComponentType type)

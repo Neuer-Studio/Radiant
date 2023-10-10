@@ -48,7 +48,7 @@ namespace Radiant
 		{
 			if (e->HasComponent(ComponentType::Mesh))
 			{
-				auto mesh = e->GetComponent<MeshComponent>()->Mesh;
+				auto mesh = e->GetComponent(ComponentType::Mesh).As<MeshComponent>()->Mesh;
 				//mesh->GetPipeline()->Bind();
 				mesh->Update();
 			}

@@ -79,7 +79,7 @@ namespace Radiant
 			m_TestScene = m_ManagerScene->Create("Debug name");
 			auto em = m_TestScene->CreateEntity();
 			em->AddComponent(CreateNewComponent<MeshComponent>());
-			em->GetComponent<MeshComponent>()->Mesh = m_Mesh;
+			em->GetComponent(ComponentType::Mesh).As<MeshComponent>()->Mesh = m_Mesh;
 			m_Outliner = new PanelOutliner(m_TestScene);
 		}
 
