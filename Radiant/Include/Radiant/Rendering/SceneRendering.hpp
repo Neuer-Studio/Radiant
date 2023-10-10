@@ -18,6 +18,8 @@ namespace Radiant
 		void End();
 
 	private:
+		void CompositePass();
+
 		void Flush();
 	private:
 		Memory::Shared<Scene> m_Context;

@@ -58,4 +58,9 @@ namespace Radiant
 		Flush();
 		m_Active = false;
 	}
+
+	void SceneRendering::CompositePass()
+	{
+
+	}
 }

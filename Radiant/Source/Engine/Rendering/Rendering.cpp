@@ -1,17 +1,25 @@
 #include <Rendering/Rendering.hpp>
 #include <Rendering/Platform/OpenGL/OpenGLRendering.hpp>
 
+#include <Rendering/VertexBuffer.hpp>
+#include <Rendering/IndexBuffer.hpp>
+#include <Rendering/Pipeline.hpp>
+
 namespace Radiant
 {
 	struct RenderingData
 	{
+		Memory::CommandBuffer* s_CommandBuffer;
+		RenderingAPI* s_RendererAPI;
+
 		Memory::Shared<RenderingPass> ActiveRenderingPass;
+
+		Memory::Shared<VertexBuffer> m_FullscreenQuadVertexBuffer;
+		Memory::Shared<IndexBuffer> m_FullscreenQuadIndexBuffer;
+		Memory::Shared<Pipeline> m_FullscreenQuadPipeline;
 	};
 
 	static RenderingData* s_Data = nullptr;
-
-	static Memory::CommandBuffer* s_CommandBuffer = nullptr;
-	static RenderingAPI* s_RendererAPI = nullptr;
 
 	static RenderingAPI* InitRenderingAPI()
 	{
@@ -27,11 +35,46 @@ namespace Radiant
 	void Rendering::Init()
 	{
 		RA_INFO("[Rendering] Init Rendering");
-		s_RendererAPI = InitRenderingAPI();
-		s_CommandBuffer = new Memory::CommandBuffer();
+		s_Data->s_RendererAPI = InitRenderingAPI();
+		s_Data->s_CommandBuffer = new Memory::CommandBuffer();
 
-		s_RendererAPI->Init();
+		s_Data->s_RendererAPI->Init();
 		s_Data = new RenderingData();
+
+		// NOTE(Danya): Create fullscreen quad
+		float x = -1;
+		float y = -1;
+		float width = 2, height = 2;
+		struct QuadVertex
+		{
+			glm::vec3 Position;
+			glm::vec2 TexCoord;
+		};
+
+		QuadVertex* data = new QuadVertex[4];
+
+		data[0].Position = glm::vec3(x, y, 0.1f);
+		data[0].TexCoord = glm::vec2(0, 0);
+
+		data[1].Position = glm::vec3(x + width, y, 0.1f);
+		data[1].TexCoord = glm::vec2(1, 0);
+
+		data[2].Position = glm::vec3(x + width, y + height, 0.1f);
+		data[2].TexCoord = glm::vec2(1, 1);
+
+		data[3].Position = glm::vec3(x, y + height, 0.1f);
+		data[3].TexCoord = glm::vec2(0, 1);
+
+		PipelineSpecification pipelineSpecification;
+		pipelineSpecification.Layout = {
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float2, "a_TexCoord" }
+		};
+		s_Data->m_FullscreenQuadPipeline = Pipeline::Create(pipelineSpecification);
+		Memory::Buffer buffer(data, 4 * sizeof(QuadVertex));
+		s_Data->m_FullscreenQuadVertexBuffer = VertexBuffer::Create(buffer);
+		uint32_t indices[6] = { 0, 1, 2, 2, 3, 0, };
+		s_Data->m_FullscreenQuadIndexBuffer = IndexBuffer::Create(indices, 6 * sizeof(uint32_t));
 	}
 
 	void Rendering::BeginRenderingPass(const Memory::Shared<RenderingPass>& pass)
@@ -55,7 +98,7 @@ namespace Radiant
 	{
 		Rendering::Submit([=]()
 			{
-				s_RendererAPI->DrawIndexed(count, depthTest);
+				s_Data->s_RendererAPI->DrawIndexed(count, depthTest);
 			});
 	}
 
@@ -63,22 +106,22 @@ namespace Radiant
 	{
 		Rendering::Submit([=]()
 			{
-				s_RendererAPI->Clear();
+				s_Data->s_RendererAPI->Clear();
 			});
 	}
 
 	void Rendering::Submit(std::function<void()> func)
 	{
-		s_CommandBuffer->AddCommand(func);
+		s_Data->s_CommandBuffer->AddCommand(func);
 	}
 
 	void Rendering::WaitAndRender()
 	{
-		s_CommandBuffer->Execute();
+		s_Data->s_CommandBuffer->Execute();
 	}
 
 	Memory::CommandBuffer& GetRenderingCommandBuffer()
 	{
-		return *s_CommandBuffer;
+		return *s_Data->s_CommandBuffer;
 	}
 }
