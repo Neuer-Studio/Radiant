@@ -9,8 +9,11 @@ namespace Radiant
 	class Entity
 	{
 	public:
-		Entity(const std::string& name);
+		Entity(const std::string& name = "Unnamed Entity");
 		~Entity();
+
+
+		const std::string& GetName() const { return m_Name; }
 
 		void AddComponent(const Memory::Shared<Component>& component);
 		void RemoveComponent(const Memory::Shared<Component>& component);

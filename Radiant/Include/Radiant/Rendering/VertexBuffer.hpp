@@ -40,8 +40,8 @@ namespace Radiant
 	{
 		ShaderDataType Type;
 		std::string Name;
-		std::size_t Offset;
-		std::size_t Size;
+		std::uint32_t Offset;
+		std::uint32_t Size;
 		bool Normalized;
 
 		VertexBufferElement() = default;
@@ -90,7 +90,7 @@ namespace Radiant
 	private:
 		void CalculateOffsetsAndStride()
 		{
-			std::size_t offset = 0;
+			std::uint32_t offset = 0;
 			m_Stride = 0;
 			for (auto& element : m_Elements)
 			{
@@ -101,7 +101,7 @@ namespace Radiant
 		}
 
 		std::vector<VertexBufferElement> m_Elements;
-		std::size_t m_Stride = 0;
+		std::uint32_t m_Stride = 0;
 	};
 
 	class VertexBuffer : public Memory::RefCounted

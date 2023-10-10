@@ -28,8 +28,8 @@ namespace Radiant
 		virtual uint64_t GetImageID() const override { return m_RenderingID; }
 	private:
 		ImageFormat m_Format;
-		std::size_t m_Width;
-		std::size_t m_Height;
+		std::uint32_t m_Width;
+		std::uint32_t m_Height;
 		Memory::Buffer m_ImageData;
 
 		RendererID m_RenderingID = 0;
