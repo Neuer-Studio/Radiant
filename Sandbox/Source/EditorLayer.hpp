@@ -19,6 +19,7 @@
 #include <Radiant/Rendering/Mesh.hpp>
 #include <Radiant/Rendering/Framebuffer.hpp>
 #include <Radiant/Scene/Entity.hpp>
+#include <Radiant/Rendering/SceneRendering.hpp>
 #include <Radiant/ImGui/Editor/Panels/PanelOutliner.hpp>
 
 namespace Radiant
@@ -81,6 +82,8 @@ namespace Radiant
 			em->AddComponent(CreateNewComponent<MeshComponent>());
 			em->GetComponent(ComponentType::Mesh).As<MeshComponent>()->Mesh = m_Mesh;
 			m_Outliner = new PanelOutliner(m_TestScene);
+
+			m_Rendering = new SceneRendering(m_TestScene);
 		}
 
 		virtual void OnDetach()
@@ -90,7 +93,7 @@ namespace Radiant
 
 		virtual void OnUpdate() override
 		{
-
+			m_TestScene->UpdateScene(m_Rendering);
 		}
 
 		virtual void OnImGuiRender() override
@@ -178,5 +181,6 @@ namespace Radiant
 		Memory::Shared<Scene> m_TestScene;
 
 		PanelOutliner* m_Outliner;
+		Memory::Shared<SceneRendering> m_Rendering;
 	};
 }

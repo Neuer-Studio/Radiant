@@ -18,8 +18,8 @@ namespace Radiant
 
 	struct RenderingData
 	{
-		Memory::CommandBuffer* s_CommandBuffer;
-		RenderingAPI* s_RendererAPI;
+		Memory::CommandBuffer* CommandBuffer;
+		RenderingAPI* RendererAPI;
 
 		Memory::Shared<RenderingPass> ActiveRenderingPass;
 
@@ -41,12 +41,13 @@ namespace Radiant
 
 	void Rendering::Init()
 	{
-		RA_INFO("[Rendering] Init Rendering");
-		s_Data->s_RendererAPI = InitRenderingAPI();
-		s_Data->s_CommandBuffer = new Memory::CommandBuffer();
-
-		s_Data->s_RendererAPI->Init();
 		s_Data = new RenderingData();
+
+		RA_INFO("[Rendering] Init Rendering");
+		s_Data->RendererAPI = InitRenderingAPI();
+		s_Data->CommandBuffer = new Memory::CommandBuffer();
+
+		s_Data->RendererAPI->Init();
 
 		// NOTE(Danya): Create fullscreen quad
 		float x = -1;
@@ -115,24 +116,24 @@ namespace Radiant
 
 	void Rendering::SubmitCommand(std::function<void()> func)
 	{
-		s_Data->s_CommandBuffer->AddCommand(func);
+		s_Data->CommandBuffer->AddCommand(func);
 	}
 
 	void Rendering::ExecuteCommand()
 	{
-		s_Data->s_CommandBuffer->Execute();
+		s_Data->CommandBuffer->Execute();
 	}
 
 	Memory::CommandBuffer& GetRenderingCommandBuffer()
 	{
-		return *s_Data->s_CommandBuffer;
+		return *s_Data->CommandBuffer;
 	}
 
 	void Rendering::DrawIndexed(std::size_t count, PrimitiveType type, bool depthTest)
 	{
 		Rendering::SubmitCommand([=]()
 			{
-				s_Data->s_RendererAPI->DrawIndexed(count, type, depthTest);
+				s_Data->RendererAPI->DrawIndexed(count, type, depthTest);
 			});
 	}
 
@@ -140,7 +141,7 @@ namespace Radiant
 	{
 		Rendering::SubmitCommand([=]()
 			{
-				s_Data->s_RendererAPI->Clear();
+				s_Data->RendererAPI->Clear();
 			});
 	}
 }

@@ -57,14 +57,17 @@ namespace Radiant
 
 	void Scene::UpdateScene(const Memory::Shared<SceneRendering>& rendering, SceneType type) // TODO(Danya): Update scene render 
 	{
+		Memory::Shared<SceneRendering> render = rendering;
 		for (const auto e : m_Entitys)
 		{
 			if (e->HasComponent(ComponentType::Mesh))
 			{
 				rendering->AddMeshToDrawList(e->GetComponent(ComponentType::Mesh).As<MeshComponent>()->Mesh);
-	
 			}
 		}
+
+		render->Begin();
+		render->End();
 	}
 
 	/*======================== SceneManager ======================*/
