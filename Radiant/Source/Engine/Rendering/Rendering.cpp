@@ -21,25 +21,6 @@ namespace Radiant
 
 	static RenderingData* s_Data = nullptr;
 
-	namespace
-	{
-		static void DrawIndexed(std::size_t count, bool depthTest)
-		{
-			Rendering::SubmitCommand([=]()
-				{
-					s_Data->s_RendererAPI->DrawIndexed(count, depthTest);
-				});
-		}
-
-		static void Clear()
-		{
-			Rendering::SubmitCommand([=]()
-				{
-					s_Data->s_RendererAPI->Clear();
-				});
-		}
-	}
-
 	static RenderingAPI* InitRenderingAPI()
 	{
 		switch (RenderingAPI::GetAPI())
@@ -113,6 +94,15 @@ namespace Radiant
 		s_Data->ActiveRenderingPass = nullptr;
 	}
 
+	void Rendering::DrawQuad()
+	{
+		s_Data->m_FullscreenQuadPipeline->Bind();
+		s_Data->m_FullscreenQuadIndexBuffer->Bind();
+		s_Data->m_FullscreenQuadVertexBuffer->Bind();
+
+		DrawIndexed(6);
+	}
+
 	void Rendering::SubmitCommand(std::function<void()> func)
 	{
 		s_Data->s_CommandBuffer->AddCommand(func);
@@ -126,5 +116,21 @@ namespace Radiant
 	Memory::CommandBuffer& GetRenderingCommandBuffer()
 	{
 		return *s_Data->s_CommandBuffer;
+	}
+
+	void Rendering::DrawIndexed(std::size_t count, PrimitiveType type, bool depthTest)
+	{
+		Rendering::SubmitCommand([=]()
+			{
+				s_Data->s_RendererAPI->DrawIndexed(count, type, depthTest);
+			});
+	}
+
+	void Rendering::Clear()
+	{
+		Rendering::SubmitCommand([=]()
+			{
+				s_Data->s_RendererAPI->Clear();
+			});
 	}
 }

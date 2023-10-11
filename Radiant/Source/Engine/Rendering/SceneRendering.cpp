@@ -102,4 +102,9 @@ namespace Radiant
 	{
 		s_SceneInfo->MeshDrawList.push_back(mesh);
 	}
+
+	uint32_t SceneRendering::GetFinalPassImage()
+	{
+		return s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->GetImage();
+	}
 }

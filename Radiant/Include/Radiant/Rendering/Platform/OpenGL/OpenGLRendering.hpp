@@ -9,9 +9,10 @@ namespace Radiant
 	public:
 		virtual void Init() override;
 		virtual void Shutdown() override;
-
-		// NOTE: Tempory wile we don't have a rendering scene
-		virtual void DrawIndexed(uint32_t count, bool depthTest) override;
+	private:
+		virtual void DrawIndexed(uint32_t count, PrimitiveType type, bool depthTest) override;
 		virtual void Clear() override;
+
+		friend Rendering;
 	};
 }

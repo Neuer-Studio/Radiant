@@ -38,12 +38,23 @@ namespace Radiant {
 
 	}
 
-	void OpenGLRendering::DrawIndexed(uint32_t count, bool depthTest)
+	void OpenGLRendering::DrawIndexed(uint32_t count, PrimitiveType type, bool depthTest)
 	{
 		if (!depthTest)
 			glDisable(GL_DEPTH_TEST);
 
-		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+		GLenum gltype = 0;
+		switch (type)
+		{
+		case PrimitiveType::Triangles:
+			gltype = GL_TRIANGLES;
+			break;
+		case PrimitiveType::Lines:
+			gltype = GL_LINES;
+			break;
+		}
+
+		glDrawElements(gltype, count, GL_UNSIGNED_INT, nullptr);
 
 		if (!depthTest)
 			glEnable(GL_DEPTH_TEST);
