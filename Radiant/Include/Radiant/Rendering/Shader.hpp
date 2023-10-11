@@ -9,7 +9,7 @@ namespace Radiant
 {
 	enum class UniformTarget // NOTE: Use for get a buffer
 	{
-		None = 0, Fragment, Vertex, Sampler, VertexStruct, FragmentStruct
+		None = 0, Fragment, Vertex, Sampler,
 	};
 
 	enum class RadiantType

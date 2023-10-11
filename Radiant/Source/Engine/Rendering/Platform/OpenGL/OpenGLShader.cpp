@@ -294,7 +294,7 @@ namespace Radiant
 					field.Position = GetExternalUniformPosition(GLSLName);
 					field.GLSLName = GLSLName;
 
-					m_FragmentStructUnfiforms.Uniforms[GLSLName] = { field.Type, UniformTarget::FragmentStruct, GLSLName, field.Position };
+					m_FragmentStructUnfiforms.Uniforms[GLSLName] = { field.Type, UniformTarget::Fragment, GLSLName, field.Position };
 
 				}
 			}
@@ -452,10 +452,6 @@ namespace Radiant
 
 		case UniformTarget::Sampler:
 			return m_SamplerUniforms.Uniforms.count(uniformName) > 0();
-
-		case UniformTarget::FragmentStruct:
-			return (m_FragmentStructUnfiforms.Uniforms.count(uniformName) > 0()) ||
-				(m_VertexStructUnfiforms.Uniforms.count(uniformName) > 0());
 		}
 
 		return false;
@@ -481,13 +477,6 @@ namespace Radiant
 		case UniformTarget::Sampler:
 			if (m_SamplerUniforms.Uniforms.count(uniformName) > 0)
 				return m_SamplerUniforms.Uniforms.at(uniformName);
-			break;
-
-		case UniformTarget::FragmentStruct:
-			if (m_FragmentStructUnfiforms.Uniforms.count(uniformName) > 0)
-				return m_FragmentStructUnfiforms.Uniforms.at(uniformName);
-			else if (m_VertexStructUnfiforms.Uniforms.count(uniformName) > 0)
-				return m_VertexStructUnfiforms.Uniforms.at(uniformName);
 			break;
 		}
 
@@ -642,9 +631,6 @@ namespace Radiant
 
 		case UniformTarget::Vertex:
 			return findUniformPosition(uniformName, m_VertexUnfiforms);
-		case UniformTarget::FragmentStruct:
-			return findUniformPosition(uniformName, m_FragmentStructUnfiforms);
-
 		default:
 			return -1;
 		}

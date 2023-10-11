@@ -4,9 +4,18 @@
 #include <Rendering/VertexBuffer.hpp>
 #include <Rendering/IndexBuffer.hpp>
 #include <Rendering/Pipeline.hpp>
+#include <Rendering/Shader.hpp>
 
 namespace Radiant
 {
+	struct QuadData
+	{
+		Memory::Shared<VertexBuffer> FullscreenQuadVertexBuffer;
+		Memory::Shared<IndexBuffer> FullscreenQuadIndexBuffer;
+		Memory::Shared<Pipeline> FullscreenQuadPipeline;
+		Memory::Shared<Shader> FullscreenQuadShader;
+	};
+
 	struct RenderingData
 	{
 		Memory::CommandBuffer* s_CommandBuffer;
@@ -14,9 +23,7 @@ namespace Radiant
 
 		Memory::Shared<RenderingPass> ActiveRenderingPass;
 
-		Memory::Shared<VertexBuffer> m_FullscreenQuadVertexBuffer;
-		Memory::Shared<IndexBuffer> m_FullscreenQuadIndexBuffer;
-		Memory::Shared<Pipeline> m_FullscreenQuadPipeline;
+		QuadData QuadInfo;
 	};
 
 	static RenderingData* s_Data = nullptr;
@@ -70,11 +77,11 @@ namespace Radiant
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float2, "a_TexCoord" }
 		};
-		s_Data->m_FullscreenQuadPipeline = Pipeline::Create(pipelineSpecification);
+		s_Data->QuadInfo.FullscreenQuadPipeline = Pipeline::Create(pipelineSpecification);
 		Memory::Buffer buffer(data, 4 * sizeof(QuadVertex));
-		s_Data->m_FullscreenQuadVertexBuffer = VertexBuffer::Create(buffer);
+		s_Data->QuadInfo.FullscreenQuadVertexBuffer = VertexBuffer::Create(buffer);
 		uint32_t indices[6] = { 0, 1, 2, 2, 3, 0, };
-		s_Data->m_FullscreenQuadIndexBuffer = IndexBuffer::Create(indices, 6 * sizeof(uint32_t));
+		s_Data->QuadInfo.FullscreenQuadIndexBuffer = IndexBuffer::Create(indices, 6 * sizeof(uint32_t));
 	}
 
 	void Rendering::BindRenderingPass(const Memory::Shared<RenderingPass>& pass)
@@ -96,9 +103,12 @@ namespace Radiant
 
 	void Rendering::DrawQuad()
 	{
-		s_Data->m_FullscreenQuadPipeline->Bind();
-		s_Data->m_FullscreenQuadIndexBuffer->Bind();
-		s_Data->m_FullscreenQuadVertexBuffer->Bind();
+		s_Data->QuadInfo.FullscreenQuadPipeline->Bind();
+		s_Data->QuadInfo.FullscreenQuadIndexBuffer->Bind();
+		s_Data->QuadInfo.FullscreenQuadVertexBuffer->Bind();
+		s_Data->QuadInfo.FullscreenQuadShader->Bind();
+
+		s_Data->QuadInfo.FullscreenQuadShader->SetValue("u_InverseVP", (std::byte*)nullptr, UniformTarget::Vertex);
 
 		DrawIndexed(6);
 	}
