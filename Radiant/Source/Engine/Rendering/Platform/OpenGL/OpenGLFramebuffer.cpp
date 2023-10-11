@@ -14,7 +14,7 @@ namespace Radiant
 
 	OpenGLFramebuffer::~OpenGLFramebuffer()
 	{
-		Rendering::Submit([=]()
+		Rendering::SubmitCommand([=]()
 			{
 				glDeleteFramebuffers(1, &m_RendererID);
 			});
@@ -28,7 +28,7 @@ namespace Radiant
 		m_Specification.Height = height;
 
 
-		Rendering::Submit([this]()
+		Rendering::SubmitCommand([this]()
 			{
 				if (m_RendererID)
 				{
@@ -59,7 +59,7 @@ namespace Radiant
 
 	void OpenGLFramebuffer::Bind() const
 	{
-		Rendering::Submit([this]()
+		Rendering::SubmitCommand([this]()
 			{
 				glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 				glViewport(0, 0, m_Specification.Width, m_Specification.Height);
@@ -68,7 +68,7 @@ namespace Radiant
 
 	void OpenGLFramebuffer::Unbind() const
 	{
-		Rendering::Submit([=]()
+		Rendering::SubmitCommand([=]()
 			{
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			});
@@ -76,7 +76,7 @@ namespace Radiant
 
 	void OpenGLFramebuffer::BindTexture(uint32_t attachmentIndex, uint32_t slot) const
 	{
-		Rendering::Submit([=]()
+		Rendering::SubmitCommand([=]()
 			{
 				glActiveTexture(GL_TEXTURE0 + slot);
 				glBindTexture(GL_TEXTURE_2D, m_ColorAttachment);

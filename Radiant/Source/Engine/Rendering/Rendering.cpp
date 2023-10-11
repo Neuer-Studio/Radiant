@@ -21,6 +21,25 @@ namespace Radiant
 
 	static RenderingData* s_Data = nullptr;
 
+	namespace
+	{
+		static void DrawIndexed(std::size_t count, bool depthTest)
+		{
+			Rendering::SubmitCommand([=]()
+				{
+					s_Data->s_RendererAPI->DrawIndexed(count, depthTest);
+				});
+		}
+
+		static void Clear()
+		{
+			Rendering::SubmitCommand([=]()
+				{
+					s_Data->s_RendererAPI->Clear();
+				});
+		}
+	}
+
 	static RenderingAPI* InitRenderingAPI()
 	{
 		switch (RenderingAPI::GetAPI())
@@ -77,7 +96,7 @@ namespace Radiant
 		s_Data->m_FullscreenQuadIndexBuffer = IndexBuffer::Create(indices, 6 * sizeof(uint32_t));
 	}
 
-	void Rendering::BeginRenderingPass(const Memory::Shared<RenderingPass>& pass)
+	void Rendering::BindRenderingPass(const Memory::Shared<RenderingPass>& pass)
 	{
 		RADIANT_VERIFY(pass, "Render pass cannot be null!");
 		s_Data->ActiveRenderingPass = pass;
@@ -86,7 +105,7 @@ namespace Radiant
 
 	}
 
-	void Rendering::EndRenderingPass()
+	void Rendering::UnbindRenderingPass()
 	{
 		RADIANT_VERIFY(s_Data->ActiveRenderingPass, "No active render pass! Have you called Renderer::EndRenderPass twice?");
 
@@ -94,28 +113,12 @@ namespace Radiant
 		s_Data->ActiveRenderingPass = nullptr;
 	}
 
-	void Rendering::DrawIndexed(std::size_t count, bool depthTest)
-	{
-		Rendering::Submit([=]()
-			{
-				s_Data->s_RendererAPI->DrawIndexed(count, depthTest);
-			});
-	}
-
-	void Rendering::Clear()
-	{
-		Rendering::Submit([=]()
-			{
-				s_Data->s_RendererAPI->Clear();
-			});
-	}
-
-	void Rendering::Submit(std::function<void()> func)
+	void Rendering::SubmitCommand(std::function<void()> func)
 	{
 		s_Data->s_CommandBuffer->AddCommand(func);
 	}
 
-	void Rendering::WaitAndRender()
+	void Rendering::ExecuteCommand()
 	{
 		s_Data->s_CommandBuffer->Execute();
 	}

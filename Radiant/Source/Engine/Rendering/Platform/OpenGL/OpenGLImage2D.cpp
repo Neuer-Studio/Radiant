@@ -56,7 +56,7 @@ namespace Radiant
 		if (m_RenderingID)
 		{
 			RendererID rendererID = m_RenderingID;
-			Rendering::Submit([rendererID]()
+			Rendering::SubmitCommand([rendererID]()
 				{
 					glDeleteTextures(1, &rendererID);
 				});

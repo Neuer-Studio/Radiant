@@ -23,7 +23,7 @@ namespace Radiant
 		m_Window->SetEventCallback(BIND_FN(OnEvent));
 
 		Rendering::Init();
-		Rendering::WaitAndRender();
+		Rendering::ExecuteCommand();
 
 		m_ImGuiLayer = ImGuiLayer::Create("ImGuiLayer");
 		PushLayer(m_ImGuiLayer);
@@ -37,7 +37,7 @@ namespace Radiant
 			delete layer;
 		}
 
-		Rendering::WaitAndRender();
+		Rendering::ExecuteCommand();
 	}
 
 	void Application::OnEvent(Event& event)
@@ -77,13 +77,13 @@ namespace Radiant
 	void Application::Run()
 	{
 		OnInit();
-		Rendering::WaitAndRender();
+		Rendering::ExecuteCommand();
 		while (m_Run)
 		{
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate();
 
-			Rendering::WaitAndRender();
+			Rendering::ExecuteCommand();
 			RenderImGui();
 
 			m_Window->OnUpdate();

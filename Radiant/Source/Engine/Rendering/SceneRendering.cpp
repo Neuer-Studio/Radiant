@@ -1,9 +1,30 @@
 #include <Radiant/Rendering/SceneRendering.hpp>
+#include <Radiant/Rendering/Rendering.hpp>
 
 namespace Radiant
 {
+
+	struct CompositeData
+	{
+		Memory::Shared<Shader> CompositeShader;
+		Memory::Shared<RenderingPass> CompositePass;
+		Memory::Shared<Pipeline> CompositePipeline;
+	};
+
+	struct GeometryData
+	{
+		Memory::Shared<Shader> GeometryShader;
+		Memory::Shared<RenderingPass> GeometryPass;
+		Memory::Shared<Pipeline> GeometryPipeline;
+	};
+
 	struct SceneInfo
 	{
+		CompositeData CompositeInfo;
+		GeometryData GeometryInfo;
+
+		std::vector<Memory::Shared<Mesh>> MeshDrawList;
+
 		Camera* Camera;
 	};
 
@@ -34,11 +55,19 @@ namespace Radiant
 		RenderingPassSpecification PassComposite;
 		PassComposite.TargetFramebuffer = Framebuffer::Create(FrameBufferComposite);
 
-		m_CompositePass = RenderingPass::Create(PassComposite);
+		s_SceneInfo->CompositeInfo.CompositePass = RenderingPass::Create(PassComposite);
 
-		m_CompositeShader = Shader::Create("Resources/Shaders/Colors.rads");
+		s_SceneInfo->CompositeInfo.CompositeShader = Shader::Create("Resources/Shaders/Colors.rads");
 
 		/****************************/
+
+		/* Geometry Pass */
+
+
+
+
+		/****************************/
+
 	}
 
 	void SceneRendering::Begin()
@@ -50,7 +79,8 @@ namespace Radiant
 
 	void SceneRendering::Flush()
 	{
-
+		s_SceneInfo->MeshDrawList.clear();
+		CompositePass();
 	}
 
 	void SceneRendering::End()
@@ -61,6 +91,15 @@ namespace Radiant
 
 	void SceneRendering::CompositePass()
 	{
+		Rendering::BindRenderingPass(s_SceneInfo->CompositeInfo.CompositePass);
 
+
+		s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->BindTexture();
+		Rendering::UnbindRenderingPass();
+	}
+
+	void SceneRendering::AddMeshToDrawList(const Memory::Shared<Mesh>& mesh) const
+	{
+		s_SceneInfo->MeshDrawList.push_back(mesh);
 	}
 }

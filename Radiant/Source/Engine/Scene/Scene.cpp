@@ -1,5 +1,6 @@
 #include <Radiant/Scene/Scene.hpp>
 #include <Radiant/Scene/Entity.hpp>
+#include <Radiant/Rendering/SceneRendering.hpp>
 
 namespace Radiant
 {
@@ -54,15 +55,14 @@ namespace Radiant
 		return nullptr;
 	}
 
-	void Scene::UpdateScene(SceneType type) // TODO(Danya): Update scene render 
+	void Scene::UpdateScene(const Memory::Shared<SceneRendering>& rendering, SceneType type) // TODO(Danya): Update scene render 
 	{
 		for (const auto e : m_Entitys)
 		{
 			if (e->HasComponent(ComponentType::Mesh))
 			{
-				auto mesh = e->GetComponent(ComponentType::Mesh).As<MeshComponent>()->Mesh;
-				//mesh->GetPipeline()->Bind();
-				mesh->Update();
+				rendering->AddMeshToDrawList(e->GetComponent(ComponentType::Mesh).As<MeshComponent>()->Mesh);
+	
 			}
 		}
 	}

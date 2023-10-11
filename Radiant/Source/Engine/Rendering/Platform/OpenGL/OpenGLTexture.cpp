@@ -44,7 +44,7 @@ namespace Radiant
 		m_MipCount = Utils::CalculateMipCount(width, height);
 
 		auto& image = m_Image;
-		Rendering::Submit([image]() mutable
+		Rendering::SubmitCommand([image]() mutable
 			{
 				image->Invalidate();
 				//stbi_image_free(buffer.Data); //TODO: Should free iamge data
@@ -55,7 +55,7 @@ namespace Radiant
 	OpenGLTexture2D::~OpenGLTexture2D()
 	{
 		Memory::Shared<Image2D> image = m_Image;
-		Rendering::Submit([image]() mutable {
+		Rendering::SubmitCommand([image]() mutable {
 			image->Release();
 			});
 
@@ -64,7 +64,7 @@ namespace Radiant
 	void OpenGLTexture2D::Bind(uint32_t slot) const
 	{
 		Memory::Shared<OpenGLImage2D> image = m_Image.As<OpenGLImage2D>();
-		Rendering::Submit([slot, image]() {
+		Rendering::SubmitCommand([slot, image]() {
 			glBindTextureUnit(slot, image->GetRenderingID());
 			});
 

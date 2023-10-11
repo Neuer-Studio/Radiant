@@ -11,16 +11,14 @@ namespace Radiant
 		static void Init();
 		static void Shutdown();
 
-		// NOTE: Tempory wile we don't have a rendering scene
-		static void DrawIndexed(std::size_t count, bool depthTest = false);
-		static void Clear();
-		//==============================
+		static void DrawMesh();
+		static void DrawMeshWithShader();
 
-		static void BeginRenderingPass(const Memory::Shared<RenderingPass>& pass);
-		static void EndRenderingPass();
+		static void BindRenderingPass(const Memory::Shared<RenderingPass>& pass);
+		static void UnbindRenderingPass();
 
-		static void Submit(std::function<void()> func);
-		static void WaitAndRender();
+		static void SubmitCommand(std::function<void()> func);
+		static void ExecuteCommand();
 	private:
 		static Memory::CommandBuffer& GetRenderingCommandBuffer();
 	};

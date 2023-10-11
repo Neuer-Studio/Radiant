@@ -6,8 +6,9 @@
 
 namespace Radiant
 {
-	class SceneRendering
+	class SceneRendering : public Memory::RefCounted
 	{
+	public:
 		SceneRendering(const Memory::Shared<Scene>& scene);
 		~SceneRendering();
 
@@ -17,15 +18,14 @@ namespace Radiant
 		void Begin();
 		void End();
 
+		void AddMeshToDrawList(const Memory::Shared<Mesh>& mesh) const;
+		void AddMeshToDrawListWithShader(const Memory::Shared<Mesh>& mesh);
 	private:
 		void CompositePass();
 
 		void Flush();
 	private:
 		Memory::Shared<Scene> m_Context;
-
-		Memory::Shared<Shader> m_CompositeShader;
-		Memory::Shared<RenderingPass> m_CompositePass;
 
 		bool m_Active;
 	};

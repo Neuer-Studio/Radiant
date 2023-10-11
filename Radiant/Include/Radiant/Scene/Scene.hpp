@@ -4,6 +4,7 @@
 
 namespace Radiant
 {
+	class SceneRendering;
 	class SceneManager;
 	class Entity;
 	enum class ComponentType;
@@ -26,7 +27,7 @@ namespace Radiant
 
 		std::vector<Entity*> GetEntityList() { return m_Entitys; }
 
-		void UpdateScene(SceneType type);
+		void UpdateScene(const Memory::Shared<SceneRendering>& rendering, SceneType type = SceneType::Editor);
 	private:
 		std::vector<Entity*> m_Entitys;
 		std::string m_SceneName;

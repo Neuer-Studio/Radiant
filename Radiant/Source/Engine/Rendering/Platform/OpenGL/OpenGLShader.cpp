@@ -413,7 +413,7 @@ namespace Radiant
 
 		m_ShaderSource = Utils::PreProcess(source);
 
-		Rendering::Submit([=]()
+		Rendering::SubmitCommand([=]()
 			{
 				CompileAndUploadShader();
 				UploadSamplerUniforms();
@@ -426,11 +426,11 @@ namespace Radiant
 	{
 		RendererID id = m_RenderingID;
 		Memory::Shared<OpenGLShader> instance = this;
-		Rendering::Submit([id]()
+		Rendering::SubmitCommand([id]()
 			{
 				glUseProgram(id);
 			});
-		Rendering::Submit([instance]() mutable
+		Rendering::SubmitCommand([instance]() mutable
 			{
 				instance->UpdateValues();
 			});
