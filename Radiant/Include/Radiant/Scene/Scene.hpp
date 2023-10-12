@@ -24,6 +24,7 @@ namespace Radiant
 		Entity* CreateEntity(const std::string& name = "Debug Name");
 		Entity* GetEntityByUUID(uint64_t uuid);
 		Entity* GetEntityByComponentType(ComponentType type);
+		bool ContainsEntityInScene(ComponentType type);
 
 		std::vector<Entity*> GetEntityList() { return m_Entitys; }
 

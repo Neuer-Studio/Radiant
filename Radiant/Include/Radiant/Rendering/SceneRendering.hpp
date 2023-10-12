@@ -15,8 +15,7 @@ namespace Radiant
 		void SetScene(const Memory::Shared<Scene>& scene) { m_Context = scene; }
 		void Init();
 
-		void Begin();
-		void End();
+		void SubmitScene();
 
 		uint32_t GetFinalPassImage(); // TODO(Danya): Set result type Image2D
 
@@ -28,7 +27,5 @@ namespace Radiant
 		void Flush();
 	private:
 		Memory::Shared<Scene> m_Context;
-
-		bool m_Active;
 	};
 }

@@ -70,11 +70,16 @@ namespace Radiant
 
 	}
 
-	void SceneRendering::Begin()
+	void SceneRendering::SubmitScene()
 	{
-		RADIANT_VERIFY(m_Active);
-		if (!s_SceneInfo->Camera) s_SceneInfo->Camera = &m_Context->GetEntityByComponentType(ComponentType::Camera)->GetComponent(ComponentType::Camera).As<CameraComponent>()->Camera;
-		m_Active = true;
+		if (!s_SceneInfo->Camera)
+		{
+			if(m_Context->ContainsEntityInScene(ComponentType::Camera))
+				s_SceneInfo->Camera = &m_Context->GetEntityByComponentType(ComponentType::Camera)->GetComponent(ComponentType::Camera).As<CameraComponent>()->Camera;
+		}
+
+		if (s_SceneInfo->Camera) s_SceneInfo->Camera->Update();
+		Flush();
 	}
 
 	void SceneRendering::Flush()
@@ -83,18 +88,12 @@ namespace Radiant
 		CompositePass();
 	}
 
-	void SceneRendering::End()
-	{
-		Flush();
-		m_Active = false;
-	}
-
 	void SceneRendering::CompositePass()
 	{
 		Rendering::BindRenderingPass(s_SceneInfo->CompositeInfo.CompositePass);
 
 
-		s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->BindTexture();
+		//s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->BindTexture();
 		Rendering::UnbindRenderingPass();
 	}
 

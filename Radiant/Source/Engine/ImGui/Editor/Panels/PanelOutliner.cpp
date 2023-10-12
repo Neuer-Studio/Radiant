@@ -182,7 +182,15 @@ namespace Radiant
 
 				if (ImGui::MenuItem("Empty Entity"))
 				{
-					Entity* newEntity = m_Context->CreateEntity("Empty Entity");
+					m_Context->CreateEntity("Empty Entity");
+				}
+
+				ImGui::Spacing();
+
+				if (ImGui::MenuItem("Camera"))
+				{
+					Entity* entity = m_Context->CreateEntity("Camera");
+					entity->AddComponent(CreateNewComponent<CameraComponent>());
 				}
 
 				ImGui::Spacing();

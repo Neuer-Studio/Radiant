@@ -55,9 +55,21 @@ namespace Radiant
 		return nullptr;
 	}
 
+	bool Scene::ContainsEntityInScene(ComponentType type)
+	{
+		for (auto e : m_Entitys)
+		{
+			if (e->HasComponent(type))
+				return true;
+		}
+
+		return false;
+	}
+
 	void Scene::UpdateScene(const Memory::Shared<SceneRendering>& rendering, SceneType type) // TODO(Danya): Update scene render 
 	{
 		Memory::Shared<SceneRendering> render = rendering;
+		render->SetScene(this);
 		for (const auto e : m_Entitys)
 		{
 			if (e->HasComponent(ComponentType::Mesh))
@@ -66,8 +78,7 @@ namespace Radiant
 			}
 		}
 
-		render->Begin();
-		render->End();
+		render->SubmitScene();
 	}
 
 	/*======================== SceneManager ======================*/

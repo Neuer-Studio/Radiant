@@ -51,7 +51,7 @@ namespace Radiant
 	{
 		Camera Camera;
 	protected:
-		virtual const ComponentType GetType() const override { return ComponentType::Mesh; }
+		virtual const ComponentType GetType() const override { return ComponentType::Camera; }
 
 		friend Entity;
 	};
