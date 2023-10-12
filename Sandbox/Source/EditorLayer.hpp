@@ -14,11 +14,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <imgui/imgui.h>
-#include <Radiant/Core/Camera.hpp>
-#include <Radiant/Rendering/IndexBuffer.hpp>
-#include <Radiant/Rendering/Mesh.hpp>
-#include <Radiant/Rendering/Framebuffer.hpp>
-#include <Radiant/Scene/Entity.hpp>
 #include <Radiant/Rendering/SceneRendering.hpp>
 #include <Radiant/ImGui/Editor/Panels/PanelOutliner.hpp>
 
@@ -55,17 +50,7 @@ namespace Radiant
 
 		virtual void OnAttach()
 		{
-			FramebufferSpecification spec;
-			spec.Width = Application::Get().GetWindow()->GetWidth();
-			spec.Height = Application::Get().GetWindow()->GetHeight();
-			m_Framebuffer = Framebuffer::Create(spec);
-
-			m_Mesh = (new Mesh("Resources/Meshes/Cube1m.fbx"));
-
-			m_CubeShader = Shader::Create("Resources/Shaders/Colors.rads");
-
-			m_Camera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), (float)1600.f, (float)1600.f, 10.1f, 10000.0f));
-
+		
 			m_Material.ambient = glm::vec3(0.1f, 0.1f, 0.1f);
 			m_Material.diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
 			m_Material.specular = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -78,9 +63,6 @@ namespace Radiant
 
 			m_ManagerScene = new SceneManager("Debug name"); //NOTE(Danya): Should be shared 
 			m_TestScene = m_ManagerScene->Create("Debug name");
-			auto em = m_TestScene->CreateEntity();
-			em->AddComponent(CreateNewComponent<MeshComponent>());
-			em->GetComponent(ComponentType::Mesh).As<MeshComponent>()->Mesh = m_Mesh;
 			m_Outliner = new PanelOutliner(m_TestScene);
 
 			m_Rendering = new SceneRendering(m_TestScene);
@@ -168,17 +150,9 @@ namespace Radiant
 
 		}
 	private:
-		Memory::Shared<Mesh> m_Mesh;
-		Memory::Shared<Shader> m_CubeShader;
-
 		Material m_Material;
 		Light m_Light;
 
-		glm::vec3 m_CubePosition { 1.f };
-
-		Camera m_Camera;
-
-		Memory::Shared<Framebuffer> m_Framebuffer;
 		SceneManager* m_ManagerScene;
 		Memory::Shared<Scene> m_TestScene;
 

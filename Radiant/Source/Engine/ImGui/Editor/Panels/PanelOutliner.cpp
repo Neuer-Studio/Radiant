@@ -203,6 +203,10 @@ namespace Radiant
 
 				if (ImGui::MenuItem("Mesh"))
 				{
+					Entity* entity = m_Context->CreateEntity("Mesh");
+					auto mesh = CreateNewComponent<MeshComponent>();
+					mesh->Mesh = Memory::Shared<Mesh>::Create("Resources/Meshes/Cube1m.fbx");
+					entity->AddComponent(mesh);
 				}
 
 				ImGui::Spacing();
@@ -299,6 +303,11 @@ namespace Radiant
 		DrawComponentUI(ComponentType::Transform, "Transform", m_SelectedEntity, [=](Memory::Shared<Component>& component) mutable
 			{
 				DrawVec3UI("Translation", component.As<TransformComponent>()->Position);
+			});
+
+		DrawComponentUI(ComponentType::Mesh, "Mesh", m_SelectedEntity, [=](Memory::Shared<Component>& component) mutable
+			{
+				//DrawVec3UI("Translation", component.As<TransformComponent>()->Position);
 			});
 
 		/* New Component */

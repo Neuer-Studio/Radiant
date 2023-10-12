@@ -111,7 +111,7 @@ namespace Radiant
 
 	void Rendering::UnbindRenderingPass()
 	{
-		RADIANT_VERIFY(s_Data->ActiveRenderingPass, "No active render pass! Have you called Renderer::EndRenderPass twice?");
+		RADIANT_VERIFY(s_Data->ActiveRenderingPass, "No active render pass! Have you called Rendernig::UnbindRenderingPass twice?");
 
 		s_Data->ActiveRenderingPass->GetSpecification().TargetFramebuffer->Unbind();
 		s_Data->ActiveRenderingPass = nullptr;

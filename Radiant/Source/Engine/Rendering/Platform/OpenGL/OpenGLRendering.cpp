@@ -42,6 +42,7 @@ namespace Radiant {
 	{
 		if (!depthTest)
 			glDisable(GL_DEPTH_TEST);
+		else glEnable(GL_DEPTH_TEST);
 
 		GLenum gltype = 0;
 		switch (type)
@@ -55,9 +56,6 @@ namespace Radiant {
 		}
 
 		glDrawElements(gltype, count, GL_UNSIGNED_INT, nullptr);
-
-		if (!depthTest)
-			glEnable(GL_DEPTH_TEST);
 	}
 
 	void OpenGLRendering::Clear(float r, float g, float b)
