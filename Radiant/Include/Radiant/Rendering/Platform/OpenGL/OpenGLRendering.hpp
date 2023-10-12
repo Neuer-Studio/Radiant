@@ -11,7 +11,7 @@ namespace Radiant
 		virtual void Shutdown() override;
 	private:
 		virtual void DrawIndexed(uint32_t count, PrimitiveType type, bool depthTest) override;
-		virtual void Clear() override;
+		virtual void Clear(float r, float g, float b) override;
 
 		friend Rendering;
 	};

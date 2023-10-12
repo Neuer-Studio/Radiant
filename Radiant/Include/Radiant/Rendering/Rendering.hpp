@@ -23,7 +23,7 @@ namespace Radiant
 		static void ExecuteCommand();
 	private:
 		static void DrawIndexed(std::size_t count, PrimitiveType type = PrimitiveType::Triangles, bool depthTest = false);
-		static void Clear();
+		static void Clear(float r, float g, float b);
 	private:
 		static Memory::CommandBuffer& GetRenderingCommandBuffer();
 	};

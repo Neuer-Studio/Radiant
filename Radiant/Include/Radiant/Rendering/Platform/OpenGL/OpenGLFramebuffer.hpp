@@ -21,7 +21,10 @@ namespace Radiant
 		virtual uint32_t GetWidth() const override { return m_Specification.Width; }
 		virtual uint32_t GetHeight() const override { return m_Specification.Height; }
 
-		virtual RendererID GetRendererID() const override { return m_ColorAttachment; } //NOTE: Temp
+		virtual FramebufferSpecification GetSpecification() { return m_Specification; }
+		virtual const FramebufferSpecification GetSpecification() const { return m_Specification; }
+
+		virtual RendererID GetRendererID() const override { return m_ColorAttachment; } //NOTE: Temp (move to GetImage)
 
 		virtual Memory::Shared<Image2D> GetImage() const override { return {}; }
 		virtual Memory::Shared<Image2D> GetDepthImage() const override { return {}; }

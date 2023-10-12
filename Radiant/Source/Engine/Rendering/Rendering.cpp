@@ -90,7 +90,13 @@ namespace Radiant
 		RADIANT_VERIFY(pass, "Render pass cannot be null!");
 		s_Data->ActiveRenderingPass = pass;
 
-		pass->GetSpecification().TargetFramebuffer->Bind();
+		const auto passSpec = pass->GetSpecification();
+		const auto fbspec = pass->GetSpecification().TargetFramebuffer->GetSpecification();
+
+		passSpec.TargetFramebuffer->Bind();
+
+		if (passSpec.clear)
+			Clear(fbspec.ClearColor.r, fbspec.ClearColor.g, fbspec.ClearColor.b);
 
 	}
 
@@ -137,11 +143,11 @@ namespace Radiant
 			});
 	}
 
-	void Rendering::Clear()
+	void Rendering::Clear(float r, float g, float b)
 	{
 		Rendering::SubmitCommand([=]()
 			{
-				s_Data->RendererAPI->Clear();
+				s_Data->RendererAPI->Clear(r, g, b);
 			});
 	}
 }

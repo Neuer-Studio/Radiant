@@ -60,14 +60,9 @@ namespace Radiant {
 			glEnable(GL_DEPTH_TEST);
 	}
 
-	void OpenGLRendering::Clear()
+	void OpenGLRendering::Clear(float r, float g, float b)
 	{
-		float r = 18.0f / 255.0f;
-		float g = 113.0f / 255.0f;
-		float b = 128.0f / 255.0f;
-		float a = 1.0f;
-
-		glClearColor(r, g, b, a);
+		glClearColor(r, g, b, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	}
 

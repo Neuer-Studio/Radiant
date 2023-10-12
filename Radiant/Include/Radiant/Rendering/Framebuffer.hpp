@@ -35,6 +35,9 @@ namespace Radiant
 
 		virtual void BindTexture(uint32_t attachmentIndex = 0, uint32_t slot = 0) const = 0;
 
+		virtual FramebufferSpecification GetSpecification() = 0;
+		virtual const FramebufferSpecification GetSpecification() const = 0;
+
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 

@@ -4,7 +4,7 @@
 
 namespace Radiant
 {
-	class OpenGLRenderingPass : public RenderingPass
+	class OpenGLRenderingPass final : public RenderingPass
 	{
 	public:
 		OpenGLRenderingPass(const RenderingPassSpecification& spec);

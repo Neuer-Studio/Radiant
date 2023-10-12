@@ -24,6 +24,7 @@ namespace Radiant
 		GeometryData GeometryInfo;
 
 		std::vector<Memory::Shared<Mesh>> MeshDrawList;
+		std::vector<Memory::Shared<Mesh>> MeshDrawListWithShader;
 
 		Camera* Camera;
 	};
@@ -51,6 +52,7 @@ namespace Radiant
 		FrameBufferComposite.Height = 1;
 		FrameBufferComposite.Width = 1;
 		FrameBufferComposite.Samples = 1;
+		FrameBufferComposite.ClearColor = glm::vec4(0.5f);
 
 		RenderingPassSpecification PassComposite;
 		PassComposite.TargetFramebuffer = Framebuffer::Create(FrameBufferComposite);
@@ -78,13 +80,14 @@ namespace Radiant
 				s_SceneInfo->Camera = &m_Context->GetEntityByComponentType(ComponentType::Camera)->GetComponent(ComponentType::Camera).As<CameraComponent>()->Camera;
 		}
 
-		if (s_SceneInfo->Camera) s_SceneInfo->Camera->Update();
+ 		if (s_SceneInfo->Camera) s_SceneInfo->Camera->Update();
 		Flush();
 	}
 
 	void SceneRendering::Flush()
 	{
 		s_SceneInfo->MeshDrawList.clear();
+		s_SceneInfo->MeshDrawListWithShader.clear();
 		CompositePass();
 	}
 
@@ -102,8 +105,13 @@ namespace Radiant
 		s_SceneInfo->MeshDrawList.push_back(mesh);
 	}
 
+	void SceneRendering::AddMeshToDrawListWithShader(const Memory::Shared<Mesh>& mesh) const
+	{
+		s_SceneInfo->MeshDrawListWithShader.push_back(mesh);
+	}
+
 	uint32_t SceneRendering::GetFinalPassImage()
 	{
-		return s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->GetImage();
+		return s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->GetRendererID();
 	}
 }
