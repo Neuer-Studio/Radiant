@@ -91,6 +91,8 @@ namespace Radiant
 							(const void*)(intptr_t)element.Offset);
 					}
 					attribIndex++;
+
+					
 				}
 			});
 	}

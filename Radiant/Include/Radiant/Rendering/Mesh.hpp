@@ -14,6 +14,7 @@ namespace Assimp
 
 namespace Radiant
 {
+	class Rendering;
 	struct Vertex {
 		glm::vec3 Position;
 		glm::vec3 Normals;
@@ -29,15 +30,13 @@ namespace Radiant
 	public:
 		Mesh(const std::string& filename);
 		~Mesh() {}
-
-		Memory::Shared<Pipeline> GetPipeline() { return m_Pipeline; } // TODO(Danya): Remove and hardcode set the pipeline in mesh rendering 
-		void Update();
 	private:
 		std::vector<Vertex> m_Vertices;
 		std::vector<Index> m_Indices;
 
-		Memory::Shared<Pipeline> m_Pipeline;
 		Memory::Shared<VertexBuffer> m_VertexBuffer;
 		Memory::Shared<IndexBuffer> m_IndexBuffer;
+
+		friend Rendering;
 	};
 }
