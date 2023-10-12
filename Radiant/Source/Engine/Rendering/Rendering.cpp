@@ -150,4 +150,11 @@ namespace Radiant
 				s_Data->RendererAPI->Clear(r, g, b);
 			});
 	}
+
+	void Rendering::DrawMesh(const Memory::Shared<Mesh>& mesh)
+	{
+		auto mesh2 = mesh;
+		mesh2->Update();
+	}
+
 }

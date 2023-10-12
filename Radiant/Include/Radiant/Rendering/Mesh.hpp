@@ -30,7 +30,7 @@ namespace Radiant
 		Mesh(const std::string& filename);
 		~Mesh() {}
 
-		Memory::Shared<Pipeline> GetPipeline() { return m_Pipeline; }
+		Memory::Shared<Pipeline> GetPipeline() { return m_Pipeline; } // TODO(Danya): Remove and hardcode set the pipeline in mesh rendering 
 		void Update();
 	private:
 		std::vector<Vertex> m_Vertices;

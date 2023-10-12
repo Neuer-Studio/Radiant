@@ -1,9 +1,9 @@
 #include <Radiant/Rendering/SceneRendering.hpp>
 #include <Radiant/Rendering/Rendering.hpp>
+#include <glm/ext/matrix_transform.hpp>
 
 namespace Radiant
 {
-
 	struct CompositeData
 	{
 		Memory::Shared<Shader> CompositeShader;
@@ -86,15 +86,30 @@ namespace Radiant
 
 	void SceneRendering::Flush()
 	{
+		if (s_SceneInfo->Camera)
+		{
+			glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(1.f));
+			glm::mat4 viewMatrix = s_SceneInfo->Camera->GetViewMatrix();
+			glm::mat4 projectionMatrix = s_SceneInfo->Camera->GetProjectionMatrix();
+
+			s_SceneInfo->CompositeInfo.CompositeShader->SetValue("u_Model", (std::byte*)&modelMatrix, UniformTarget::Vertex);
+			s_SceneInfo->CompositeInfo.CompositeShader->SetValue("u_View", (std::byte*)&viewMatrix, UniformTarget::Vertex);
+			s_SceneInfo->CompositeInfo.CompositeShader->SetValue("u_Projection", (std::byte*)&projectionMatrix, UniformTarget::Vertex);
+			s_SceneInfo->CompositeInfo.CompositeShader->Bind();
+		}
+		CompositePass();
+
 		s_SceneInfo->MeshDrawList.clear();
 		s_SceneInfo->MeshDrawListWithShader.clear();
-		CompositePass();
 	}
 
 	void SceneRendering::CompositePass()
 	{
 		Rendering::BindRenderingPass(s_SceneInfo->CompositeInfo.CompositePass);
 
+
+		for (const auto m : s_SceneInfo->MeshDrawList)
+			Rendering::DrawMesh(m);
 
 		//s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->BindTexture();
 		Rendering::UnbindRenderingPass();

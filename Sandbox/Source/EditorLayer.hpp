@@ -84,6 +84,7 @@ namespace Radiant
 			m_Outliner = new PanelOutliner(m_TestScene);
 
 			m_Rendering = new SceneRendering(m_TestScene);
+
 		}
 
 		virtual void OnDetach()

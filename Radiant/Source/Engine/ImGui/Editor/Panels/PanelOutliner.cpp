@@ -5,6 +5,9 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 namespace Radiant
 {
 	namespace
@@ -190,7 +193,10 @@ namespace Radiant
 				if (ImGui::MenuItem("Camera"))
 				{
 					Entity* entity = m_Context->CreateEntity("Camera");
-					entity->AddComponent(CreateNewComponent<CameraComponent>());
+					auto camera = CreateNewComponent<CameraComponent>();
+					camera->Camera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), (float)1600.f, (float)1600.f, 10.1f, 10000.0f));
+					entity->AddComponent(camera);
+
 				}
 
 				ImGui::Spacing();

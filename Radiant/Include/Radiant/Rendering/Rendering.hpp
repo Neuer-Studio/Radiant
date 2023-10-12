@@ -2,6 +2,7 @@
 
 #include <Radiant/Memory/CommandBuffer.hpp>
 #include <Radiant/Rendering/RenderingPass.hpp>
+#include <Radiant/Rendering/Mesh.hpp>
 
 namespace Radiant
 {
@@ -11,7 +12,7 @@ namespace Radiant
 		static void Init();
 		static void Shutdown();
 
-		static void DrawMesh();
+		static void DrawMesh(const Memory::Shared<Mesh>& mesh);
 		static void DrawMeshWithShader();
 
 		static void DrawQuad();
@@ -26,5 +27,7 @@ namespace Radiant
 		static void Clear(float r, float g, float b);
 	private:
 		static Memory::CommandBuffer& GetRenderingCommandBuffer();
+
+		friend Mesh;
 	};
 }
