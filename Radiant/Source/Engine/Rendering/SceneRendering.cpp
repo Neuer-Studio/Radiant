@@ -110,6 +110,18 @@ namespace Radiant
 		s_SceneInfo->MeshDrawListWithShader.push_back(mesh);
 	}
 
+	void SceneRendering::SetSceneVeiwPortSize(const glm::vec2& size)
+	{
+		if (m_ViewportWidth != size.x || m_ViewportHeight != size.y)
+		{
+			m_ViewportWidth = size.x;
+			m_ViewportHeight = size.y;
+
+			s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->Resize(size.x, size.y);
+	//		s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->Resize(size.x, size.y);
+		}
+	}
+
 	uint32_t SceneRendering::GetFinalPassImage()
 	{
 		return s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->GetRendererID();

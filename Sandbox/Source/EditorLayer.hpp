@@ -146,6 +146,7 @@ namespace Radiant
 			{
 				auto viewportOffset = ImGui::GetCursorPos(); // includes tab bar
 				auto viewportSize = ImGui::GetContentRegionAvail();
+				m_Rendering->SetSceneVeiwPortSize({viewportSize.x, viewportSize.y});
 
 				ImGui::Image((void*)m_Rendering->GetFinalPassImage(), viewportSize, {0, 1}, {1, 0});
 
