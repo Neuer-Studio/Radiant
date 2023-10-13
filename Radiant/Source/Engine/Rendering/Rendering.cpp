@@ -82,7 +82,7 @@ namespace Radiant
 		};
 		s_Data->QuadInfo.FullscreenQuadPipeline = Pipeline::Create(pipelineSpecification);
 		Memory::Buffer buffer(data, 4 * sizeof(QuadVertex));
-		s_Data->QuadInfo.FullscreenQuadVertexBuffer = VertexBuffer::Create(buffer);
+		//s_Data->QuadInfo.FullscreenQuadVertexBuffer = VertexBuffer::Create(buffer);
 		uint32_t indices[6] = { 0, 1, 2, 2, 3, 0, };
 		s_Data->QuadInfo.FullscreenQuadIndexBuffer = IndexBuffer::Create(indices, 6 * sizeof(uint32_t));
 
@@ -160,7 +160,7 @@ namespace Radiant
 			});
 	}
 
-	void Rendering::DrawMesh(const Memory::Shared<Mesh>& mesh)
+	void Rendering::DrawMesh(Memory::Shared<Mesh> mesh)
 	{
 		auto mesh2 = mesh;
 

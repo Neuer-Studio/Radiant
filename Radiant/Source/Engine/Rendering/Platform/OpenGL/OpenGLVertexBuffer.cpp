@@ -16,22 +16,22 @@ namespace Radiant
 		return 0;
 	}
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(Memory::Buffer buffer, VertexBufferUsage usage)
-		: m_Buffer(buffer), m_Usage(usage), m_Size(buffer.Size)
+	OpenGLVertexBuffer::OpenGLVertexBuffer(const std::string& tag, Memory::Buffer buffer, VertexBufferUsage usage)
+		: m_Buffer(buffer), m_Usage(usage), m_Size(buffer.Size), m_Tag(tag)
 	{
-
-		Rendering::SubmitCommand([this]()
+		Memory::Shared<OpenGLVertexBuffer> instance(this);
+		Rendering::SubmitCommand([instance]() mutable
 			{
 				RA_INFO("[OpenGLVertexBuffer] OpenGLVertexBuffer::OpenGLVertexBuffer");
-				glGenBuffers(1, &m_RenderingID);
+				glGenBuffers(1, &instance->m_RenderingID);
 
-				glBindBuffer(GL_ARRAY_BUFFER, m_RenderingID);
-				glBufferData(GL_ARRAY_BUFFER, m_Buffer.Size, m_Buffer.Data, OpenGLUsage(m_Usage));
+				glBindBuffer(GL_ARRAY_BUFFER, instance->m_RenderingID);
+				glBufferData(GL_ARRAY_BUFFER, instance->m_Buffer.Size, instance->m_Buffer.Data, OpenGLUsage(instance->m_Usage));
 			});
 	}
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(std::size_t size, VertexBufferUsage usage)
-		: m_Buffer(), m_Usage(usage), m_Size(size)
+	OpenGLVertexBuffer::OpenGLVertexBuffer(const std::string& tag, std::size_t size, VertexBufferUsage usage)
+		: m_Buffer(), m_Usage(usage), m_Size(size), m_Tag(tag)
 	{
 		RADIANT_VERIFY(false);
 	}
@@ -52,13 +52,13 @@ namespace Radiant
 		RADIANT_VERIFY(false);
 	}
 
-	void OpenGLVertexBuffer::Bind() const
+	void OpenGLVertexBuffer::Bind()
 	{
-		RendererID id = m_RenderingID;
-		Rendering::SubmitCommand([id]() mutable
+		const Memory::Shared<OpenGLVertexBuffer> instance = this;
+		Rendering::SubmitCommand([instance]() mutable
 			{
-				glBindBuffer(GL_ARRAY_BUFFER, id);
-
+				auto id = instance->m_RenderingID;
+				glBindBuffer(GL_ARRAY_BUFFER, instance->m_RenderingID);
 			}
 		);
 

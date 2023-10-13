@@ -110,12 +110,12 @@ namespace Radiant
 		virtual ~VertexBuffer() {}
 
 		virtual void SetData(Memory::Buffer buffer, std::size_t offset = 0) = 0;
-		virtual void Bind() const = 0;
+		virtual void Bind() = 0;
 
 		virtual std::size_t GetCount() const = 0;
 		virtual std::size_t GetSize() const = 0;
 
-		static Memory::Shared<VertexBuffer> Create(Memory::Buffer data, VertexBufferUsage usage = VertexBufferUsage::Static);
-		static Memory::Shared<VertexBuffer> Create(std::size_t size, VertexBufferUsage usage = VertexBufferUsage::Dynamic);
+		static Memory::Shared<VertexBuffer> Create(const std::string& tag, Memory::Buffer data, VertexBufferUsage usage = VertexBufferUsage::Static);
+		static Memory::Shared<VertexBuffer> Create(const std::string& tag, std::size_t size, VertexBufferUsage usage = VertexBufferUsage::Dynamic);
 	};
 }

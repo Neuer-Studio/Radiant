@@ -71,7 +71,7 @@ namespace Radiant
 		}
 
 		Memory::Buffer buffer((std::byte*)m_Vertices.data(), m_Vertices.size() * sizeof(Vertex));
-		m_VertexBuffer = VertexBuffer::Create(buffer);
+		m_VertexBuffer = VertexBuffer::Create("Mesh", buffer);
 
 		// Extract indices from model
 		m_Indices.reserve(mesh->mNumFaces);
