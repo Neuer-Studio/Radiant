@@ -111,11 +111,12 @@ namespace Radiant
 		for (const auto m : s_SceneInfo->MeshDrawList)
 			Rendering::DrawMesh(m);
 
+
 		//s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->BindTexture();
 		Rendering::UnbindRenderingPass();
 	}
 
-	void SceneRendering::AddMeshToDrawList(const Memory::Shared<Mesh>& mesh) const
+	void SceneRendering::AddMeshToDrawList(Memory::Shared<Mesh> mesh) const
 	{
 		s_SceneInfo->MeshDrawList.push_back(mesh);
 	}

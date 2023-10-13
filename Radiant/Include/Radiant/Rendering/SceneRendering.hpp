@@ -19,7 +19,7 @@ namespace Radiant
 
 		uint32_t GetFinalPassImage(); // TODO(Danya): Set result type Image2D
 	private:
-		void AddMeshToDrawList(const Memory::Shared<Mesh>& mesh) const;
+		void AddMeshToDrawList(Memory::Shared<Mesh> mesh) const;
 		void AddMeshToDrawListWithShader(const Memory::Shared<Mesh>& mesh) const;
 	private:
 		void Init();

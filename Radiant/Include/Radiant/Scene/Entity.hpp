@@ -14,7 +14,7 @@ namespace Radiant
 
 		const std::string& GetName() const { return m_Name; }
 
-		void AddComponent(const Memory::Shared<Component>& component);
+		void AddComponent(Memory::Shared<Component> component);
 		void RemoveComponent(ComponentType type);
 		bool HasComponent(ComponentType type);
 		Memory::Shared<Component> GetComponent(ComponentType type) { return m_Components[type]; }

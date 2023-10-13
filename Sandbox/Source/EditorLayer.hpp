@@ -64,7 +64,9 @@ namespace Radiant
 			m_ManagerScene = new SceneManager("Debug name"); //NOTE(Danya): Should be shared 
 			m_TestScene = m_ManagerScene->Create("Debug name");
 			m_Outliner = new PanelOutliner(m_TestScene);
-
+			/*auto em = m_TestScene->CreateEntity();
+			em->AddComponent(CreateNewComponent<MeshComponent>());
+			em->GetComponent(ComponentType::Mesh).As<MeshComponent>()->Mesh = (new Mesh("Resources/Meshes/Cube1m.fbx"));*/
 			m_Rendering = new SceneRendering(m_TestScene);
 
 		}

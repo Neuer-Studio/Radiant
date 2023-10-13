@@ -41,12 +41,13 @@ namespace Radiant
 		);
 	}
 
-	void OpenGLIndexBuffer::Bind() const {
+	void OpenGLIndexBuffer::Bind() {
 
-		RendererID id = m_RenderingID;
-		Rendering::SubmitCommand([id]() mutable
+		const Memory::Shared<OpenGLIndexBuffer> instance = this;
+		Rendering::SubmitCommand([instance]() mutable
 			{
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
+				auto id = instance->m_RenderingID;
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, instance->m_RenderingID);
 			}
 		);
 

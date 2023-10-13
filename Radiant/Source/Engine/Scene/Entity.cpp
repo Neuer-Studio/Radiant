@@ -13,7 +13,7 @@ namespace Radiant
 	
 	}
 
-	void Entity::AddComponent(const Memory::Shared<Component>& component)
+	void Entity::AddComponent(Memory::Shared<Component> component)
 	{
 		//TODO(Danya): Add a RADIANT_VERIFY
 		auto it = m_Components.find(component->GetType());
