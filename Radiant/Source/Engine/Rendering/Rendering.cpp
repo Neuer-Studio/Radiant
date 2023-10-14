@@ -82,7 +82,7 @@ namespace Radiant
 		};
 		s_Data->QuadInfo.FullscreenQuadPipeline = Pipeline::Create(pipelineSpecification);
 		Memory::Buffer buffer(data, 4 * sizeof(QuadVertex));
-		//s_Data->QuadInfo.FullscreenQuadVertexBuffer = VertexBuffer::Create(buffer);
+		s_Data->QuadInfo.FullscreenQuadVertexBuffer = VertexBuffer::Create("Quad", buffer);
 		uint32_t indices[6] = { 0, 1, 2, 2, 3, 0, };
 		s_Data->QuadInfo.FullscreenQuadIndexBuffer = IndexBuffer::Create(indices, 6 * sizeof(uint32_t));
 
@@ -92,6 +92,7 @@ namespace Radiant
 			{ ShaderDataType::Float3, "a_Normals" }
 		};
 		s_Data->PiplineStaticMesh = Pipeline::Create(pipelineSpecificationStaticMesh);
+		//s_Data->QuadInfo.FullscreenQuadShader = Shader::Create("");
 	}
 
 	void Rendering::BindRenderingPass(const Memory::Shared<RenderingPass>& pass)

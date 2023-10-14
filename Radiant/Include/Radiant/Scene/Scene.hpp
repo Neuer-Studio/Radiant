@@ -5,6 +5,7 @@
 namespace Radiant
 {
 	class SceneRendering;
+	class SceneRenderingPanel;
 	class SceneManager;
 	class Entity;
 	enum class ComponentType;
@@ -34,7 +35,11 @@ namespace Radiant
 		std::string m_SceneName;
 		Utils::UUID m_UUID;
 
+		std::size_t m_ViewportWidth = 0;
+		std::size_t m_ViewportHeight = 0;
+
 		friend SceneManager;
+		friend SceneRenderingPanel;
 	};
 
 	class SceneManager

@@ -16,6 +16,7 @@
 #include <imgui/imgui.h>
 #include <Radiant/Rendering/SceneRendering.hpp>
 #include <Radiant/ImGui/Editor/Panels/PanelOutliner.hpp>
+#include <Radiant/ImGui/Editor/Panels/SceneRenderingPanel.hpp>
 
 namespace Radiant
 {
@@ -45,7 +46,6 @@ namespace Radiant
 		~EditorLayer()
 		{
 			delete m_ManagerScene;
-			delete m_Outliner;
 		}
 
 		virtual void OnAttach()
@@ -64,6 +64,7 @@ namespace Radiant
 			m_ManagerScene = new SceneManager("Debug name"); //NOTE(Danya): Should be shared 
 			m_TestScene = m_ManagerScene->Create("Debug name");
 			m_Outliner = new PanelOutliner(m_TestScene);
+			m_ScenePanel = new SceneRenderingPanel(m_TestScene);
 			/*auto em = m_TestScene->CreateEntity();
 			em->AddComponent(CreateNewComponent<MeshComponent>());
 			em->GetComponent(ComponentType::Mesh).As<MeshComponent>()->Mesh = (new Mesh("Resources/Meshes/Cube1m.fbx"));*/
@@ -132,6 +133,10 @@ namespace Radiant
 				auto viewportOffset = ImGui::GetCursorPos(); // includes tab bar
 				auto viewportSize = ImGui::GetContentRegionAvail();
 				m_Rendering->SetSceneVeiwPortSize({viewportSize.x, viewportSize.y});
+				if (m_TestScene->ContainsEntityInScene(ComponentType::Camera))
+				{
+					m_TestScene->GetEntityByComponentType(ComponentType::Camera)->GetComponent(ComponentType::Camera).As<CameraComponent>()->Camera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), viewportSize.x, viewportSize.y, 0.1f, 1000.0f));
+				}
 
 				ImGui::Image((void*)m_Rendering->GetFinalPassImage(), viewportSize, {0, 1}, {1, 0});
 
@@ -148,6 +153,7 @@ namespace Radiant
 			ImGui::PopStyleVar();
 
 			m_Outliner->DrawImGuiUI();
+			m_ScenePanel->DrawImGuiUI();
 			ImGui::End();
 
 		}
@@ -158,7 +164,8 @@ namespace Radiant
 		SceneManager* m_ManagerScene;
 		Memory::Shared<Scene> m_TestScene;
 
-		PanelOutliner* m_Outliner;
+		Memory::Shared<SceneRenderingPanel> m_ScenePanel;
+		Memory::Shared<PanelOutliner> m_Outliner;
 		Memory::Shared<SceneRendering> m_Rendering;
 	};
 }

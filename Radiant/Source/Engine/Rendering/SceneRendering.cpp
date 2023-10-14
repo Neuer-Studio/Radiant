@@ -136,6 +136,10 @@ namespace Radiant
 			s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->Resize(size.x, size.y);
 	//		s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->Resize(size.x, size.y);
 		}
+		if (s_SceneInfo->Camera)
+		{
+			//s_SceneInfo->Camera->Se
+		}
 	}
 
 	uint32_t SceneRendering::GetFinalPassImage()

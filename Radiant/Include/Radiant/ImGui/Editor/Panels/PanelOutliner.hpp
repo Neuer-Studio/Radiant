@@ -4,7 +4,7 @@
 
 namespace Radiant
 {
-	class PanelOutliner
+	class PanelOutliner final : public Memory::RefCounted
 	{
 	public:
 		PanelOutliner(const Memory::Shared<Scene>& scene = nullptr);
