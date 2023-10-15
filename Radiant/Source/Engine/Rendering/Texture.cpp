@@ -17,4 +17,15 @@ namespace Radiant
 		return nullptr;
 	}
 
+	Memory::Shared<TextureCube> TextureCube::Create(const std::filesystem::path& path)
+	{
+		switch (RenderingAPI::GetAPI())
+		{
+		case RenderingAPIType::None:    return nullptr;
+		case RenderingAPIType::OpenGL:  return Memory::Shared<OpenGLTextureCube>::Create(path);
+		}
+		RADIANT_VERIFY(false, "Unknown RenderingAPI");
+		return nullptr;
+	}
+
 }

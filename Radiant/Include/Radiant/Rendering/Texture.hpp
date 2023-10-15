@@ -11,7 +11,7 @@ namespace Radiant
 
 		virtual void Bind(uint32_t slot = 0) const = 0;
 
-		virtual Memory::Shared<Image2D> GetImage() const = 0;
+		//virtual Memory::Shared<Image> GetImage() const = 0;
 		virtual ImageFormat GetImageFormat() const = 0;
 
 		virtual std::size_t GetWidth() const = 0;
@@ -25,5 +25,13 @@ namespace Radiant
 	{	
 	public:
 		static Memory::Shared<Texture2D> Create(const std::filesystem::path& path, bool srgb = false);
+		virtual Memory::Shared<Image2D> GetImage() const = 0;
+	};
+
+	class TextureCube : public Texture
+	{
+	public:
+		static Memory::Shared<TextureCube> Create(const std::filesystem::path& path);
+		virtual Memory::Shared<ImageCube> GetImage() const = 0;
 	};
 }

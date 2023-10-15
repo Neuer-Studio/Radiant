@@ -228,6 +228,10 @@ namespace Radiant
 				{
 					if (ImGui::MenuItem("Sky Light"))
 					{
+						Entity* entity = m_Context->CreateEntity("SkyLight");
+						auto cube = CreateNewComponent<CubeComponent>();
+						cube->Cube = TextureCube::Create("Resources/Envorement/Arches_E_PineTree_Radiance_Mini.tga");
+						entity->AddComponent(cube);
 					}
 
 					ImGui::Spacing();

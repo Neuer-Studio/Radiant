@@ -2,6 +2,7 @@
 #include <Rendering/Platform/OpenGL/OpenGLRendering.hpp>
 
 #include <Rendering/VertexBuffer.hpp>
+#include <Rendering/Texture.hpp>
 #include <Rendering/IndexBuffer.hpp>
 #include <Rendering/Pipeline.hpp>
 #include <Rendering/Shader.hpp>
@@ -92,7 +93,7 @@ namespace Radiant
 			{ ShaderDataType::Float3, "a_Normals" }
 		};
 		s_Data->PiplineStaticMesh = Pipeline::Create(pipelineSpecificationStaticMesh);
-		//s_Data->QuadInfo.FullscreenQuadShader = Shader::Create("");
+		s_Data->QuadInfo.FullscreenQuadShader = Shader::Create("Resources/Shaders/Quad.rads");
 	}
 
 	void Rendering::BindRenderingPass(const Memory::Shared<RenderingPass>& pass)
@@ -118,14 +119,15 @@ namespace Radiant
 		s_Data->ActiveRenderingPass = nullptr;
 	}
 
-	void Rendering::DrawQuad()
+	void Rendering::DrawQuad(const Memory::Shared<TextureCube> cube, const glm::mat4& viewProjection)
 	{
 		s_Data->QuadInfo.FullscreenQuadPipeline->Bind();
 		s_Data->QuadInfo.FullscreenQuadIndexBuffer->Bind();
 		s_Data->QuadInfo.FullscreenQuadVertexBuffer->Bind();
 		s_Data->QuadInfo.FullscreenQuadShader->Bind();
+		cube->Bind();
 
-		s_Data->QuadInfo.FullscreenQuadShader->SetValue("u_InverseVP", (std::byte*)nullptr, UniformTarget::Vertex);
+		s_Data->QuadInfo.FullscreenQuadShader->SetValue("u_InverseVP", (std::byte*)&glm::inverse(viewProjection), UniformTarget::Vertex);
 
 		DrawIndexed(6);
 	}

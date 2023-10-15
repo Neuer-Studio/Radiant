@@ -38,6 +38,13 @@ namespace Radiant
 		static Memory::Shared<Image2D> Create(ImageFormat format, std::size_t width, std::size_t height, const void* buffer = nullptr);
 	};
 
+	class ImageCube : public Image
+	{
+	public:
+		static Memory::Shared<ImageCube> Create(ImageFormat format, std::size_t width, std::size_t height, Memory::Buffer buffer);
+		static Memory::Shared<ImageCube> Create(ImageFormat format, std::size_t width, std::size_t height, const void* buffer = nullptr);
+	};
+
 	namespace Utils
 	{
 		inline uint32_t GetImageFormatBPP(ImageFormat format)

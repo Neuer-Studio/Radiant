@@ -106,7 +106,11 @@ namespace Radiant
 	void SceneRendering::CompositePass()
 	{
 		Rendering::BindRenderingPass(s_SceneInfo->CompositeInfo.CompositePass);
-
+		if (m_Context->ContainsEntityInScene(ComponentType::Cube))
+		{
+			auto viewProjection = s_SceneInfo->Camera->GetProjectionMatrix() * s_SceneInfo->Camera->GetViewMatrix();
+			Rendering::DrawQuad(m_Context->GetEntityByComponentType(ComponentType::Cube)->GetComponent(ComponentType::Cube).As<CubeComponent>()->Cube, viewProjection);
+		}
 
 		for (const auto m : s_SceneInfo->MeshDrawList)
 			Rendering::DrawMesh(m);

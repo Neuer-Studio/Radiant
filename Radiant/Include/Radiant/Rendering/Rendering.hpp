@@ -6,6 +6,8 @@
 
 namespace Radiant
 {
+	class TextureCube;
+
 	class Rendering 
 	{
 	public:
@@ -15,7 +17,7 @@ namespace Radiant
 		static void DrawMesh(Memory::Shared<Mesh> mesh);
 		static void DrawMeshWithShader();
 
-		static void DrawQuad();
+		static void DrawQuad(const Memory::Shared<TextureCube> cube, const glm::mat4& viewProjection);
 
 		static void BindRenderingPass(const Memory::Shared<RenderingPass>& pass);
 		static void UnbindRenderingPass();

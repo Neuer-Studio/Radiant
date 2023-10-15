@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <Radiant/Rendering/Mesh.hpp>
 #include <Radiant/Core/Camera.hpp>
+#include <Radiant/Rendering/Texture.hpp>
 
 namespace Radiant
 {
@@ -10,7 +11,7 @@ namespace Radiant
 
 	enum class ComponentType
 	{
-		None = 0, Transform, Mesh, Camera
+		None = 0, Transform, Mesh, Camera, Cube
 	};
 
 	struct Component : public Memory::RefCounted
@@ -52,6 +53,15 @@ namespace Radiant
 		Camera Camera;
 	protected:
 		virtual const ComponentType GetType() const override { return ComponentType::Camera; }
+
+		friend Entity;
+	};
+
+	struct CubeComponent : public Component
+	{
+		Memory::Shared<TextureCube> Cube;
+	protected:
+		virtual const ComponentType GetType() const override { return ComponentType::Cube; }
 
 		friend Entity;
 	};
