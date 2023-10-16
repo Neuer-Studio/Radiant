@@ -52,12 +52,12 @@ namespace Radiant
 		RADIANT_VERIFY(false);
 	}
 
-	void OpenGLVertexBuffer::Bind()
+	void OpenGLVertexBuffer::Bind() const
 	{
-		const Memory::Shared<OpenGLVertexBuffer> instance = this;
+		const Memory::Shared<const OpenGLVertexBuffer> instance = this;
+		auto id = this->m_RenderingID;
 		Rendering::SubmitCommand([instance]() mutable
 			{
-				auto id = instance->m_RenderingID;
 				glBindBuffer(GL_ARRAY_BUFFER, instance->m_RenderingID);
 			}
 		);

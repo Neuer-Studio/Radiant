@@ -12,7 +12,7 @@ namespace Radiant
 		~OpenGLVertexBuffer() override;
 
 		virtual void SetData(Memory::Buffer buffer, std::size_t offset = 0) override;
-		virtual void Bind() override;
+		virtual void Bind() const override;
 
 		virtual std::size_t GetCount() const override;
 		virtual std::size_t GetSize() const override;

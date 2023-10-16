@@ -110,7 +110,7 @@ namespace Radiant
 		virtual ~VertexBuffer() {}
 
 		virtual void SetData(Memory::Buffer buffer, std::size_t offset = 0) = 0;
-		virtual void Bind() = 0;
+		virtual void Bind() const = 0;
 
 		virtual std::size_t GetCount() const = 0;
 		virtual std::size_t GetSize() const = 0;
