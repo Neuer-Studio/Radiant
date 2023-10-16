@@ -40,7 +40,7 @@ namespace Radiant
 	{
 	public:
 		OpenGLImageCube(ImageFormat format, std::size_t width, std::size_t height, Memory::Buffer buffer);
-		OpenGLImageCube(ImageFormat format, std::size_t width, std::size_t height, const void* data);
+		OpenGLImageCube(ImageFormat format, std::size_t width, std::size_t height, const std::byte* data);
 		virtual ~OpenGLImageCube() override;
 
 		virtual void Release() override;
@@ -74,18 +74,6 @@ namespace Radiant
 			case ImageFormat::RGB:     return GL_RGB;
 			case ImageFormat::RGBA:
 			case ImageFormat::RGBA32F: return GL_RGBA;
-			}
-			RADIANT_VERIFY(false, "Unknown image format");
-			return 0;
-		}
-
-		inline GLenum OpenGLImageInternalFormat(ImageFormat format)
-		{
-			switch (format)
-			{
-				case ImageFormat::RGB:             return GL_RGB8;
-				case ImageFormat::RGBA:            return GL_RGBA8;
-				case ImageFormat::RGBA32F:         return GL_RGBA32F;
 			}
 			RADIANT_VERIFY(false, "Unknown image format");
 			return 0;

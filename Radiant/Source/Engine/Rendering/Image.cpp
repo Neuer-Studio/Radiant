@@ -38,7 +38,7 @@ namespace Radiant
 		return nullptr;
 	}
 
-	Memory::Shared<ImageCube> ImageCube::Create(ImageFormat format, std::size_t width, std::size_t height, const void* buffer /*= nullptr*/)
+	Memory::Shared<ImageCube> ImageCube::Create(ImageFormat format, std::size_t width, std::size_t height, const std::byte* buffer /*= nullptr*/)
 	{
 		switch (RenderingAPI::GetAPI())
 		{

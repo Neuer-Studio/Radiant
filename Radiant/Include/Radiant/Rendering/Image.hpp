@@ -42,12 +42,12 @@ namespace Radiant
 	{
 	public:
 		static Memory::Shared<ImageCube> Create(ImageFormat format, std::size_t width, std::size_t height, Memory::Buffer buffer);
-		static Memory::Shared<ImageCube> Create(ImageFormat format, std::size_t width, std::size_t height, const void* buffer = nullptr);
+		static Memory::Shared<ImageCube> Create(ImageFormat format, std::size_t width, std::size_t height, const std::byte* buffer = nullptr);
 	};
 
 	namespace Utils
 	{
-		inline uint32_t GetImageFormatBPP(ImageFormat format)
+		inline uint32_t GetPixelSize(ImageFormat format)
 		{
 			switch (format)
 			{
@@ -66,7 +66,7 @@ namespace Radiant
 
 		inline uint32_t GetImageMemorySize(ImageFormat format, uint32_t width, uint32_t height)
 		{
-			return width * height * GetImageFormatBPP(format);
+			return width * height * GetPixelSize(format);
 		}
 	}
 }

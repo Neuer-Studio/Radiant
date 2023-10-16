@@ -78,10 +78,11 @@ namespace Radiant
 		
 		int width, height, channels;
 		stbi_set_flip_vertically_on_load(false);
-		auto* imageData = stbi_load(path.string().c_str(), &width, &height, &channels, STBI_rgb);
+		const std::byte* imageData = (std::byte*)stbi_load(path.string().c_str(), &width, &height, &channels, STBI_rgb);
 		RADIANT_VERIFY(imageData);
 
 		m_Image = ImageCube::Create(ImageFormat::RGB, width, height, imageData);
+		stbi_image_free(m_Image->GetBuffer().Data);
 	}
 
 	OpenGLTextureCube::~OpenGLTextureCube()

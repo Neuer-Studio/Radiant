@@ -13,11 +13,27 @@ namespace Radiant
 		OpenGL = 2
 	};
 
+	struct GraphicsInfo {
+		std::string Vendor;
+		std::string Renderer;
+		std::string Version;
+
+		int MaxSamples = 0;
+		float MaxAnisotropy = 0.0f;
+		int MaxTextureUnits = 0;
+	};
+
 	class RenderingAPI : public Memory::RefCounted
 	{
 	public:
 		virtual void Init() = 0;
 		virtual void Shutdown() = 0;
+
+		static GraphicsInfo& GetGraphicsInfo()
+		{
+			static GraphicsInfo info;
+			return info;
+		}
 
 		static RenderingAPIType GetAPI() { return s_RendererAPI; }
 	private:

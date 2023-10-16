@@ -31,6 +31,16 @@ namespace Radiant {
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
+		auto& info = RenderingAPI::GetGraphicsInfo();
+
+		info.Vendor = (const char*)glGetString(GL_VENDOR);
+		info.Renderer = (const char*)glGetString(GL_RENDERER);
+		info.Version = (const char*)glGetString(GL_VERSION);
+
+		glGetIntegerv(GL_MAX_SAMPLES, &info.MaxSamples);
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &info.MaxAnisotropy);
+
+		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &info.MaxTextureUnits);
 	}
 
 	void OpenGLRendering::Shutdown()

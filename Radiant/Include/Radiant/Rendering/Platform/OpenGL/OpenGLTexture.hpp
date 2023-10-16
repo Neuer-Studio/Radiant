@@ -55,6 +55,8 @@ namespace Radiant
 		RendererID m_RenderingID = 0;
 		std::size_t m_Width;
 		std::size_t m_Height;
+
+		std::byte* m_ImageData;
 	};
 
 }
