@@ -37,6 +37,12 @@ namespace Radiant {
 		info.Renderer = (const char*)glGetString(GL_RENDERER);
 		info.Version = (const char*)glGetString(GL_VERSION);
 
+		size_t pos = info.Renderer.find('/');
+
+		if (pos != std::string::npos) 
+			info.Renderer = info.Renderer.substr(0, pos);
+		
+
 		glGetIntegerv(GL_MAX_SAMPLES, &info.MaxSamples);
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &info.MaxAnisotropy);
 
