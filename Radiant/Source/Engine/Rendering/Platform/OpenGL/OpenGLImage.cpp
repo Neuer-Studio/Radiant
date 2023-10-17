@@ -1,3 +1,5 @@
+#include <Radiant/Rendering/Platform/OpenGL/OpenGLUtils.hpp>
+
 #include <Radiant/Rendering/Platform/OpenGL/OpenGLImage.hpp>
 #include <Radiant/Rendering/Rendering.hpp>
 #include <Radiant/Rendering/RenderingAPI.hpp>
@@ -169,7 +171,7 @@ namespace Radiant
 				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 				glTextureParameterf(instance->m_RenderingID, GL_TEXTURE_MAX_ANISOTROPY, RenderingAPI::GetGraphicsInfo().MaxAnisotropy);
 
-				auto format = Utils::OpenGLImageFormat(ImageFormat::RGB);
+				auto format = Utils::OpenGLImageFormat(ImageFormat::RGB8);
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[2]);
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[0]);
 

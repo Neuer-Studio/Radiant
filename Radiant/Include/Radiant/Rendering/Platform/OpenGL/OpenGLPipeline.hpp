@@ -16,6 +16,7 @@ namespace Radiant
 		virtual void Invalidate() override;
 
 		virtual void Bind() const override;
+		virtual void Unbind() const override;
 	private:
 		PipelineSpecification m_Specification;
 		RendererID m_RendererID;

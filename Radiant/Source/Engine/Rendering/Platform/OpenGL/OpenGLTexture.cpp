@@ -1,6 +1,7 @@
 #include <Radiant/Rendering/Platform/OpenGL/OpenGLTexture.hpp>
 #include <Rendering/Platform/OpenGL/OpenGLImage.hpp>
 #include <Radiant/Rendering/Rendering.hpp>
+#include <Radiant/Rendering/Platform/OpenGL/OpenGLUtils.hpp>
 
 #include <stb_image/stb_image.h>
 #include <glad/glad.h>
@@ -32,7 +33,7 @@ namespace Radiant
 			auto* imageData = stbi_load(path.string().c_str(), &width, &height, &channels, srgb ? STBI_rgb : STBI_rgb_alpha);
 			RADIANT_VERIFY(imageData);
 
-			ImageFormat format = srgb ? ImageFormat::RGB : ImageFormat::RGBA;
+			ImageFormat format = srgb ? ImageFormat::RGB8 : ImageFormat::RGBA;
 			Memory::Buffer buffer((std::byte*)imageData, width * height * Utils::GetImageMemorySize(format, width, height));
 			m_Image = Image2D::Create(format, width, height, buffer);
 
@@ -81,7 +82,7 @@ namespace Radiant
 		const std::byte* imageData = (std::byte*)stbi_load(path.string().c_str(), &width, &height, &channels, STBI_rgb);
 		RADIANT_VERIFY(imageData);
 
-		m_Image = ImageCube::Create(ImageFormat::RGB, width, height, imageData);
+		m_Image = ImageCube::Create(ImageFormat::RGB8, width, height, imageData);
 		stbi_image_free(m_Image->GetBuffer().Data);
 	}
 

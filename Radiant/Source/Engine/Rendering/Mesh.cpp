@@ -58,6 +58,8 @@ namespace Radiant
 		RADIANT_VERIFY(mesh->HasPositions(), "Meshes require positions.");
 		RADIANT_VERIFY(mesh->HasNormals(), "Meshes require normals.");
 
+		m_Shader = Rendering::GetShaderLibrary()->Get("Static_Shader.rads");
+
 		m_Vertices.reserve(mesh->mNumVertices);
 
 		// Extract vertices from model

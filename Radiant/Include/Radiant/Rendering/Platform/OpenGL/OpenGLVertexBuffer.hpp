@@ -13,6 +13,7 @@ namespace Radiant
 
 		virtual void SetData(Memory::Buffer buffer, std::size_t offset = 0) override;
 		virtual void Bind() const override;
+		virtual void Unbind() const override;
 
 		virtual std::size_t GetCount() const override;
 		virtual std::size_t GetSize() const override;

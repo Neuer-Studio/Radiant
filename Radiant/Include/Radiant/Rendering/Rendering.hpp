@@ -7,6 +7,7 @@
 namespace Radiant
 {
 	class TextureCube;
+	class OpenGLRenderingPass;
 
 	class Rendering 
 	{
@@ -17,19 +18,23 @@ namespace Radiant
 		static void DrawMesh(Memory::Shared<Mesh> mesh);
 		static void DrawMeshWithShader();
 
-		static void DrawQuad(const Memory::Shared<TextureCube> cube, const glm::mat4& viewProjection);
+		static void DrawQuad();
 
 		static void BindRenderingPass(const Memory::Shared<RenderingPass>& pass);
 		static void UnbindRenderingPass();
 
 		static void SubmitCommand(std::function<void()> func);
 		static void ExecuteCommand();
+
+		static const Memory::Shared<ShaderLibrary>& GetShaderLibrary();
 	private:
 		static void DrawIndexed(std::size_t count, PrimitiveType type = PrimitiveType::Triangles, bool depthTest = false);
 		static void Clear(float r, float g, float b);
 	private:
+	private:
 		static Memory::CommandBuffer& GetRenderingCommandBuffer();
 
 		friend Mesh;
+		friend OpenGLRenderingPass;
 	};
 }

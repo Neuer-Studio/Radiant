@@ -21,6 +21,7 @@ namespace Radiant
 	{
 		Memory::CommandBuffer* CommandBuffer;
 		RenderingAPI* RendererAPI;
+		Memory::Shared<ShaderLibrary> RenderingShaders;
 
 		Memory::Shared<RenderingPass> ActiveRenderingPass;
 		Memory::Shared<Pipeline> PiplineStaticMesh;
@@ -87,13 +88,25 @@ namespace Radiant
 		uint32_t indices[6] = { 0, 1, 2, 2, 3, 0, };
 		s_Data->QuadInfo.FullscreenQuadIndexBuffer = IndexBuffer::Create(indices, 6 * sizeof(uint32_t));
 
+		/***************** Static Mesh *****************/
+
 		PipelineSpecification pipelineSpecificationStaticMesh;
 		pipelineSpecificationStaticMesh.Layout = {
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float3, "a_Normals" }
 		};
 		s_Data->PiplineStaticMesh = Pipeline::Create(pipelineSpecificationStaticMesh);
-		s_Data->QuadInfo.FullscreenQuadShader = Shader::Create("Resources/Shaders/Quad.rads");
+
+		{
+			s_Data->RenderingShaders = Memory::Shared<ShaderLibrary>::Create();
+			s_Data->RenderingShaders->Load("Resources/Shaders/Static_Shader.rads");
+			s_Data->RenderingShaders->Load("Resources/Shaders/Quad.rads");
+		}
+	}
+
+	const Memory::Shared<ShaderLibrary>& Rendering::GetShaderLibrary()
+	{
+		return s_Data->RenderingShaders;
 	}
 
 	void Rendering::BindRenderingPass(const Memory::Shared<RenderingPass>& pass)
@@ -101,35 +114,24 @@ namespace Radiant
 		RADIANT_VERIFY(pass, "Render pass cannot be null!");
 		s_Data->ActiveRenderingPass = pass;
 
-		const auto passSpec = pass->GetSpecification();
-		const auto fbspec = pass->GetSpecification().TargetFramebuffer->GetSpecification();
-
-		passSpec.TargetFramebuffer->Bind();
-
-		if (passSpec.clear)
-			Clear(fbspec.ClearColor.r, fbspec.ClearColor.g, fbspec.ClearColor.b);
-
+		pass->Bind();
 	}
 
 	void Rendering::UnbindRenderingPass()
 	{
 		RADIANT_VERIFY(s_Data->ActiveRenderingPass, "No active render pass! Have you called Rendernig::UnbindRenderingPass twice?");
 
-		s_Data->ActiveRenderingPass->GetSpecification().TargetFramebuffer->Unbind();
+		s_Data->ActiveRenderingPass->Unbind();
 		s_Data->ActiveRenderingPass = nullptr;
 	}
 
-	void Rendering::DrawQuad(const Memory::Shared<TextureCube> cube, const glm::mat4& viewProjection)
+	void Rendering::DrawQuad()
 	{
+		s_Data->QuadInfo.FullscreenQuadVertexBuffer->Bind();
 		s_Data->QuadInfo.FullscreenQuadPipeline->Bind();
 		s_Data->QuadInfo.FullscreenQuadIndexBuffer->Bind();
-		s_Data->QuadInfo.FullscreenQuadVertexBuffer->Bind();
-		s_Data->QuadInfo.FullscreenQuadShader->Bind();
-		cube->Bind();
 
-		s_Data->QuadInfo.FullscreenQuadShader->SetValue("u_InverseVP", (std::byte*)&glm::inverse(viewProjection), UniformTarget::Vertex);
-
-		DrawIndexed(6);
+		DrawIndexed(s_Data->QuadInfo.FullscreenQuadIndexBuffer->GetCount());
 	}
 
 	void Rendering::SubmitCommand(std::function<void()> func)
@@ -165,11 +167,11 @@ namespace Radiant
 
 	void Rendering::DrawMesh(Memory::Shared<Mesh> mesh)
 	{
-		auto mesh2 = mesh;
-
-		s_Data->PiplineStaticMesh->Bind();
 		mesh->m_VertexBuffer->Bind();
+		s_Data->PiplineStaticMesh->Bind();
 		mesh->m_IndexBuffer->Bind();
+
+		mesh->m_Shader->Bind();
 
 		DrawIndexed(mesh->m_IndexBuffer->GetCount());
 	}

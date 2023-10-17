@@ -64,34 +64,4 @@ namespace Radiant
 		RendererID m_RenderingID = 0;
 		RendererID m_SamplerRenderingID = 0;
 	};
-
-	namespace Utils {
-
-		inline GLenum OpenGLImageFormat(ImageFormat format)
-		{
-			switch (format)
-			{
-			case ImageFormat::RGB:     return GL_RGB;
-			case ImageFormat::RGBA:
-			case ImageFormat::RGBA32F: return GL_RGBA;
-			}
-			RADIANT_VERIFY(false, "Unknown image format");
-			return 0;
-		}
-
-		inline GLenum OpenGLFormatDataType(ImageFormat format)
-		{
-			switch (format)
-			{
-			case ImageFormat::RGB:
-			case ImageFormat::RGBA:    return GL_UNSIGNED_BYTE;
-			case ImageFormat::RGBA32F: return GL_FLOAT;
-			}
-			RADIANT_VERIFY(false, "Unknown image format");
-			return 0;
-		}
-
-	}
-
-
 }

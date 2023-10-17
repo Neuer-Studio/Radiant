@@ -390,7 +390,7 @@ namespace Radiant
 	{
 		std::string result;
 		std::ifstream in(filepath, std::ios::in | std::ios::binary);
-		RADIANT_VERIFY(in, "Could not load shader!");
+		RADIANT_VERIFY(in, "Could not load shader! {}", filepath.string().c_str());
 
 		in.seekg(0, std::ios::end);
 		result.resize(in.tellg());
@@ -433,6 +433,14 @@ namespace Radiant
 		Rendering::SubmitCommand([instance]() mutable
 			{
 				instance->UpdateValues();
+			});
+	}
+
+	void OpenGLShader::Unbind()
+	{
+		Rendering::SubmitCommand([]()
+			{
+				glUseProgram(0);
 			});
 	}
 

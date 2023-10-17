@@ -15,6 +15,7 @@ namespace Radiant
 
 		virtual void SetData(void* data, uint32_t size, uint32_t offset) override;
 		virtual void Bind() const override;
+		virtual void Unbind() const override;
 
 		virtual uint32_t GetSize() const { return m_Size; }
 		virtual uint32_t GetCount() const { return m_Size / sizeof(uint32_t); }

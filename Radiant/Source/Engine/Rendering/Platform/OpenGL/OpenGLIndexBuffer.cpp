@@ -53,6 +53,15 @@ namespace Radiant
 
 	}
 
+	void OpenGLIndexBuffer::Unbind() const {
+		Rendering::SubmitCommand([]() mutable
+			{
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
+			}
+		);
+
+	}
+
 	void OpenGLIndexBuffer::SetData(void* data, uint32_t size, uint32_t offset)
 	{
 		m_LocalData = Memory::Buffer::Copy(data, size);

@@ -68,6 +68,7 @@ namespace Radiant
 		virtual ~Shader() {}
 		
 		virtual void Bind() = 0;
+		virtual void Unbind() = 0;
 
 		virtual const std::string& GetName() const = 0;
 		virtual const std::filesystem::path& GetPath() const = 0;
@@ -79,5 +80,29 @@ namespace Radiant
 	public:
 		virtual bool HasBufferUniform(const std::string& uniformName, UniformTarget type) const = 0;
 		virtual ShaderUniformDeclaration& GetBufferUniform(const std::string& uniformName, UniformTarget type) = 0;
+	};
+
+
+	class ShaderLibrary : public Memory::RefCounted
+	{
+	public:
+		ShaderLibrary()
+		{
+
+		}
+
+		~ShaderLibrary()
+		{
+
+		}
+
+		void Add(const Memory::Shared<Shader>& shader);
+		void Load(const std::string& name, const std::filesystem::path& filepath);
+		void Load(const std::filesystem::path& filepath);
+
+		const Memory::Shared<Shader>& Get(const std::string& name) const;
+		std::unordered_map<std::string, Memory::Shared<Shader>>& GetShaders() { return m_Shaders; }
+	private:
+		std::unordered_map<std::string, Memory::Shared<Shader>> m_Shaders;
 	};
 }

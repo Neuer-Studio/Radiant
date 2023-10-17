@@ -12,6 +12,9 @@ namespace Radiant
 
 		virtual RenderingPassSpecification& GetSpecification() override { return m_Specification; }
 		virtual const RenderingPassSpecification& GetSpecification() const override { return m_Specification; }
+
+		virtual void Bind() const override;
+		virtual void Unbind() const override;
 	private:
 		RenderingPassSpecification m_Specification;
 	};

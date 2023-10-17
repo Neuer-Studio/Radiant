@@ -12,7 +12,8 @@ namespace Radiant
 		OpenGLShader(const std::filesystem::path& path);
 		~OpenGLShader() override {}
 
-		virtual void Bind();
+		virtual void Bind() override;
+		virtual void Unbind() override;
 
 		virtual const std::string& GetName() const override { return m_Name; }
 		virtual const std::filesystem::path& GetPath() const override { return m_AssetPath; }

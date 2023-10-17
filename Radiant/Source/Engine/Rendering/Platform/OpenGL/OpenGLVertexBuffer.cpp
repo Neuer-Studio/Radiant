@@ -64,6 +64,17 @@ namespace Radiant
 
 	}
 
+	void OpenGLVertexBuffer::Unbind() const
+	{
+	
+		Rendering::SubmitCommand([]() mutable
+			{
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+			}
+		);
+
+	}
+
 	std::size_t OpenGLVertexBuffer::GetCount() const
 	{
 		return m_Size / sizeof(std::size_t);

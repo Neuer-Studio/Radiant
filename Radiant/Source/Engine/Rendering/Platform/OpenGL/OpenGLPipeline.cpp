@@ -92,8 +92,16 @@ namespace Radiant
 					}
 					attribIndex++;
 
-					
+
 				}
+			});
+	}
+
+	void OpenGLPipeline::Unbind() const
+	{
+		Rendering::SubmitCommand([]()
+			{
+				glBindVertexArray(0);
 			});
 	}
 

@@ -24,6 +24,7 @@ namespace Radiant
 	private:
 		void Init();
 		void CompositePass();
+		void GeometryPass();
 		void Flush();
 	private:
 		std::size_t m_ViewportWidth = -1, m_ViewportHeight = -1;

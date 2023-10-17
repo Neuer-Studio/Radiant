@@ -230,7 +230,7 @@ namespace Radiant
 					{
 						Entity* entity = m_Context->CreateEntity("SkyLight");
 						auto cube = CreateNewComponent<CubeComponent>();
-						cube->Cube = TextureCube::Create("Resources/Envorement/Arches_E_PineTree_Radiance_Mini.tga");
+						cube->Cube = TextureCube::Create("Resources/Envorement/Arches_E_PineTree_Radiance.tga");
 						entity->AddComponent(cube);
 					}
 

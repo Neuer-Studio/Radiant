@@ -21,6 +21,8 @@ namespace Radiant
 		uint32_t Height = 0;
 		glm::vec4 ClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 		uint32_t Samples = 1; // multisampling
+
+		ImageFormat Format;
 	};
 
 	class Framebuffer : public Memory::RefCounted
@@ -42,6 +44,7 @@ namespace Radiant
 		virtual uint32_t GetHeight() const = 0;
 
 		virtual RendererID GetRendererID() const = 0;
+		virtual RendererID GetDepth() const = 0; // temp
 
 		virtual Memory::Shared<Image2D> GetImage() const = 0;
 		virtual Memory::Shared<Image2D> GetDepthImage() const = 0;
@@ -58,5 +61,4 @@ namespace Radiant
 	private:
 		static std::vector<Memory::Shared<Framebuffer>> m_Pool;
 	};
-
 }

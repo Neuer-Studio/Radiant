@@ -1,6 +1,7 @@
 #include <Radiant/Rendering/SceneRendering.hpp>
 #include <Radiant/Rendering/Rendering.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glad/glad.h>
 
 namespace Radiant
 {
@@ -22,7 +23,7 @@ namespace Radiant
 	{
 		CompositeData CompositeInfo;
 		GeometryData GeometryInfo;
-
+		Memory::Shared<Shader> QuadShader;
 		std::vector<Memory::Shared<Mesh>> MeshDrawList;
 		std::vector<Memory::Shared<Mesh>> MeshDrawListWithShader;
 
@@ -45,30 +46,39 @@ namespace Radiant
 	void SceneRendering::Init()
 	{
 		s_SceneInfo = new SceneInfo();
+		s_SceneInfo->QuadShader = Rendering::GetShaderLibrary()->Get("Quad.rads");
 
 		/* Composite Pass */
 
-		FramebufferSpecification FrameBufferComposite;
-		FrameBufferComposite.Height = 1;
-		FrameBufferComposite.Width = 1;
-		FrameBufferComposite.Samples = 1;
-		FrameBufferComposite.ClearColor = glm::vec4(0.5f);
+		{
+			FramebufferSpecification FrameBufferComposite;
+			FrameBufferComposite.Height = 1;
+			FrameBufferComposite.Width = 1;
+			FrameBufferComposite.Samples = 1;
+			FrameBufferComposite.ClearColor = glm::vec4(0.5f);
+			FrameBufferComposite.Format = ImageFormat::RGB8;
 
-		RenderingPassSpecification PassComposite;
-		PassComposite.TargetFramebuffer = Framebuffer::Create(FrameBufferComposite);
+			RenderingPassSpecification PassComposite;
+			PassComposite.TargetFramebuffer = Framebuffer::Create(FrameBufferComposite);
+			s_SceneInfo->CompositeInfo.CompositePass = RenderingPass::Create(PassComposite);
 
-		s_SceneInfo->CompositeInfo.CompositePass = RenderingPass::Create(PassComposite);
-
-		s_SceneInfo->CompositeInfo.CompositeShader = Shader::Create("Resources/Shaders/Colors.rads");
-
-		/****************************/
+			s_SceneInfo->CompositeInfo.CompositeShader = Shader::Create("Resources/Shaders/hdr.rads");
+		}
 
 		/* Geometry Pass */
 
+		{
+			FramebufferSpecification FrameBufferGeometry;
+			FrameBufferGeometry.Height = 1;
+			FrameBufferGeometry.Width = 1;
+			FrameBufferGeometry.Samples = 1;
+			FrameBufferGeometry.ClearColor = glm::vec4(0.5f); 
+			FrameBufferGeometry.Format = ImageFormat::RGB16F;
 
-
-
-		/****************************/
+			RenderingPassSpecification PassGeometry;
+			PassGeometry.TargetFramebuffer = Framebuffer::Create(FrameBufferGeometry);
+			s_SceneInfo->GeometryInfo.GeometryPass = RenderingPass::Create(PassGeometry);
+		}
 
 	}
 
@@ -76,47 +86,45 @@ namespace Radiant
 	{
 		if (!s_SceneInfo->Camera)
 		{
-			if(m_Context->ContainsEntityInScene(ComponentType::Camera))
+			if (m_Context->ContainsEntityInScene(ComponentType::Camera))
 				s_SceneInfo->Camera = &m_Context->GetEntityByComponentType(ComponentType::Camera)->GetComponent(ComponentType::Camera).As<CameraComponent>()->Camera;
 		}
 
- 		if (s_SceneInfo->Camera) s_SceneInfo->Camera->Update();
+		if (s_SceneInfo->Camera) s_SceneInfo->Camera->Update();
 		Flush();
 	}
 
 	void SceneRendering::Flush()
 	{
-		if (s_SceneInfo->Camera)
-		{
-			glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(1.f));
-			glm::mat4 viewMatrix = s_SceneInfo->Camera->GetViewMatrix();
-			glm::mat4 projectionMatrix = s_SceneInfo->Camera->GetProjectionMatrix();
-
-			s_SceneInfo->CompositeInfo.CompositeShader->SetValue("u_Model", (std::byte*)&modelMatrix, UniformTarget::Vertex);
-			s_SceneInfo->CompositeInfo.CompositeShader->SetValue("u_View", (std::byte*)&viewMatrix, UniformTarget::Vertex);
-			s_SceneInfo->CompositeInfo.CompositeShader->SetValue("u_Projection", (std::byte*)&projectionMatrix, UniformTarget::Vertex);
-			s_SceneInfo->CompositeInfo.CompositeShader->Bind();
-		}
+		GeometryPass();
 		CompositePass();
 
 		s_SceneInfo->MeshDrawList.clear();
 		s_SceneInfo->MeshDrawListWithShader.clear();
 	}
 
+	void SceneRendering::GeometryPass()
+	{
+		Rendering::BindRenderingPass(s_SceneInfo->GeometryInfo.GeometryPass);
+		{
+			for (const auto m : s_SceneInfo->MeshDrawList)
+				Rendering::DrawMesh(m);
+		}
+		Rendering::UnbindRenderingPass();
+	}
+
 	void SceneRendering::CompositePass()
 	{
 		Rendering::BindRenderingPass(s_SceneInfo->CompositeInfo.CompositePass);
-		if (m_Context->ContainsEntityInScene(ComponentType::Cube))
 		{
-			auto viewProjection = s_SceneInfo->Camera->GetProjectionMatrix() * s_SceneInfo->Camera->GetViewMatrix();
-			Rendering::DrawQuad(m_Context->GetEntityByComponentType(ComponentType::Cube)->GetComponent(ComponentType::Cube).As<CubeComponent>()->Cube, viewProjection);
+			std::byte* ex = (std::byte*)"2.0f";
+			s_SceneInfo->CompositeInfo.CompositeShader->SetValue("u_Exposure", ex, UniformTarget::Fragment);
+			s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->BindTexture();
+
+			s_SceneInfo->CompositeInfo.CompositeShader->Bind();
+
+			Rendering::DrawQuad();
 		}
-
-		for (const auto m : s_SceneInfo->MeshDrawList)
-			Rendering::DrawMesh(m);
-
-
-		//s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->BindTexture();
 		Rendering::UnbindRenderingPass();
 	}
 
@@ -138,11 +146,7 @@ namespace Radiant
 			m_ViewportHeight = size.y;
 
 			s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->Resize(size.x, size.y);
-	//		s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->Resize(size.x, size.y);
-		}
-		if (s_SceneInfo->Camera)
-		{
-			//s_SceneInfo->Camera->Se
+			s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->Resize(size.x, size.y);
 		}
 	}
 

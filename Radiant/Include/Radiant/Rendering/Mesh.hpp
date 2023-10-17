@@ -6,6 +6,7 @@
 #include <Radiant/Rendering/VertexBuffer.hpp>
 #include <Radiant/Rendering/IndexBuffer.hpp>
 #include <Radiant/Rendering/Pipeline.hpp>
+#include <Radiant/Rendering/Shader.hpp>
 
 namespace Assimp
 {
@@ -35,6 +36,7 @@ namespace Radiant
 		std::vector<Index> m_Indices;
 
 		Memory::Shared<VertexBuffer> m_VertexBuffer;
+		Memory::Shared<Shader> m_Shader;
 		Memory::Shared<IndexBuffer> m_IndexBuffer;
 
 		friend Rendering;

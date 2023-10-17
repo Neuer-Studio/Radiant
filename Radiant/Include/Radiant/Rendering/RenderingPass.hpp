@@ -18,6 +18,9 @@ namespace Radiant
 		virtual RenderingPassSpecification& GetSpecification() = 0;
 		virtual const RenderingPassSpecification& GetSpecification() const = 0;
 
+		virtual void Bind() const = 0;
+		virtual void Unbind() const = 0;
+
 		static Memory::Shared<RenderingPass> Create(const RenderingPassSpecification& spec);
 	};
 }
