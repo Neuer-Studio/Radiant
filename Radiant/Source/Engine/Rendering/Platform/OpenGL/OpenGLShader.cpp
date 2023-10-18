@@ -512,6 +512,11 @@ namespace Radiant
 		return BSetValue(name, (std::byte*)&value, type, RadiantType::Float4);
 	}
 
+	bool OpenGLShader::SetValue(const std::string& name, const glm::mat4& value, UniformTarget type)
+	{
+		return BSetValue(name, (std::byte*)&value, type, RadiantType::Mat4);
+	}
+
 	// ========================================================
 
 	bool OpenGLShader::BSetValue(const std::string& name, const std::byte* value, UniformTarget type, RadiantType uniformType)

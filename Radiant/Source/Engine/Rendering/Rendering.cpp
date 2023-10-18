@@ -176,4 +176,14 @@ namespace Radiant
 		DrawIndexed(mesh->m_IndexBuffer->GetCount());
 	}
 
+	void Rendering::DrawMeshWithShader(Memory::Shared<Mesh> mesh, Memory::Shared<Shader> shader)
+	{
+		mesh->m_VertexBuffer->Bind();
+		s_Data->PiplineStaticMesh->Bind();
+		mesh->m_IndexBuffer->Bind();
+
+		shader->Bind();
+
+		DrawIndexed(mesh->m_IndexBuffer->GetCount());
+	}
 }

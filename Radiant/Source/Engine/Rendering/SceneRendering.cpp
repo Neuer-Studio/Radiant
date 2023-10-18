@@ -105,10 +105,20 @@ namespace Radiant
 
 	void SceneRendering::GeometryPass()
 	{
+		Memory::Shared<Shader> staticShader = Rendering::GetShaderLibrary()->Get("Static_Shader.rads"); // TODO: Material
+		if (s_SceneInfo->Camera)
+		{
+			auto viewProjection = s_SceneInfo->Camera->GetProjectionMatrix() * s_SceneInfo->Camera->GetViewMatrix();
+			staticShader->SetValue("u_ViewProjection", viewProjection, UniformTarget::Vertex);
+		}
+
 		Rendering::BindRenderingPass(s_SceneInfo->GeometryInfo.GeometryPass);
 		{
 			for (const auto m : s_SceneInfo->MeshDrawList)
 				Rendering::DrawMesh(m);
+
+			for (const auto m : s_SceneInfo->MeshDrawListWithShader)
+				Rendering::DrawMeshWithShader(m, staticShader);
 		}
 		Rendering::UnbindRenderingPass();
 	}

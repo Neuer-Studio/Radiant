@@ -42,6 +42,7 @@ namespace Radiant
 		virtual bool SetValue(const std::string& name, const glm::vec2& value, UniformTarget type) override;
 		virtual bool SetValue(const std::string& name, const glm::vec3& value, UniformTarget type) override;
 		virtual bool SetValue(const std::string& name, const glm::vec4& value, UniformTarget type) override;
+		virtual bool SetValue(const std::string& name, const glm::mat4& value, UniformTarget type) override;
 	private:
 		bool BSetValue(const std::string& name, const std::byte* value, UniformTarget type, RadiantType uniformType);
 	public:

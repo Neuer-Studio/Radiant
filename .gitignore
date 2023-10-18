@@ -36,3 +36,4 @@
 *.user
 *.sln
 build
+.git-gitlab

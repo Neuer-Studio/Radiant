@@ -2,7 +2,7 @@
 
 #include <ImGui/imgui.h>
 
-namespace Radiant::Utils::ImGui::API
+namespace Radiant::Utils::ImGui
 {
 	void Image(void* texture, const glm::vec2& size, const glm::vec2& uv0, const glm::vec2& uv1, const glm::vec4& color, const glm::vec4& bordercolor)
 	{

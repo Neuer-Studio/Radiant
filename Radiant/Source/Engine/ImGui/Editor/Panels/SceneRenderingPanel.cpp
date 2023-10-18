@@ -25,10 +25,10 @@ namespace Radiant
 					std::string viewport = "Viewport: " + std::to_string(width) + " : " + std::to_string(height);
 					std::string graphicInfo = "GPU: " + info.Renderer + "\nVersion: " + info.Version;
 
-					Utils::ImGui::API::Text(viewport);
-					Utils::ImGui::API::Text(graphicInfo);
+					Utils::ImGui::Text(viewport);
+					Utils::ImGui::Text(graphicInfo);
 
-					Utils::ImGui::API::Slider("Exposure", &m_Context->m_Exposure);
+					Utils::ImGui::Slider("Exposure", &m_Context->m_Exposure);
 				}
 			});
 	}

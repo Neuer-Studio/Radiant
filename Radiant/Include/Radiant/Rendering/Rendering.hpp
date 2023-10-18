@@ -17,7 +17,7 @@ namespace Radiant
 		static void Shutdown();
 
 		static void DrawMesh(Memory::Shared<Mesh> mesh);
-		static void DrawMeshWithShader();
+		static void DrawMeshWithShader(Memory::Shared<Mesh> mesh, Memory::Shared<Shader> shader);
 
 		static void DrawFullscreenQuad();
 
