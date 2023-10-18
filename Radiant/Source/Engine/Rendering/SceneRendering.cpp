@@ -117,13 +117,12 @@ namespace Radiant
 	{
 		Rendering::BindRenderingPass(s_SceneInfo->CompositeInfo.CompositePass);
 		{
-			std::byte* ex = (std::byte*)"2.0f";
-			s_SceneInfo->CompositeInfo.CompositeShader->SetValue("u_Exposure", ex, UniformTarget::Fragment);
+			s_SceneInfo->CompositeInfo.CompositeShader->SetValue("u_Exposure", m_Context->m_Exposure, UniformTarget::Fragment);
 			s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->BindTexture();
 
 			s_SceneInfo->CompositeInfo.CompositeShader->Bind();
 
-			Rendering::DrawQuad();
+			Rendering::DrawFullscreenQuad();
 		}
 		Rendering::UnbindRenderingPass();
 	}

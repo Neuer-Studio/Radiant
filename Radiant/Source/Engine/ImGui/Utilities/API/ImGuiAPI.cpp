@@ -13,4 +13,9 @@ namespace Radiant::Utils::ImGui::API
 	{
 		::ImGui::Text(text.c_str());
 	}
+
+	void Slider(const std::string& label, float* v, float v_min, float v_max, const char* format, float power)
+	{
+		::ImGui::SliderFloat(label.c_str(), v, v_min, v_max, format, power);
+	}
 }

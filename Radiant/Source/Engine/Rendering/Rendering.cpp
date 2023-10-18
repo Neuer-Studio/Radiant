@@ -125,7 +125,7 @@ namespace Radiant
 		s_Data->ActiveRenderingPass = nullptr;
 	}
 
-	void Rendering::DrawQuad()
+	void Rendering::DrawFullscreenQuad()
 	{
 		s_Data->QuadInfo.FullscreenQuadVertexBuffer->Bind();
 		s_Data->QuadInfo.FullscreenQuadPipeline->Bind();

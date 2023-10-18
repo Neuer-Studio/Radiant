@@ -38,7 +38,12 @@ namespace Radiant
 		int32_t GetRadiantUniformPosition(const std::string& uniformName, UniformTarget type);
 		void UpdateValues();
 	public:
-		virtual bool SetValue(const std::string& name, const std::byte* value, UniformTarget type) override;
+		virtual bool SetValue(const std::string& name, float value, UniformTarget type) override;
+		virtual bool SetValue(const std::string& name, const glm::vec2& value, UniformTarget type) override;
+		virtual bool SetValue(const std::string& name, const glm::vec3& value, UniformTarget type) override;
+		virtual bool SetValue(const std::string& name, const glm::vec4& value, UniformTarget type) override;
+	private:
+		bool BSetValue(const std::string& name, const std::byte* value, UniformTarget type, RadiantType uniformType);
 	public:
 		virtual bool HasBufferUniform(const std::string& uniformName, UniformTarget type) const override;
 		virtual ShaderUniformDeclaration& GetBufferUniform(const std::string& uniformName, UniformTarget type) override;

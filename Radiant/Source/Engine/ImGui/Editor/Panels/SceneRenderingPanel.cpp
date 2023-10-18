@@ -27,6 +27,8 @@ namespace Radiant
 
 					Utils::ImGui::API::Text(viewport);
 					Utils::ImGui::API::Text(graphicInfo);
+
+					Utils::ImGui::API::Slider("Exposure", &m_Context->m_Exposure);
 				}
 			});
 	}

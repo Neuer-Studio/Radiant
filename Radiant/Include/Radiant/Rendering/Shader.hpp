@@ -76,7 +76,11 @@ namespace Radiant
 
 		static Memory::Shared<Shader> Create(const std::filesystem::path& path);
 	public:
-		virtual bool SetValue(const std::string& name, const std::byte* value, UniformTarget type) = 0;
+		virtual bool SetValue(const std::string& name, float value, UniformTarget type) = 0;
+		virtual bool SetValue(const std::string& name, const glm::vec2& value, UniformTarget type) = 0;
+		virtual bool SetValue(const std::string& name, const glm::vec3& value, UniformTarget type) = 0;
+		virtual bool SetValue(const std::string& name, const glm::vec4& value, UniformTarget type) = 0;
+		//virtual bool SetValue(const std::string& name, const std::byte* value, UniformTarget type) = 0;
 	public:
 		virtual bool HasBufferUniform(const std::string& uniformName, UniformTarget type) const = 0;
 		virtual ShaderUniformDeclaration& GetBufferUniform(const std::string& uniformName, UniformTarget type) = 0;

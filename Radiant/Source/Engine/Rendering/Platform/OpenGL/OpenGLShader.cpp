@@ -492,15 +492,40 @@ namespace Radiant
 	}
 
 
+	bool OpenGLShader::SetValue(const std::string& name, float value, UniformTarget type)
+	{
+		return BSetValue(name, (std::byte*)&value, type, RadiantType::Float);
+	}
+
+	bool OpenGLShader::SetValue(const std::string& name, const glm::vec2& value, UniformTarget type)
+	{
+		return BSetValue(name, (std::byte*)&value, type, RadiantType::Float2);
+	}
+
+	bool OpenGLShader::SetValue(const std::string& name, const glm::vec3& value, UniformTarget type)
+	{
+		return BSetValue(name, (std::byte*)&value, type, RadiantType::Float3);
+	}
+
+	bool OpenGLShader::SetValue(const std::string& name, const glm::vec4& value, UniformTarget type)
+	{
+		return BSetValue(name, (std::byte*)&value, type, RadiantType::Float4);
+	}
+
 	// ========================================================
 
-	bool OpenGLShader::SetValue(const std::string& name, const std::byte* value, UniformTarget type)
+	bool OpenGLShader::BSetValue(const std::string& name, const std::byte* value, UniformTarget type, RadiantType uniformType)
 	{
 		if (!HasBufferUniform(name, type))
 			return false;
 
 		ShaderUniformDeclaration& uniform = GetBufferUniform(name, type);
-		RadiantType uniformType = uniform.Type;
+		RadiantType uType = uniform.Type;
+		if (uniformType != uType)
+		{
+			RADIANT_VERIFY(false);
+			return false;
+		}
 		uniform.isChanged = true;
 		uint32_t size = Utils::GetGLMDataSizeFromRadiant(uniformType);
 

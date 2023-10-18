@@ -8,6 +8,7 @@ namespace Radiant
 {
 	class TextureCube;
 	class OpenGLRenderingPass;
+	class SceneRenderingPanel;
 
 	class Rendering 
 	{
@@ -18,7 +19,7 @@ namespace Radiant
 		static void DrawMesh(Memory::Shared<Mesh> mesh);
 		static void DrawMeshWithShader();
 
-		static void DrawQuad();
+		static void DrawFullscreenQuad();
 
 		static void BindRenderingPass(const Memory::Shared<RenderingPass>& pass);
 		static void UnbindRenderingPass();
@@ -36,5 +37,6 @@ namespace Radiant
 
 		friend Mesh;
 		friend OpenGLRenderingPass;
+		friend SceneRenderingPanel;
 	};
 }

@@ -38,8 +38,11 @@ namespace Radiant
 		std::size_t m_ViewportWidth = 0;
 		std::size_t m_ViewportHeight = 0;
 
+		float m_Exposure; // NOTE(Danya): Using in SceneRendering
+
 		friend SceneManager;
 		friend SceneRenderingPanel;
+		friend SceneRendering;
 	};
 
 	class SceneManager
