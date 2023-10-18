@@ -1,0 +1,38 @@
+// Test Shader
+
+#type vertex
+#version 430
+
+layout(location = 0) in vec3 a_Position;
+layout(location = 1) in vec2 a_TexCoords;
+
+uniform mat4 u_ViewProjection;
+
+out VertexOutput
+{
+	vec2 TexCoords;
+} vs_Output;
+
+void main()
+{
+    vs_Output.TexCoords = a_TexCoords;
+	gl_Position = vec4( a_Position, 1.0);
+}
+
+#type fragment
+#version 430
+
+in VertexOutput
+{
+	vec2 TexCoords;
+} vs_Input;
+
+uniform sampler2D u_Sampler;
+uniform sampler2D u_Sampler1;
+
+out vec4 o_Color;
+
+void main()
+{
+    o_Color = mix(texture(u_Sampler, vs_Input.TexCoords), texture(u_Sampler1, vs_Input.TexCoords), 0.2);
+}

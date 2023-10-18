@@ -1,0 +1,68 @@
+#type vertex
+#version 430
+
+layout(location = 0) in vec3 a_Position;
+layout(location = 1) in vec3 a_Normals;
+
+uniform mat4 u_ViewProjection;
+
+out VertexOutput
+{
+    out vec3 Normals;
+    out vec3 FragPos;
+} vs_Output;
+
+void main()
+{
+    vs_Output.Normals = a_Normals;
+    vs_Output.FragPos = vec3(vec4(a_Position, 1.0));
+    gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
+}
+
+#type fragment
+#version 430
+
+in VertexOutput
+{
+    in vec3 Normals;
+    in vec3 FragPos;
+} vs_Input;
+
+out vec4 o_Color;
+
+struct Material
+{
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
+};
+
+struct Light
+{
+    vec3 position;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
+uniform Material u_Material;
+uniform Light u_Light;
+
+void main()
+{
+    vec3 ambientColor = u_Material.ambient * u_Light.ambient;
+
+    vec3 normal = normalize(vs_Input.Normals);
+    vec3 lightDirection = normalize(u_Light.position - vs_Input.FragPos);
+    float diffuseFactor = max(dot(normal, lightDirection), 0.0);
+    vec3 diffuseColor = u_Material.diffuse * u_Light.diffuse * diffuseFactor;
+
+    vec3 viewDirection = normalize(vec3(0.0, 0.0, 1.0) - vs_Input.FragPos);
+    vec3 reflectDirection = reflect(-lightDirection, normal);
+    float specularFactor = pow(max(dot(viewDirection, reflectDirection), 0.0), u_Material.shininess);
+    vec3 specularColor = u_Material.specular * u_Light.specular * specularFactor;
+
+    vec3 result = ambientColor + diffuseColor + specularColor;
+    o_Color = vec4(0.0, 1.0, 0.0, 1.0);
+}
