@@ -522,7 +522,10 @@ namespace Radiant
 	bool OpenGLShader::BSetValue(const std::string& name, const std::byte* value, UniformTarget type, RadiantType uniformType)
 	{
 		if (!HasBufferUniform(name, type))
+		{
+			RADIANT_VERIFY(false, "");
 			return false;
+		}
 
 		ShaderUniformDeclaration& uniform = GetBufferUniform(name, type);
 		RadiantType uType = uniform.Type;

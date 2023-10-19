@@ -9,6 +9,7 @@ namespace Radiant
 	class TextureCube;
 	class OpenGLRenderingPass;
 	class SceneRenderingPanel;
+	class SceneRendering;
 
 	class Rendering 
 	{
@@ -38,5 +39,6 @@ namespace Radiant
 		friend Mesh;
 		friend OpenGLRenderingPass;
 		friend SceneRenderingPanel;
+		friend SceneRendering;
 	};
 }

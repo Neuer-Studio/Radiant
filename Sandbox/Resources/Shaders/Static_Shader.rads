@@ -64,5 +64,5 @@ void main()
     vec3 specularColor = u_Material.specular * u_Light.specular * specularFactor;
 
     vec3 result = ambientColor + diffuseColor + specularColor;
-    o_Color = vec4(0.0, 1.0, 0.0, 1.0);
+    o_Color = vec4(result, 1.0);
 }

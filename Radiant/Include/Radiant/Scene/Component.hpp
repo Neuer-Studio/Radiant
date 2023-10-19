@@ -25,14 +25,13 @@ namespace Radiant
 	struct TransformComponent : public Component
 	{
 		TransformComponent() = default;
+		TransformComponent(const TransformComponent& other) = default;
+		TransformComponent(const glm::vec3& translation)
+			: Translation(translation) {}
 
-		TransformComponent(glm::vec3 Position)
-			: Position(Position)
-		{
-
-		}
-
-		glm::vec3 Position;
+		glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 
 	protected:
 		virtual const ComponentType GetType() const override { return ComponentType::Transform; }

@@ -11,7 +11,7 @@ namespace Radiant
 	struct ApplicationSpecification
 	{
 		std::string Name = "TheRock";
-		uint32_t WindowWidth = 1600, WindowHeight = 900;
+		uint32_t WindowWidth = 1920, WindowHeight = 1080;
 	};
 
 	class Application

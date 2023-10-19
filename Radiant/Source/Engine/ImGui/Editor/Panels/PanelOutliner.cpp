@@ -61,7 +61,7 @@ namespace Radiant
 
 			ImGuiIO& io = ImGui::GetIO();
 			auto boldFont = io.Fonts->Fonts[0];
-
+			
 			ImGui::PushID(label.c_str());
 
 			ImGui::Columns(2);
@@ -306,7 +306,11 @@ namespace Radiant
 
 		DrawComponentUI(ComponentType::Transform, "Transform", m_SelectedEntity, [=](Memory::Shared<Component>& component) mutable
 			{
-				DrawVec3UI("Translation", component.As<TransformComponent>()->Position);
+				DrawVec3UI("Translation", component.As<TransformComponent>()->Translation);
+				glm::vec3 rotation = glm::degrees(component.As<TransformComponent>()->Rotation);
+				DrawVec3UI("Rotation", rotation);
+				component.As<TransformComponent>()->Rotation = glm::radians(rotation);
+				DrawVec3UI("Scale", component.As<TransformComponent>()->Scale, 1.0f);
 			});
 
 		DrawComponentUI(ComponentType::Mesh, "Mesh", m_SelectedEntity, [=](Memory::Shared<Component>& component) mutable

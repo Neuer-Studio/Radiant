@@ -36,7 +36,7 @@ namespace Radiant
 		if (Input::IsKeyPressed(KeyCode::LeftAlt))
 		{
 			const glm::vec2& mouse{ Input::GetMouseX(), Input::GetMouseY() };
-			glm::vec2 delta = mouse - m_InitialMousePosition;
+			glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
 			m_InitialMousePosition = mouse;
 
 			if (Input::IsMouseButtonPressed(Button::Middle))
@@ -64,7 +64,8 @@ namespace Radiant
 	void Camera::MouseRotate(const glm::vec2& delta)
 	{
 		float yawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
-		m_Yaw += yawSign * delta.x * m_RotationSpeed;
+		m_Yaw += yawSign * delta.x * 0.8f;
+		m_Pitch += delta.y * 0.8f;
 	}
 
 	void Camera::MouseZoom(float delta)

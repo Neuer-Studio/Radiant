@@ -114,6 +114,7 @@ namespace Radiant
 
 		Rendering::BindRenderingPass(s_SceneInfo->GeometryInfo.GeometryPass);
 		{
+			DrawSkyLight();
 			for (const auto m : s_SceneInfo->MeshDrawList)
 				Rendering::DrawMesh(m);
 
@@ -162,5 +163,22 @@ namespace Radiant
 	uint32_t SceneRendering::GetFinalPassImage()
 	{
 		return s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->GetRendererID();
+	}
+
+	void SceneRendering::DrawSkyLight()
+	{
+		if (!m_Context->ContainsEntityInScene(ComponentType::Cube))
+			return;
+		auto cube = m_Context->GetEntityByComponentType(ComponentType::Cube)->GetComponent(ComponentType::Cube).As<CubeComponent>()->Cube;
+		glm::mat4 viewProjection;
+
+		if(s_SceneInfo->Camera)
+			viewProjection = s_SceneInfo->Camera->GetViewProjectionMatrix();
+		
+		s_SceneInfo->QuadShader->SetValue("u_InverseVP", glm::inverse(viewProjection), UniformTarget::Vertex);
+		s_SceneInfo->QuadShader->Bind();
+		cube->Bind();
+
+		Rendering::DrawIndexed(6);
 	}
 }

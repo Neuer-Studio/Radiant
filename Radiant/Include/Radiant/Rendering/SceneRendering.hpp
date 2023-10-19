@@ -26,6 +26,7 @@ namespace Radiant
 		void CompositePass();
 		void GeometryPass();
 		void Flush();
+		void DrawSkyLight();
 	private:
 		std::size_t m_ViewportWidth = -1, m_ViewportHeight = -1;
 		Memory::Shared<Scene> m_Context;
