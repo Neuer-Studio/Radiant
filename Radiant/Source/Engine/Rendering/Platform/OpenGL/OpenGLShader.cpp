@@ -21,46 +21,6 @@ namespace Radiant
 
 	namespace Utils
 	{
-		static const uint32_t GetGLMDataSizeFromRadiant(RadiantType type)
-		{
-			switch (type)
-			{
-				case RadiantType::Float:
-					return sizeof(float);
-				case RadiantType::Float2:
-					return sizeof(glm::vec2);
-				case RadiantType::Float3:
-					return sizeof(glm::vec3);
-				case RadiantType::Mat4:
-					return sizeof(glm::mat4);
-			}
-			RADIANT_VERIFY(false);
-			return 0u;
-		}
-
-		static const RadiantType OpenGLUniformTypeToRaiantUniformType(const std::string& uniform)
-		{
-			if (uniform == "sampler2D")
-				return RadiantType::sampler2D;
-			if (uniform == "sampler3D")
-				return RadiantType::sampler3D;
-
-			if (uniform == "float")
-				return RadiantType::Float;
-			if (uniform == "vec2")
-				return RadiantType::Float2;
-			if (uniform == "vec3")
-				return RadiantType::Float3;
-			if (uniform == "vec4")
-				return RadiantType::Float4;
-
-			if (uniform == "mat4")
-				return RadiantType::Mat4;
-
-			return RadiantType::None;
-		}
-
-
 		static GLenum ShaderTypeFromString(const std::string& type)
 		{
 			if (type == "vertex")
@@ -489,59 +449,6 @@ namespace Radiant
 		}
 
 		return m_FragmentUniforms.Uniforms[0];
-	}
-
-
-	bool OpenGLShader::SetValue(const std::string& name, float value, UniformTarget type)
-	{
-		return BSetValue(name, (std::byte*)&value, type, RadiantType::Float);
-	}
-
-	bool OpenGLShader::SetValue(const std::string& name, const glm::vec2& value, UniformTarget type)
-	{
-		return BSetValue(name, (std::byte*)&value, type, RadiantType::Float2);
-	}
-
-	bool OpenGLShader::SetValue(const std::string& name, const glm::vec3& value, UniformTarget type)
-	{
-		return BSetValue(name, (std::byte*)&value, type, RadiantType::Float3);
-	}
-
-	bool OpenGLShader::SetValue(const std::string& name, const glm::vec4& value, UniformTarget type)
-	{
-		return BSetValue(name, (std::byte*)&value, type, RadiantType::Float4);
-	}
-
-	bool OpenGLShader::SetValue(const std::string& name, const glm::mat4& value, UniformTarget type)
-	{
-		return BSetValue(name, (std::byte*)&value, type, RadiantType::Mat4);
-	}
-
-	// ========================================================
-
-	bool OpenGLShader::BSetValue(const std::string& name, const std::byte* value, UniformTarget type, RadiantType uniformType)
-	{
-		if (!HasBufferUniform(name, type))
-		{
-			RADIANT_VERIFY(false, "");
-			return false;
-		}
-
-		ShaderUniformDeclaration& uniform = GetBufferUniform(name, type);
-		RadiantType uType = uniform.Type;
-		if (uniformType != uType)
-		{
-			RADIANT_VERIFY(false);
-			return false;
-		}
-		uniform.isChanged = true;
-		uint32_t size = Utils::GetGLMDataSizeFromRadiant(uniformType);
-
-		std::memcpy(uniform.Value, value, size);
-
-		m_OverrideValues.push_back(uniform);
-
-		return true;
 	}
 
 	//====================== Unifrom ==========================

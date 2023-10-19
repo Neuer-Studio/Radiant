@@ -17,9 +17,30 @@ namespace Radiant
 		virtual ~Material() = default;
 
 		virtual Memory::Shared<Shader> GetShader() = 0;
-		virtual void Bind() const = 0;
+	public:
+		virtual bool SetValue(const std::string& name, float value, UniformTarget type) = 0;
+		virtual bool SetValue(const std::string& name, int value, UniformTarget type) = 0;
+		virtual bool SetValue(const std::string& name, const glm::vec2& value, UniformTarget type) = 0;
+		virtual bool SetValue(const std::string& name, const glm::vec3& value, UniformTarget type) = 0;
+		virtual bool SetValue(const std::string& name, const glm::vec4& value, UniformTarget type) = 0;
+		virtual bool SetValue(const std::string& name, const glm::mat4& value, UniformTarget type) = 0;
 
-		void Set(const std::string& name, const Memory::Shared<Texture>& texture);
+		virtual float GetFloat(const std::string& name, UniformTarget type) = 0;
+		virtual float& GetFloatRef(const std::string& name, UniformTarget type) = 0;
+
+		virtual int GetInt(const std::string& name, UniformTarget type) = 0;
+		virtual int& GetIntRef(const std::string& name, UniformTarget type) = 0;
+
+		virtual glm::vec2 GetVec2(const std::string& name, UniformTarget type) = 0;
+		virtual glm::vec2& GetVec2Ref(const std::string& name, UniformTarget type) = 0;
+
+		virtual glm::vec3 GetVec3(const std::string& name, UniformTarget type) = 0;
+		virtual glm::vec3& GetVec3Ref(const std::string& name, UniformTarget type) = 0;
+
+		virtual glm::vec4 GetVec4(const std::string& name, UniformTarget type) = 0;
+		virtual glm::vec4& GetVec4Ref(const std::string& name, UniformTarget type) = 0;
+
+		virtual void Bind() = 0; // NOTE(Danya): Does we need this function?
 	public:
 		uint32_t GetFlags() const { return m_MaterialFlags; }
 		void SetFlag(MaterialFlag flag) { m_MaterialFlags |= (uint32_t)flag; }

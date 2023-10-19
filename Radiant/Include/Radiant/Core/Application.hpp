@@ -46,7 +46,6 @@ namespace Radiant
 		static Application* s_Instance;
 	};
 
-
 	//Iml. by client
 	Application* CreateApplication(int argc, char** argv);
 }

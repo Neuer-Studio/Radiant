@@ -23,10 +23,14 @@ namespace Radiant
 		void AddMeshToDrawListWithShader(const Memory::Shared<Mesh>& mesh) const;
 	private:
 		void Init();
+	private:
 		void CompositePass();
 		void GeometryPass();
 		void Flush();
+	private:
 		void DrawSkyLight();
+		void UpdateDirectionalLight();
+		void UpdateCamera();
 	private:
 		std::size_t m_ViewportWidth = -1, m_ViewportHeight = -1;
 		Memory::Shared<Scene> m_Context;

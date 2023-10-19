@@ -9,7 +9,7 @@ namespace Radiant
 
 	namespace Utils {
 
-		inline GLenum OpenGLImageFormat(ImageFormat format)
+		inline GLenum OpenGLImageInternalFormat(ImageFormat format)
 		{
 			switch (format)
 			{

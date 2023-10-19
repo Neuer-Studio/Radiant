@@ -1,11 +1,13 @@
 #pragma once
 
 #include <Radiant/Rendering/Shader.hpp>
+#include <Radiant/Rendering/Material.hpp>
 
 #include <glad/glad.h>
 
 namespace Radiant
 {
+	class OpenGLMaterial;
 	class OpenGLShader final : public Shader
 	{
 	public:
@@ -14,6 +16,8 @@ namespace Radiant
 
 		virtual void Bind() override;
 		virtual void Unbind() override;
+
+		virtual Memory::Shared<Material> GetMaterialInstance() const { return m_Material; }
 
 		virtual const std::string& GetName() const override { return m_Name; }
 		virtual const std::filesystem::path& GetPath() const override { return m_AssetPath; }
@@ -38,20 +42,13 @@ namespace Radiant
 		int32_t GetRadiantUniformPosition(const std::string& uniformName, UniformTarget type);
 		void UpdateValues();
 	public:
-		virtual bool SetValue(const std::string& name, float value, UniformTarget type) override;
-		virtual bool SetValue(const std::string& name, const glm::vec2& value, UniformTarget type) override;
-		virtual bool SetValue(const std::string& name, const glm::vec3& value, UniformTarget type) override;
-		virtual bool SetValue(const std::string& name, const glm::vec4& value, UniformTarget type) override;
-		virtual bool SetValue(const std::string& name, const glm::mat4& value, UniformTarget type) override;
-	private:
-		bool BSetValue(const std::string& name, const std::byte* value, UniformTarget type, RadiantType uniformType);
-	public:
 		virtual bool HasBufferUniform(const std::string& uniformName, UniformTarget type) const override;
 		virtual ShaderUniformDeclaration& GetBufferUniform(const std::string& uniformName, UniformTarget type) override;
 	private:
 		RendererID m_RenderingID = 0;
 		std::filesystem::path m_AssetPath;
 		std::string m_Name;
+		Memory::Shared<Material> m_Material;
 
 		std::unordered_map<GLenum, std::string> m_ShaderSource;
 	private:
@@ -68,5 +65,8 @@ namespace Radiant
 		void UploadSamplerUniforms();
 	public:
 		void UpdateGLMValues(const ShaderUniformDeclaration& decl);
+	private:
+
+		friend OpenGLMaterial;
 	};
 }

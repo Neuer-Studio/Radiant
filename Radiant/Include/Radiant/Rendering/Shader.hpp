@@ -14,7 +14,10 @@ namespace Radiant
 
 	enum class RadiantType
 	{
-		None = 0, sampler1D = 1, sampler2D, sampler3D, // Sampler
+		None = 0, 
+
+		sampler1D = 1, sampler2D, sampler3D, // Sampler
+		Int, // Int
 		Float, Float2, Float3, Float4, // Float 
 		Mat2, Mat3, Mat4, // Mat
 	};
@@ -62,6 +65,8 @@ namespace Radiant
 
 	//================================================
 
+	class Material;
+
 	class Shader : public Memory::RefCounted
 	{
 	public:
@@ -73,15 +78,9 @@ namespace Radiant
 		virtual const std::string& GetName() const = 0;
 		virtual const std::filesystem::path& GetPath() const = 0;
 		virtual RendererID GetRendererID() const = 0;
+		virtual Memory::Shared<Material> GetMaterialInstance() const = 0;
 
 		static Memory::Shared<Shader> Create(const std::filesystem::path& path);
-	public:
-		virtual bool SetValue(const std::string& name, float value, UniformTarget type) = 0;
-		virtual bool SetValue(const std::string& name, const glm::vec2& value, UniformTarget type) = 0;
-		virtual bool SetValue(const std::string& name, const glm::vec3& value, UniformTarget type) = 0;
-		virtual bool SetValue(const std::string& name, const glm::vec4& value, UniformTarget type) = 0;
-		virtual bool SetValue(const std::string& name, const glm::mat4& value, UniformTarget type) = 0;
-		//virtual bool SetValue(const std::string& name, const std::byte* value, UniformTarget type) = 0;
 	public:
 		virtual bool HasBufferUniform(const std::string& uniformName, UniformTarget type) const = 0;
 		virtual ShaderUniformDeclaration& GetBufferUniform(const std::string& uniformName, UniformTarget type) = 0;
@@ -110,4 +109,49 @@ namespace Radiant
 	private:
 		std::unordered_map<std::string, Memory::Shared<Shader>> m_Shaders;
 	};
+
+	namespace Utils
+	{
+		static const uint32_t GetGLMDataSizeFromRadiant(RadiantType type)
+		{
+			switch (type)
+			{
+			case RadiantType::Float:
+				return sizeof(float);
+			case RadiantType::Float2:
+				return sizeof(glm::vec2);
+			case RadiantType::Float3:
+				return sizeof(glm::vec3);
+			case RadiantType::Mat4:
+				return sizeof(glm::mat4);
+			}
+			RADIANT_VERIFY(false);
+			return 0u;
+		}
+
+		static const RadiantType OpenGLUniformTypeToRaiantUniformType(const std::string& uniform)
+		{
+			if (uniform == "sampler2D")
+				return RadiantType::sampler2D;
+			if (uniform == "sampler3D")
+				return RadiantType::sampler3D;
+
+			if (uniform == "int")
+				return RadiantType::Int;
+			if (uniform == "float")
+				return RadiantType::Float;
+			if (uniform == "vec2")
+				return RadiantType::Float2;
+			if (uniform == "vec3")
+				return RadiantType::Float3;
+			if (uniform == "vec4")
+				return RadiantType::Float4;
+
+			if (uniform == "mat4")
+				return RadiantType::Mat4;
+
+			return RadiantType::None;
+		}
+
+	}
 }

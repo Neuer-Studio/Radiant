@@ -38,7 +38,7 @@ namespace Radiant
 
 		if (m_ImageData)
 		{
-			GLenum format = Utils::OpenGLImageFormat(m_Format);
+			GLenum format = Utils::OpenGLImageInternalFormat(m_Format);
 			GLenum dataType = Utils::OpenGLFormatDataType(m_Format);
 			glTextureSubImage2D(m_RenderingID, 0, 0, 0, m_Width, m_Height, format, dataType, m_ImageData.Data);
 			glGenerateTextureMipmap(m_RenderingID); // TODO: optional
@@ -171,7 +171,7 @@ namespace Radiant
 				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 				glTextureParameterf(instance->m_RenderingID, GL_TEXTURE_MAX_ANISOTROPY, RenderingAPI::GetGraphicsInfo().MaxAnisotropy);
 
-				auto format = Utils::OpenGLImageFormat(ImageFormat::RGB8);
+				auto format = Utils::OpenGLImageInternalFormat(ImageFormat::RGB8);
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, format, faceWidth, faceHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, faces[2]);
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, format, faceWidth, faceHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, faces[0]);
 

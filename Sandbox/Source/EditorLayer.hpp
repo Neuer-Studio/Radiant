@@ -20,21 +20,7 @@
 
 namespace Radiant
 {
-	struct Material
-	{
-		glm::vec3 ambient;
-		glm::vec3 diffuse;
-		glm::vec3 specular;
-		float shininess;
-	};
 
-	struct Light
-	{
-		glm::vec3 position;
-		glm::vec3 ambient;
-		glm::vec3 diffuse;
-		glm::vec3 specular;
-	};
 
 	class EditorLayer : public Layer
 	{
@@ -50,17 +36,6 @@ namespace Radiant
 
 		virtual void OnAttach()
 		{
-		
-			m_Material.ambient = glm::vec3(0.1f, 0.1f, 0.1f);
-			m_Material.diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
-			m_Material.specular = glm::vec3(1.0f, 1.0f, 1.0f);
-			m_Material.shininess = 32.0f;
-
-			m_Light.position = glm::vec3(1.0f, 2.0f, 3.0f);
-			m_Light.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
-			m_Light.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
-			m_Light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
-
 			m_ManagerScene = new SceneManager("Debug name"); //NOTE(Danya): Should be shared 
 			m_TestScene = m_ManagerScene->Create("Debug name");
 			m_Outliner = new PanelOutliner(m_TestScene);
@@ -158,8 +133,6 @@ namespace Radiant
 
 		}
 	private:
-		Material m_Material;
-		Light m_Light;
 
 		SceneManager* m_ManagerScene;
 		Memory::Shared<Scene> m_TestScene;

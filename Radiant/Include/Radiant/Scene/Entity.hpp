@@ -18,6 +18,7 @@ namespace Radiant
 		void RemoveComponent(ComponentType type);
 		bool HasComponent(ComponentType type);
 		Memory::Shared<Component> GetComponent(ComponentType type) { return m_Components[type]; }
+		const glm::mat4 GetEntityTransform() { return GetComponent(ComponentType::Transform).As<const TransformComponent>()->GetTransform(); }
 
 		//template <typename T>
 		//Memory::Shared<T> GetComponent()

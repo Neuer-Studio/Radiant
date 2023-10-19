@@ -44,7 +44,7 @@ namespace Radiant
 				glGenTextures(1, &m_ColorAttachment);
 				glBindTexture(GL_TEXTURE_2D, m_ColorAttachment);
 
-				auto format = Utils::OpenGLImageFormat(m_Specification.Format);
+				auto format = Utils::OpenGLImageInternalFormat(m_Specification.Format);
 				auto type = Utils::OpenGLFormatDataType(m_Specification.Format);
 
 				glTexImage2D(GL_TEXTURE_2D, 0, format, m_Specification.Width, m_Specification.Height, 0, GL_RGBA, type, NULL);

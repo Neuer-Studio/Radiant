@@ -3,6 +3,8 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glad/glad.h>
 
+#include <Radiant/Rendering/Material.hpp>
+
 namespace Radiant
 {
 	struct CompositeData
@@ -26,6 +28,9 @@ namespace Radiant
 		Memory::Shared<Shader> QuadShader;
 		std::vector<Memory::Shared<Mesh>> MeshDrawList;
 		std::vector<Memory::Shared<Mesh>> MeshDrawListWithShader;
+		Memory::Shared<Material> Material; // TODO(Danya): temp (move to mesh)
+		Memory::Shared<class Material> CompositeMaterial;
+		Memory::Shared<Shader> staticShader; // TODO: Material // TODO(Danya): temp (move to mesh)
 
 		Camera* Camera;
 	};
@@ -47,6 +52,8 @@ namespace Radiant
 	{
 		s_SceneInfo = new SceneInfo();
 		s_SceneInfo->QuadShader = Rendering::GetShaderLibrary()->Get("Quad.rads");
+		s_SceneInfo->staticShader = Rendering::GetShaderLibrary()->Get("Static_Shader.rads");
+		s_SceneInfo->Material = Material::Create(s_SceneInfo->staticShader);
 
 		/* Composite Pass */
 
@@ -63,6 +70,7 @@ namespace Radiant
 			s_SceneInfo->CompositeInfo.CompositePass = RenderingPass::Create(PassComposite);
 
 			s_SceneInfo->CompositeInfo.CompositeShader = Shader::Create("Resources/Shaders/hdr.rads");
+			s_SceneInfo->CompositeMaterial = Material::Create(s_SceneInfo->CompositeInfo.CompositeShader);
 		}
 
 		/* Geometry Pass */
@@ -84,13 +92,7 @@ namespace Radiant
 
 	void SceneRendering::SubmitScene()
 	{
-		if (!s_SceneInfo->Camera)
-		{
-			if (m_Context->ContainsEntityInScene(ComponentType::Camera))
-				s_SceneInfo->Camera = &m_Context->GetEntityByComponentType(ComponentType::Camera)->GetComponent(ComponentType::Camera).As<CameraComponent>()->Camera;
-		}
-
-		if (s_SceneInfo->Camera) s_SceneInfo->Camera->Update();
+		UpdateCamera();
 		Flush();
 	}
 
@@ -105,11 +107,10 @@ namespace Radiant
 
 	void SceneRendering::GeometryPass()
 	{
-		Memory::Shared<Shader> staticShader = Rendering::GetShaderLibrary()->Get("Static_Shader.rads"); // TODO: Material
 		if (s_SceneInfo->Camera)
 		{
 			auto viewProjection = s_SceneInfo->Camera->GetProjectionMatrix() * s_SceneInfo->Camera->GetViewMatrix();
-			staticShader->SetValue("u_ViewProjection", viewProjection, UniformTarget::Vertex);
+			s_SceneInfo->staticShader->GetMaterialInstance()->SetValue("u_ViewProjection", viewProjection, UniformTarget::Vertex); // TODO(Danya): Remove this method, create material instance
 		}
 
 		Rendering::BindRenderingPass(s_SceneInfo->GeometryInfo.GeometryPass);
@@ -119,7 +120,7 @@ namespace Radiant
 				Rendering::DrawMesh(m);
 
 			for (const auto m : s_SceneInfo->MeshDrawListWithShader)
-				Rendering::DrawMeshWithShader(m, staticShader);
+				Rendering::DrawMeshWithShader(m, s_SceneInfo->staticShader);
 		}
 		Rendering::UnbindRenderingPass();
 	}
@@ -128,7 +129,14 @@ namespace Radiant
 	{
 		Rendering::BindRenderingPass(s_SceneInfo->CompositeInfo.CompositePass);
 		{
-			s_SceneInfo->CompositeInfo.CompositeShader->SetValue("u_Exposure", m_Context->m_Exposure, UniformTarget::Fragment);
+			s_SceneInfo->CompositeInfo.CompositeShader->GetMaterialInstance()->SetValue("u_Exposure", m_Context->m_Exposure, UniformTarget::Fragment);
+			auto& sdf = s_SceneInfo->CompositeInfo.CompositeShader->GetMaterialInstance()->GetFloatRef("u_Exposure", UniformTarget::Fragment);
+
+			sdf = 2.f;
+
+			auto sdfsdf = s_SceneInfo->CompositeInfo.CompositeShader->GetMaterialInstance()->GetFloat("u_Exposure", UniformTarget::Fragment);
+
+
 			s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->BindTexture();
 
 			s_SceneInfo->CompositeInfo.CompositeShader->Bind();
@@ -175,10 +183,27 @@ namespace Radiant
 		if(s_SceneInfo->Camera)
 			viewProjection = s_SceneInfo->Camera->GetViewProjectionMatrix();
 		
-		s_SceneInfo->QuadShader->SetValue("u_InverseVP", glm::inverse(viewProjection), UniformTarget::Vertex);
+		s_SceneInfo->QuadShader->GetMaterialInstance()->SetValue("u_InverseVP", glm::inverse(viewProjection), UniformTarget::Vertex);
 		s_SceneInfo->QuadShader->Bind();
 		cube->Bind();
 
 		Rendering::DrawIndexed(6);
 	}
+
+	void SceneRendering::UpdateDirectionalLight()
+	{
+
+	}
+
+	void SceneRendering::UpdateCamera()
+	{
+		if (!s_SceneInfo->Camera)
+		{
+			if (m_Context->ContainsEntityInScene(ComponentType::Camera))
+				s_SceneInfo->Camera = &m_Context->GetEntityByComponentType(ComponentType::Camera)->GetComponent(ComponentType::Camera).As<CameraComponent>()->Camera;
+		}
+
+		if (s_SceneInfo->Camera) s_SceneInfo->Camera->Update();
+	}
+
 }
