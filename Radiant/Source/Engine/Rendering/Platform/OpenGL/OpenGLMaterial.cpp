@@ -1,5 +1,6 @@
 #include <Radiant/Rendering/Platform/OpenGL/OpenGLMaterial.hpp>
 #include <Radiant/Rendering/Platform/OpenGL/OpenGLShader.hpp>
+#include <Radiant/Rendering/Rendering.hpp>
 
 namespace Radiant
 {
@@ -57,9 +58,7 @@ namespace Radiant
 
 	int& OpenGLMaterial::GetIntRef(const std::string& name, UniformTarget type)
 	{
-		int  a = 0;
-
-		return a;
+		return GetRef<int>(name, type, RadiantType::Int);
 	}
 
 	glm::vec2 OpenGLMaterial::GetVec2(const std::string& name, UniformTarget type)
@@ -69,9 +68,7 @@ namespace Radiant
 
 	glm::vec2& OpenGLMaterial::GetVec2Ref(const std::string& name, UniformTarget type)
 	{
-		glm::vec2 a;
-		return a;
-
+		return GetRef<glm::vec2>(name, type, RadiantType::Float2);
 	}
 
 	glm::vec3 OpenGLMaterial::GetVec3(const std::string& name, UniformTarget type)
@@ -81,11 +78,7 @@ namespace Radiant
 
 	glm::vec3& OpenGLMaterial::GetVec3Ref(const std::string& name, UniformTarget type)
 	{
-
-		glm::vec3 a;
-
-		return a;
-
+		return GetRef<glm::vec3>(name, type, RadiantType::Float3);
 	}
 
 	glm::vec4 OpenGLMaterial::GetVec4(const std::string& name, UniformTarget type)
@@ -95,10 +88,17 @@ namespace Radiant
 
 	glm::vec4& OpenGLMaterial::GetVec4Ref(const std::string& name, UniformTarget type)
 	{
+		return GetRef<glm::vec4>(name, type, RadiantType::Float3);
+	}
 
-		glm::vec4 a;
-		return a;
+	glm::mat4 OpenGLMaterial::GetMat4(const std::string& name, UniformTarget type)
+	{
+		return Get<glm::mat4>(name, type, RadiantType::Mat4);
+	}
 
+	glm::mat4& OpenGLMaterial::GetMat4Ref(const std::string& name, UniformTarget type)
+	{
+		return GetRef<glm::mat4>(name, type, RadiantType::Mat4);
 	}
 
 	// ========================================================
@@ -123,13 +123,23 @@ namespace Radiant
 
 		std::memcpy(uniform.Value, value, size);
 
-		m_Shader.As<OpenGLShader>()->m_OverrideValues.push_back(uniform);
-
+		m_OverrideValues.push_back(uniform);
 		return true;
 	}
 
-	void OpenGLMaterial::Bind()
+	void OpenGLMaterial::UpdateForRendering()
 	{
-		m_Shader.As<OpenGLShader>()->UpdateValues();
+		if (!m_OverrideValues.size()) return;
+
+		Memory::Shared<OpenGLMaterial> instance = this;
+		Rendering::SubmitCommand([instance]() mutable
+			{
+				glUseProgram(instance->m_Shader.As<OpenGLShader>()->GetRendererID());
+				for (auto buffer : instance->m_OverrideValues)
+				{
+					instance->m_Shader.As<OpenGLShader>()->UpdateShaderValue(buffer);
+				}
+				instance->m_OverrideValues.clear();
+			});
 	}
 }

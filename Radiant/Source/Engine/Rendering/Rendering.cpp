@@ -7,6 +7,10 @@
 #include <Rendering/Pipeline.hpp>
 #include <Rendering/Shader.hpp>
 
+
+#include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
+
 namespace Radiant
 {
 	struct QuadData
@@ -125,11 +129,12 @@ namespace Radiant
 		s_Data->ActiveRenderingPass = nullptr;
 	}
 
-	void Rendering::DrawFullscreenQuad()
+	void Rendering::DrawFullscreenQuad(Memory::Shared<Material> material)
 	{
 		s_Data->QuadInfo.FullscreenQuadVertexBuffer->Bind();
 		s_Data->QuadInfo.FullscreenQuadPipeline->Bind();
 		s_Data->QuadInfo.FullscreenQuadIndexBuffer->Bind();
+		material->UpdateForRendering();
 
 		DrawIndexed(s_Data->QuadInfo.FullscreenQuadIndexBuffer->GetCount());
 	}
@@ -165,13 +170,12 @@ namespace Radiant
 			});
 	}
 
-	void Rendering::DrawMesh(Memory::Shared<Mesh> mesh)
+	void Rendering::DrawMesh(Memory::Shared<Mesh> mesh, Memory::Shared<Material> material)
 	{
 		mesh->m_VertexBuffer->Bind();
 		s_Data->PiplineStaticMesh->Bind();
 		mesh->m_IndexBuffer->Bind();
-
-		mesh->m_Shader->Bind();
+		material->UpdateForRendering();
 
 		DrawIndexed(mesh->m_IndexBuffer->GetCount());
 	}

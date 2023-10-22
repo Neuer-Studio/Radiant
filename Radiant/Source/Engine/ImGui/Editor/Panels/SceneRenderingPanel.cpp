@@ -29,6 +29,11 @@ namespace Radiant
 					Utils::ImGui::Text(graphicInfo);
 
 					Utils::ImGui::Slider("Exposure", &m_Context->m_Exposure);
+
+					if (m_Context->m_SelectedEntity)
+					{
+
+					}
 				}
 			});
 	}

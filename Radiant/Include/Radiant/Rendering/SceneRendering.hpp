@@ -6,6 +6,13 @@
 
 namespace Radiant
 {
+	struct DrawProperties
+	{
+		Memory::Shared<Mesh> Mesh;
+		glm::mat4 Transform;
+		Memory::Shared<Material> Material;
+	};
+
 	class SceneRendering : public Memory::RefCounted
 	{
 	public:
@@ -19,7 +26,7 @@ namespace Radiant
 
 		uint32_t GetFinalPassImage(); // TODO(Danya): Set result type Image2D
 	private:
-		void AddMeshToDrawList(Memory::Shared<Mesh> mesh) const;
+		void AddMeshToDrawList(DrawProperties component) const;
 		void AddMeshToDrawListWithShader(const Memory::Shared<Mesh>& mesh) const;
 	private:
 		void Init();
@@ -29,7 +36,7 @@ namespace Radiant
 		void Flush();
 	private:
 		void DrawSkyLight();
-		void UpdateDirectionalLight();
+		void UpdateDirectionalLight(Memory::Shared<Material>& material);
 		void UpdateCamera();
 	private:
 		std::size_t m_ViewportWidth = -1, m_ViewportHeight = -1;

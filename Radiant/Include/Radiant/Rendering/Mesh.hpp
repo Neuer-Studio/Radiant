@@ -7,6 +7,7 @@
 #include <Radiant/Rendering/IndexBuffer.hpp>
 #include <Radiant/Rendering/Pipeline.hpp>
 #include <Radiant/Rendering/Shader.hpp>
+#include <Radiant/Rendering/Material.hpp>
 
 namespace Assimp
 {
@@ -16,6 +17,8 @@ namespace Assimp
 namespace Radiant
 {
 	class Rendering;
+	class SceneRendering;
+	class Material;
 	struct Vertex {
 		glm::vec3 Position;
 		glm::vec3 Normals;
@@ -38,7 +41,9 @@ namespace Radiant
 		Memory::Shared<VertexBuffer> m_VertexBuffer;
 		Memory::Shared<Shader> m_Shader;
 		Memory::Shared<IndexBuffer> m_IndexBuffer;
+		Memory::Shared<Material> m_Material;
 
 		friend Rendering;
+		friend SceneRendering;
 	};
 }

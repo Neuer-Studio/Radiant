@@ -39,8 +39,11 @@ namespace Radiant
 
 		virtual glm::vec4 GetVec4(const std::string& name, UniformTarget type) = 0;
 		virtual glm::vec4& GetVec4Ref(const std::string& name, UniformTarget type) = 0;
+		
+		virtual glm::mat4 GetMat4(const std::string& name, UniformTarget type) = 0;
+		virtual glm::mat4& GetMat4Ref(const std::string& name, UniformTarget type) = 0;
 
-		virtual void Bind() = 0; // NOTE(Danya): Does we need this function?
+		virtual void UpdateForRendering() = 0; // NOTE(Danya): Does we need this function?
 	public:
 		uint32_t GetFlags() const { return m_MaterialFlags; }
 		void SetFlag(MaterialFlag flag) { m_MaterialFlags |= (uint32_t)flag; }

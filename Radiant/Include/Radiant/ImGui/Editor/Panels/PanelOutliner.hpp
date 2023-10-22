@@ -17,6 +17,5 @@ namespace Radiant
 		void DrawPropertiesUI();
 	private:
 		Memory::Shared<Scene> m_Context;
-		Entity* m_SelectedEntity;
 	};
 }

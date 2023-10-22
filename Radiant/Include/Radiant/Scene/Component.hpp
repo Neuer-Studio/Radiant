@@ -15,7 +15,7 @@ namespace Radiant
 
 	enum class ComponentType
 	{
-		None = 0, Transform, Mesh, Camera, Cube
+		None = 0, Transform, Mesh, Camera, Cube, DirectionLight
 	};
 
 	struct Component : public Memory::RefCounted
@@ -72,6 +72,20 @@ namespace Radiant
 		Memory::Shared<TextureCube> Cube;
 	protected:
 		virtual const ComponentType GetType() const override { return ComponentType::Cube; }
+
+		friend Entity;
+	};
+
+	struct DirectionLightComponent : public Component
+	{
+		struct
+		{
+			glm::vec3 Direction;
+			glm::vec3 Radiance;
+		} DirLight;
+
+	protected:
+		virtual const ComponentType GetType() const override { return ComponentType::DirectionLight; }
 
 		friend Entity;
 	};

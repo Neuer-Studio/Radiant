@@ -58,11 +58,6 @@ namespace Radiant
 		std::vector<SFields> Fields; // list of fields
 	};
 
-	struct StructBuffer
-	{
-		std::unordered_map<std::string, ShaderStructDeclaration> Uniforms;
-	};
-
 	//================================================
 
 	class Material;

@@ -1,12 +1,14 @@
 #pragma once
 
 #include <Radiant/Utilities/UUID.hpp>
+#include <glm/glm.hpp>
 
 namespace Radiant
 {
 	class SceneRendering;
 	class SceneRenderingPanel;
 	class SceneManager;
+	class PanelOutliner;
 	class Entity;
 	enum class ComponentType;
 
@@ -31,7 +33,9 @@ namespace Radiant
 
 		void UpdateScene(const Memory::Shared<SceneRendering>& rendering, SceneType type = SceneType::Editor);
 	private:
+		Entity* m_SelectedEntity = nullptr; // NOTE(Danya): Using for panels
 		std::vector<Entity*> m_Entitys;
+
 		std::string m_SceneName;
 		Utils::UUID m_UUID;
 
@@ -43,6 +47,7 @@ namespace Radiant
 		friend SceneManager;
 		friend SceneRenderingPanel;
 		friend SceneRendering;
+		friend PanelOutliner;
 	};
 
 	class SceneManager

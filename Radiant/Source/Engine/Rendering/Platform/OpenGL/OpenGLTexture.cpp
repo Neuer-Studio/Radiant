@@ -33,7 +33,7 @@ namespace Radiant
 			auto* imageData = stbi_load(path.string().c_str(), &width, &height, &channels, srgb ? STBI_rgb : STBI_rgb_alpha);
 			RADIANT_VERIFY(imageData);
 
-			ImageFormat format = srgb ? ImageFormat::RGB8 : ImageFormat::RGBA;
+			ImageFormat format = srgb ? ImageFormat::RGBA8 : ImageFormat::RGBA;
 			Memory::Buffer buffer((std::byte*)imageData, width * height * Utils::GetImageMemorySize(format, width, height));
 			m_Image = Image2D::Create(format, width, height, buffer);
 
@@ -82,7 +82,7 @@ namespace Radiant
 		const std::byte* imageData = (std::byte*)stbi_load(path.string().c_str(), &width, &height, &channels, STBI_rgb);
 		RADIANT_VERIFY(imageData);
 
-		m_Image = ImageCube::Create(ImageFormat::RGB8, width, height, imageData);
+		m_Image = ImageCube::Create(ImageFormat::RGBA8, width, height, imageData);
 		stbi_image_free(m_Image->GetBuffer().Data);
 	}
 

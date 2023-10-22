@@ -140,7 +140,7 @@ namespace Radiant
 	}
 
 	PanelOutliner::PanelOutliner(const Memory::Shared<Scene>& context)
-		: m_Context(context), m_SelectedEntity(nullptr)
+		: m_Context(context)
 	{
 	}
 
@@ -161,7 +161,7 @@ namespace Radiant
 
 		ImGui::Begin("Properties");
 
-		if (m_SelectedEntity)
+		if (m_Context->m_SelectedEntity)
 			DrawPropertiesUI();
 
 		ImGui::End();
@@ -238,6 +238,9 @@ namespace Radiant
 
 					if (ImGui::MenuItem("Directional Light"))
 					{
+						Entity* entity = m_Context->CreateEntity("Directional Light");
+						auto light = CreateNewComponent<DirectionLightComponent>();
+						entity->AddComponent(light);
 					}
 
 					ImGui::Spacing();
@@ -262,13 +265,13 @@ namespace Radiant
 		if (!entity->GetName().empty())	
 			name = entity->GetName().c_str();
 
-		ImGuiTreeNodeFlags flags = (entity == m_SelectedEntity ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+		ImGuiTreeNodeFlags flags = (entity == m_Context->m_SelectedEntity ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 		bool opened = ImGui::TreeNodeEx((void*)entity, flags, name);
 
 		if (ImGui::IsItemClicked())
 		{
-			m_SelectedEntity = entity;
+			m_Context->m_SelectedEntity = entity;
 		}
 
 		if (opened)
@@ -284,8 +287,8 @@ namespace Radiant
 		// ...
 		ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
-		auto& name = m_SelectedEntity->m_Name;
-		if (m_SelectedEntity->m_Name.empty())
+		auto& name = m_Context->m_SelectedEntity->m_Name;
+		if (m_Context->m_SelectedEntity->m_Name.empty())
 			name = "Unnamed Entity";
 		char buffer[256];
 		memset(buffer, 0, 256);
@@ -297,14 +300,14 @@ namespace Radiant
 			name = std::string(buffer);
 		}
 
-		std::string TextUUID("UUID: " + m_SelectedEntity->m_UUID.ToString());
+		std::string TextUUID("UUID: " + m_Context->m_SelectedEntity->m_UUID.ToString());
 
 		ImGui::Text(TextUUID.c_str());
 		ImGui::Unindent(contentRegionAvailable.x * 0.05f);
 		ImGui::PopItemWidth();
 
 
-		DrawComponentUI(ComponentType::Transform, "Transform", m_SelectedEntity, [=](Memory::Shared<Component>& component) mutable
+		DrawComponentUI(ComponentType::Transform, "Transform", m_Context->m_SelectedEntity, [=](Memory::Shared<Component>& component) mutable
 			{
 				DrawVec3UI("Translation", component.As<TransformComponent>()->Translation);
 				glm::vec3 rotation = glm::degrees(component.As<TransformComponent>()->Rotation);
@@ -313,10 +316,17 @@ namespace Radiant
 				DrawVec3UI("Scale", component.As<TransformComponent>()->Scale, 1.0f);
 			});
 
-		DrawComponentUI(ComponentType::Mesh, "Mesh", m_SelectedEntity, [=](Memory::Shared<Component>& component) mutable
+		DrawComponentUI(ComponentType::Mesh, "Mesh", m_Context->m_SelectedEntity, [=](Memory::Shared<Component>& component) mutable
 			{
 				//DrawVec3UI("Translation", component.As<TransformComponent>()->Position);
 			});
+
+		DrawComponentUI(ComponentType::DirectionLight, "Mesh", m_Context->m_SelectedEntity, [=](Memory::Shared<Component>& component) mutable
+			{
+				DrawVec3UI("Direction", component.As<DirectionLightComponent>()->DirLight.Direction);
+				DrawVec3UI("Radiance", component.As<DirectionLightComponent>()->DirLight.Radiance);
+			});
+
 
 		/* New Component */
 

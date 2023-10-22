@@ -5,9 +5,9 @@ namespace Radiant
 	enum class ImageFormat
 	{
 		None = 0,
-		RGB8,
+		RGBA8,
 		RGBA,
-		RGB16F,
+		RGB16AF,
 		RGBA32F,
 	};
 }

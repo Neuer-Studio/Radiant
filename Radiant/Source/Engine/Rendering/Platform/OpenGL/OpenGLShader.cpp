@@ -1,6 +1,7 @@
 #include <Rendering/Platform/OpenGL/OpenGLShader.hpp>
 
 #include <Rendering/Rendering.hpp>	
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Radiant
 {
@@ -242,11 +243,11 @@ namespace Radiant
 			}
 		}
 
-		m_StructUnfiforms.Uniforms = Utils::ExtractShaderStruct(fragmentSource);
+		auto fragmentUniformsStruct = Utils::ExtractShaderStruct(fragmentSource);
 
 		// Parsing struct uniforms
 		{
-			for (auto& [name, structDecl] : m_StructUnfiforms.Uniforms)
+			for (auto& [name, structDecl] : fragmentUniformsStruct)
 			{
 				for (auto& field : structDecl.Fields)
 				{
@@ -254,7 +255,7 @@ namespace Radiant
 					field.Position = GetExternalUniformPosition(GLSLName);
 					field.GLSLName = GLSLName;
 
-					m_FragmentStructUnfiforms.Uniforms[GLSLName] = { field.Type, UniformTarget::Fragment, GLSLName, field.Position };
+					m_FragmentUniforms.Uniforms[GLSLName] = { field.Type, UniformTarget::Fragment, GLSLName, field.Position };
 
 				}
 			}
@@ -390,10 +391,6 @@ namespace Radiant
 			{
 				glUseProgram(id);
 			});
-		Rendering::SubmitCommand([instance]() mutable
-			{
-				instance->UpdateValues();
-			});
 	}
 
 	void OpenGLShader::Unbind()
@@ -489,7 +486,7 @@ namespace Radiant
 	void OpenGLShader::UploadUniformMat4(int32_t location, const glm::mat4& values, UniformTarget type)
 	{
 		if (location != -1)
-			glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)&values);
+			glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(values));
 		else
 			LOG_UNIFORM("Uniform 'X' not found!");
 	}
@@ -502,17 +499,7 @@ namespace Radiant
 
 	// ========================================================================
 
-	void OpenGLShader::UpdateValues() 
-	{
-		for (auto& buffer : m_OverrideValues)
-		{
-			UpdateGLMValues(buffer);
-			buffer.isChanged = false;
-		}
-		m_OverrideValues.clear();
-	}
-
-	void OpenGLShader::UpdateGLMValues(const ShaderUniformDeclaration& decl)
+	void OpenGLShader::UpdateShaderValue(const ShaderUniformDeclaration& decl)
 	{
 		if (decl.Type == RadiantType::Float)
 		{

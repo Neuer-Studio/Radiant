@@ -77,7 +77,11 @@ namespace Radiant
 		{
 			if (e->HasComponent(ComponentType::Mesh))
 			{
-				rendering->AddMeshToDrawList(e->GetComponent(ComponentType::Mesh).As<MeshComponent>()->Mesh);
+				rendering->AddMeshToDrawList(
+					{ 
+						e->GetComponent(ComponentType::Mesh).As<MeshComponent>()->Mesh, 
+						e->GetComponent(ComponentType::Transform).As<TransformComponent>()->GetTransform()
+					});
 			}
 		}
 

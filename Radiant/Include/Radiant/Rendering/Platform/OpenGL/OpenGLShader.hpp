@@ -40,7 +40,6 @@ namespace Radiant
 	private:
 		int32_t GetExternalUniformPosition(const std::string& uniformName);
 		int32_t GetRadiantUniformPosition(const std::string& uniformName, UniformTarget type);
-		void UpdateValues();
 	public:
 		virtual bool HasBufferUniform(const std::string& uniformName, UniformTarget type) const override;
 		virtual ShaderUniformDeclaration& GetBufferUniform(const std::string& uniformName, UniformTarget type) override;
@@ -55,16 +54,10 @@ namespace Radiant
 		UniformBuffer m_SamplerUniforms; // Sampler uniform buffer
 		UniformBuffer m_FragmentUniforms; // Fragment uniform buffer
 		UniformBuffer m_VertexUnfiforms; // Vertex uniform buffer
-
-		StructBuffer m_StructUnfiforms; // Struct uniform buffer
-		UniformBuffer m_FragmentStructUnfiforms; // Struct Fragment uniform buffer
-		UniformBuffer m_VertexStructUnfiforms; // Struct Vertex uniform buffer
-
-		std::vector<ShaderUniformDeclaration> m_OverrideValues; // Vector for overriding uniforms buffer
 	private:
 		void UploadSamplerUniforms();
 	public:
-		void UpdateGLMValues(const ShaderUniformDeclaration& decl);
+		void UpdateShaderValue(const ShaderUniformDeclaration& decl);
 	private:
 
 		friend OpenGLMaterial;

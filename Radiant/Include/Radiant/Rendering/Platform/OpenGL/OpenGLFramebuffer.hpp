@@ -16,7 +16,7 @@ namespace Radiant
 
 		virtual void Resize(uint32_t width, uint32_t height, bool forceRecreate = false) override;
 
-		virtual void BindTexture(uint32_t attachmentIndex = 0, uint32_t slot = 0) const override;
+		virtual void BindTexture(uint32_t slot = 0) const override;
 
 		virtual uint32_t GetWidth() const override { return m_Specification.Width; }
 		virtual uint32_t GetHeight() const override { return m_Specification.Height; }

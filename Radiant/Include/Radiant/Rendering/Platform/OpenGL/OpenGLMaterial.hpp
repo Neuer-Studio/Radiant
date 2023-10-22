@@ -7,7 +7,6 @@ namespace Radiant
 	class OpenGLMaterial final : public Material
 	{
 	public:
-
 		OpenGLMaterial(const Memory::Shared<Shader> shader);
 		virtual ~OpenGLMaterial() override = default;
 
@@ -35,7 +34,10 @@ namespace Radiant
 		virtual glm::vec4 GetVec4(const std::string& name, UniformTarget type) override;
 		virtual glm::vec4& GetVec4Ref(const std::string& name, UniformTarget type) override;
 
-		virtual void Bind() override;
+		virtual glm::mat4 GetMat4(const std::string& name, UniformTarget type) override;
+		virtual glm::mat4& GetMat4Ref(const std::string& name, UniformTarget type) override;
+
+		virtual void UpdateForRendering() override;
 	private:
 		bool Set(const std::string& name, const std::byte* value, UniformTarget type, RadiantType uniformType);
 
@@ -79,6 +81,7 @@ namespace Radiant
 			return *(T*)&uniform.Value;
 		}
 	private:
+		std::vector<ShaderUniformDeclaration> m_OverrideValues; // Vector for overriding uniforms buffer
 		Memory::Shared<Shader> m_Shader;
 	};
 }

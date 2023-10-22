@@ -13,9 +13,9 @@ namespace Radiant
 		{
 			switch (format)
 			{
-			case ImageFormat::RGB8:		return GL_RGB8;
+			case ImageFormat::RGBA8:		return GL_RGBA8;
 			case ImageFormat::RGBA:		return GL_RGBA;
-			case ImageFormat::RGB16F:	return GL_RGB16F;
+			case ImageFormat::RGB16AF:	return GL_RGBA16F;
 			case ImageFormat::RGBA32F:	return GL_RGBA32F;
 			}
 			RADIANT_VERIFY(false, "Unknown image format");
@@ -26,9 +26,9 @@ namespace Radiant
 		{
 			switch (format)
 			{
-			case ImageFormat::RGB8:
+			case ImageFormat::RGBA8:
 			case ImageFormat::RGBA:    return GL_UNSIGNED_BYTE;
-			case ImageFormat::RGB16F:
+			case ImageFormat::RGB16AF:
 			case ImageFormat::RGBA32F: return GL_FLOAT;
 			}
 			RADIANT_VERIFY(false, "Unknown image format");
@@ -39,7 +39,7 @@ namespace Radiant
 		{
 			switch (format)
 			{
-			case ImageFormat::RGB8:		return 3;
+			case ImageFormat::RGBA8:		return 3;
 			case ImageFormat::RGBA:		return 4;
 			case ImageFormat::RGBA32F:	return 4 * 2;
 			}

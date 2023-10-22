@@ -35,7 +35,7 @@ namespace Radiant
 
 		virtual void Resize(uint32_t width, uint32_t height, bool forceRecreate = false) = 0;
 
-		virtual void BindTexture(uint32_t attachmentIndex = 0, uint32_t slot = 0) const = 0;
+		virtual void BindTexture(uint32_t slot = 0) const = 0;
 
 		virtual FramebufferSpecification GetSpecification() = 0;
 		virtual const FramebufferSpecification GetSpecification() const = 0;

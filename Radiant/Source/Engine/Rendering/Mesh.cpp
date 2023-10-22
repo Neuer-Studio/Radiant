@@ -84,5 +84,7 @@ namespace Radiant
 		}
 
 		m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), m_Indices.size() * sizeof(Index));
+
+		m_Material = Material::Create(m_Shader);
 	}
 }

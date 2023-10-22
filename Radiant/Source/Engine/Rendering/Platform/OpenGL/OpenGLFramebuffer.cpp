@@ -86,7 +86,7 @@ namespace Radiant
 			});
 	}
 
-	void OpenGLFramebuffer::BindTexture(uint32_t attachmentIndex, uint32_t slot) const
+	void OpenGLFramebuffer::BindTexture(uint32_t slot) const
 	{
 		Rendering::SubmitCommand([=]()
 			{
