@@ -19,6 +19,7 @@ namespace Radiant
 	class Rendering;
 	class SceneRendering;
 	class Material;
+
 	struct Vertex {
 		glm::vec3 Position;
 		glm::vec3 Normals;
@@ -32,9 +33,15 @@ namespace Radiant
 	class Mesh : public Memory::RefCounted
 	{
 	public:
-		Mesh(const std::string& filename);
+		Mesh(const std::string& filepath);
 		~Mesh() {}
+
+		inline const std::string& GetFilePath() const { return m_FilePath; }
+		inline const std::string& GetName() const { return m_Name; }
 	private:
+		std::string m_FilePath;
+		std::string m_Name;
+
 		std::vector<Vertex> m_Vertices;
 		std::vector<Index> m_Indices;
 

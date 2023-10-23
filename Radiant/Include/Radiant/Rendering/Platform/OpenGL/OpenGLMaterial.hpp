@@ -82,6 +82,7 @@ namespace Radiant
 		}
 	private:
 		std::vector<ShaderUniformDeclaration> m_OverrideValues; // Vector for overriding uniforms buffer
+		std::vector<Memory::Shared<Texture2D>> m_Textures2D;
 		Memory::Shared<Shader> m_Shader;
 	};
 }

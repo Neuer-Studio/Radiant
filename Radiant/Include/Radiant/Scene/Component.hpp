@@ -52,6 +52,9 @@ namespace Radiant
 	{
 		Memory::Shared<Radiant::Mesh> Mesh;
 
+		explicit operator bool() const {
+			return Mesh.Ptr() != nullptr;
+		}
 	protected:
 		virtual const ComponentType GetType() const override { return  ComponentType::Mesh; }
 

@@ -44,6 +44,7 @@ namespace Radiant
 	{
 		EventDispatcher dispather(event);
 		dispather.Dispatch<WindowCloseEvent>(BIND_FN(OnWindowClose));
+		dispather.Dispatch<WindowResizeEvent>(BIND_FN(OnWindowResize));
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
@@ -51,6 +52,14 @@ namespace Radiant
 		m_Run = false;
 		return true;
 	}
+
+	bool Application::OnWindowResize(WindowResizeEvent& e)
+	{
+		int width = e.GetWidth(), height = e.GetHeight();
+
+		return false;
+	}
+
 
 	void Application::PushLayer(Layer* layer)
 	{

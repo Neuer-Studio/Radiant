@@ -21,6 +21,7 @@ namespace Radiant
 		uint32_t Height = 0;
 		glm::vec4 ClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 		uint32_t Samples = 1; // multisampling
+		bool NoResize = false;
 
 		ImageFormat Format;
 	};
@@ -57,7 +58,7 @@ namespace Radiant
 	public:
 		static void Add(Memory::Shared<Framebuffer> framebuffer);
 
-		static const std::vector<Memory::Shared<Framebuffer>>& GetAll() { return m_Pool; }
+		static std::vector<Memory::Shared<Framebuffer>>& GetAll() { return m_Pool; }
 	private:
 		static std::vector<Memory::Shared<Framebuffer>> m_Pool;
 	};

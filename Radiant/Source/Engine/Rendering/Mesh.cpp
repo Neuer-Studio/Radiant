@@ -42,16 +42,17 @@ namespace Radiant
 		}
 	};
 
-	Mesh::Mesh(const std::string& filename)
+	Mesh::Mesh(const std::string& filepath)
+		: m_FilePath(filepath), m_Name(Utils::FileSystem::GetFileName(filepath))
 	{
-		RADIANT_VERIFY(Utils::FileSystem::Exists(filename));
-		RA_INFO("Loading mesh: {0}", filename.c_str());
+		RADIANT_VERIFY(Utils::FileSystem::Exists(filepath));
+		RA_INFO("Loading mesh: {0}", filepath.c_str());
 
 		Assimp::Importer importer;
 
-		const aiScene* scene = importer.ReadFile(filename, ImportFlags);
+		const aiScene* scene = importer.ReadFile(filepath, ImportFlags);
 		if (!scene || !scene->HasMeshes())
-			RADIANT_VERIFY("Failed to load mesh file: {0}", filename);
+			RADIANT_VERIFY("Failed to load mesh file: {0}", filepath);
 
 		aiMesh* mesh = scene->mMeshes[0];
 

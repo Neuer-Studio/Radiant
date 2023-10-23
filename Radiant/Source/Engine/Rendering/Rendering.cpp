@@ -134,7 +134,8 @@ namespace Radiant
 		s_Data->QuadInfo.FullscreenQuadVertexBuffer->Bind();
 		s_Data->QuadInfo.FullscreenQuadPipeline->Bind();
 		s_Data->QuadInfo.FullscreenQuadIndexBuffer->Bind();
-		material->UpdateForRendering();
+		if(material.Ptr() != nullptr)
+			material->UpdateForRendering();
 
 		DrawIndexed(s_Data->QuadInfo.FullscreenQuadIndexBuffer->GetCount());
 	}

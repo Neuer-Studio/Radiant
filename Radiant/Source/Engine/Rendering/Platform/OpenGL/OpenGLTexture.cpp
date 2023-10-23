@@ -74,6 +74,7 @@ namespace Radiant
 	/*********************** Texture Cube ***********************/
 
 	OpenGLTextureCube::OpenGLTextureCube(const std::filesystem::path& path)
+		: m_FilePath(path)
 	{
 		RA_INFO("Loading skylight texture {}, srgb = {}", Utils::FileSystem::GetFileName(path));
 		

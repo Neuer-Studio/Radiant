@@ -12,6 +12,7 @@ namespace Radiant
 		Memory::Shared<Shader> CompositeShader;
 		Memory::Shared<RenderingPass> CompositePass;
 		Memory::Shared<Pipeline> CompositePipeline;
+		Memory::Shared<class Material> CompositeMaterial;
 	};
 
 	struct GeometryData
@@ -26,11 +27,10 @@ namespace Radiant
 		CompositeData CompositeInfo;
 		GeometryData GeometryInfo;
 		Memory::Shared<Shader> QuadShader;
-		Memory::Shared<Shader> staticShader;
+		Memory::Shared<Shader> StaticShader;
 		std::vector<DrawProperties> MeshDrawList;
 		std::vector<Memory::Shared<Mesh>> MeshDrawListWithShader;
-		Memory::Shared<Material> Material; // TODO(Danya): temp (move to mesh)
-		Memory::Shared<class Material> CompositeMaterial;
+		Memory::Shared<class Material> QuadMaterial;
 
 		Camera* Camera;
 	};
@@ -52,8 +52,8 @@ namespace Radiant
 	{
 		s_SceneInfo = new SceneInfo();
 		s_SceneInfo->QuadShader = Rendering::GetShaderLibrary()->Get("Quad.rads");
-		s_SceneInfo->staticShader = Rendering::GetShaderLibrary()->Get("Static_Shader.rads");
-
+		s_SceneInfo->StaticShader = Rendering::GetShaderLibrary()->Get("Static_Shader.rads");
+		s_SceneInfo->QuadMaterial = Material::Create(s_SceneInfo->QuadShader);
 		/* Composite Pass */
 
 		{
@@ -69,7 +69,7 @@ namespace Radiant
 			s_SceneInfo->CompositeInfo.CompositePass = RenderingPass::Create(PassComposite);
 
 			s_SceneInfo->CompositeInfo.CompositeShader = Shader::Create("Resources/Shaders/hdr.rads");
-			s_SceneInfo->CompositeMaterial = Material::Create(s_SceneInfo->CompositeInfo.CompositeShader);
+			s_SceneInfo->CompositeInfo.CompositeMaterial = Material::Create(s_SceneInfo->CompositeInfo.CompositeShader);
 		}
 
 		/* Geometry Pass */
@@ -111,21 +111,24 @@ namespace Radiant
 			DrawSkyLight();
 			for (auto dc : s_SceneInfo->MeshDrawList)
 			{
-				Memory::Shared<Material> material;
-				material = Material::Create(s_SceneInfo->staticShader);
-
 				glm::mat4 viewProjection;
+				glm::vec3 CameraPosition;
+
+				Memory::Shared<Material> material;
+				material = Material::Create(s_SceneInfo->StaticShader);
+
 				if (s_SceneInfo->Camera)
 				{
 					viewProjection = s_SceneInfo->Camera->GetProjectionMatrix() * s_SceneInfo->Camera->GetViewMatrix();
+					CameraPosition = s_SceneInfo->Camera->GetPosition();
 				}
 				material->SetValue("u_ViewProjection", viewProjection, UniformTarget::Vertex);
 				material->SetValue("u_Transform", dc.Transform, UniformTarget::Vertex);
+				material->SetValue("u_CameraPosition", CameraPosition, UniformTarget::Fragment);
+
+				UpdateDirectionalLight(material);
 				Rendering::DrawMesh(dc.Mesh, material);
 			}
-
-			/*for (const auto m : s_SceneInfo->MeshDrawListWithShader)
-				Rendering::DrawMeshWithShader(m, s_SceneInfo->staticShader);*/
 		}
 		Rendering::UnbindRenderingPass();
 	}
@@ -134,11 +137,11 @@ namespace Radiant
 	{
 		Rendering::BindRenderingPass(s_SceneInfo->CompositeInfo.CompositePass);
 		{
-			s_SceneInfo->CompositeMaterial->SetValue("u_Exposure", m_Context->m_Exposure, UniformTarget::Fragment);
+			s_SceneInfo->CompositeInfo.CompositeMaterial->SetValue("u_Exposure", m_Context->m_Exposure, UniformTarget::Fragment);
 			s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->BindTexture();
 
-			Rendering::DrawFullscreenQuad(s_SceneInfo->CompositeMaterial);
 		}
+		Rendering::DrawFullscreenQuad(s_SceneInfo->CompositeInfo.CompositeMaterial);
 		Rendering::UnbindRenderingPass();
 	}
 
@@ -162,6 +165,8 @@ namespace Radiant
 			s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->Resize(size.x, size.y);
 			s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->Resize(size.x, size.y);
 		}
+		if(s_SceneInfo->Camera)
+			s_SceneInfo->Camera->SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), size.x, size.y, 0.1f, 10000.0f));
 	}
 
 	uint32_t SceneRendering::GetFinalPassImage()
@@ -178,11 +183,10 @@ namespace Radiant
 
 		if(s_SceneInfo->Camera)
 			viewProjection = s_SceneInfo->Camera->GetViewProjectionMatrix();
-		
-		s_SceneInfo->QuadShader->GetMaterialInstance()->SetValue("u_InverseVP", glm::inverse(viewProjection), UniformTarget::Vertex);// FIX(Danya): Material is null
 		s_SceneInfo->QuadShader->Bind();
+		Rendering::DrawFullscreenQuad(s_SceneInfo->QuadMaterial);
 		cube->Bind();
-
+		s_SceneInfo->QuadMaterial->SetValue("u_InverseVP", glm::inverse(viewProjection), UniformTarget::Vertex);
 		Rendering::DrawIndexed(6);
 	}
 

@@ -1,6 +1,7 @@
 #include <Radiant/ImGui/Editor/Panels/PanelOutliner.hpp>
 #include <Radiant/Scene/Entity.hpp>
 #include <Radiant/Scene/Component.hpp>
+#include <Radiant/ImGui/Utilities/UI.hpp>
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -205,7 +206,6 @@ namespace Radiant
 				{
 					Entity* entity = m_Context->CreateEntity("Mesh");
 					auto mesh = CreateNewComponent<MeshComponent>();
-					mesh->Mesh = Memory::Shared<Mesh>::Create("Resources/Meshes/Cube1m.fbx");
 					entity->AddComponent(mesh);
 				}
 
@@ -230,7 +230,7 @@ namespace Radiant
 					{
 						Entity* entity = m_Context->CreateEntity("SkyLight");
 						auto cube = CreateNewComponent<CubeComponent>();
-						cube->Cube = TextureCube::Create("Resources/Envorement/Arches_E_PineTree_Radiance.tga");
+						cube->Cube = TextureCube::Create("Resources/Envorement/Arches_E_PineTree_Irradiance.tga");
 						entity->AddComponent(cube);
 					}
 
@@ -283,6 +283,7 @@ namespace Radiant
 
 	void PanelOutliner::DrawPropertiesUI()
 	{
+		Entity* entity = m_Context->m_SelectedEntity;
 		ImGui::AlignTextToFramePadding();
 		// ...
 		ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
@@ -307,7 +308,7 @@ namespace Radiant
 		ImGui::PopItemWidth();
 
 
-		DrawComponentUI(ComponentType::Transform, "Transform", m_Context->m_SelectedEntity, [=](Memory::Shared<Component>& component) mutable
+		DrawComponentUI(ComponentType::Transform, "Transform", entity, [=](Memory::Shared<Component>& component) mutable
 			{
 				DrawVec3UI("Translation", component.As<TransformComponent>()->Translation);
 				glm::vec3 rotation = glm::degrees(component.As<TransformComponent>()->Rotation);
@@ -316,12 +317,48 @@ namespace Radiant
 				DrawVec3UI("Scale", component.As<TransformComponent>()->Scale, 1.0f);
 			});
 
-		DrawComponentUI(ComponentType::Mesh, "Mesh", m_Context->m_SelectedEntity, [=](Memory::Shared<Component>& component) mutable
+		DrawComponentUI(ComponentType::Mesh, "Mesh", entity, [=](Memory::Shared<Component>& component) mutable
 			{
-				//DrawVec3UI("Translation", component.As<TransformComponent>()->Position);
+				auto& mesh = component.As<MeshComponent>()->Mesh;
+				UI::BeginPropertyGrid();
+
+				ImGui::Text(entity->GetName().c_str());
+				ImGui::NextColumn();
+				ImGui::PushItemWidth(-1);
+
+				ImVec2 originalButtonTextAlign = ImGui::GetStyle().ButtonTextAlign;
+				ImGui::GetStyle().ButtonTextAlign = { 0.0f, 0.5f };
+				float width = ImGui::GetContentRegionAvail().x - 0.0f;
+				UI::PushID();
+
+				float itemHeight = 28.0f;
+
+				std::string buttonName;
+				if (mesh)
+					buttonName = mesh->GetName();
+				else
+					buttonName = "Null";
+
+				if (ImGui::Button(buttonName.c_str(), { width, itemHeight }))
+				{
+					std::string file = Utils::FileSystem::OpenFileDialog().string();
+					if (!file.empty())
+					{
+						mesh = Memory::Shared<Mesh>::Create(file);
+					}
+				}
+
+				UI::PopID();
+				ImGui::GetStyle().ButtonTextAlign = originalButtonTextAlign;
+				ImGui::PopItemWidth();
+
+				UI::EndPropertyGrid();
+
+				UI::BeginPropertyGrid();
+				UI::EndPropertyGrid();
 			});
 
-		DrawComponentUI(ComponentType::DirectionLight, "Mesh", m_Context->m_SelectedEntity, [=](Memory::Shared<Component>& component) mutable
+		DrawComponentUI(ComponentType::DirectionLight, "DirectionLight", entity, [=](Memory::Shared<Component>& component) mutable
 			{
 				DrawVec3UI("Direction", component.As<DirectionLightComponent>()->DirLight.Direction);
 				DrawVec3UI("Radiance", component.As<DirectionLightComponent>()->DirLight.Radiance);

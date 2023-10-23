@@ -17,14 +17,14 @@ namespace Radiant
 		m_RotationSpeed = 0.002f;
 		m_ZoomSpeed = 0.2f;
 
-		m_Position = { -10, 10, 10 };
+		m_Position = { -100, 100, 100 };
 		m_Rotation = glm::vec3(90.0f, 0.0f, 0.0f);
 
 		m_FocalPoint = glm::vec3(0.0f);
 		m_Distance = glm::distance(m_Position, m_FocalPoint);
+
 		m_Yaw = 3.0f * (float)M_PI / 4.0f;
 		m_Pitch = M_PI / 4.0f;
-
 	}
 
 	void Camera::Focus()
@@ -36,7 +36,7 @@ namespace Radiant
 		if (Input::IsKeyPressed(KeyCode::LeftAlt))
 		{
 			const glm::vec2& mouse{ Input::GetMouseX(), Input::GetMouseY() };
-			glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
+			glm::vec2 delta = mouse - m_InitialMousePosition;
 			m_InitialMousePosition = mouse;
 
 			if (Input::IsMouseButtonPressed(Button::Middle))
@@ -52,26 +52,25 @@ namespace Radiant
 		glm::quat orientation = GetOrientation();
 		m_Rotation = glm::eulerAngles(orientation) * (180.0f / (float)M_PI);
 		m_ViewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 1)) * glm::toMat4(glm::conjugate(orientation)) * glm::translate(glm::mat4(1.0f), -m_Position);
-
 	}
 
 	void Camera::MousePan(const glm::vec2& delta)
 	{
 		m_FocalPoint += -GetRightDirection() * delta.x * m_PanSpeed * m_Distance;
-		m_FocalPoint += GetRightDirection() * delta.y * m_PanSpeed * m_Distance;
+		m_FocalPoint += GetUpDirection() * delta.y * m_PanSpeed * m_Distance;
 	}
 
 	void Camera::MouseRotate(const glm::vec2& delta)
 	{
 		float yawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
-		m_Yaw += yawSign * delta.x * 0.8f;
-		m_Pitch += delta.y * 0.8f;
+		m_Yaw += yawSign * delta.x * m_RotationSpeed;
+		m_Pitch += delta.y * m_RotationSpeed;
 	}
 
 	void Camera::MouseZoom(float delta)
 	{
 		m_Distance -= delta * m_ZoomSpeed;
-		if (m_Distance <= 1.0f)
+		if (m_Distance < 1.0f)
 		{
 			m_FocalPoint += GetForwardDirection();
 			m_Distance = 1.0f;

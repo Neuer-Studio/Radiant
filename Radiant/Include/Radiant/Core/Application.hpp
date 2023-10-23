@@ -36,6 +36,7 @@ namespace Radiant
 		Memory::Shared<Window> GetWindow() { return m_Window; }
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
+		bool OnWindowResize(WindowResizeEvent& e);
 	private:
 		Memory::Shared<Window> m_Window;
 		LayerStack m_LayerStack;

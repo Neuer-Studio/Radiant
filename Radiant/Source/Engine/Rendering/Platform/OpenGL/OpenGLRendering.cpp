@@ -38,9 +38,6 @@ namespace Radiant {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		glEnable(GL_MULTISAMPLE);
-		glEnable(GL_STENCIL_TEST);
-
 		auto& info = RenderingAPI::GetGraphicsInfo();
 
 		info.Vendor = (const char*)glGetString(GL_VENDOR);
@@ -89,7 +86,7 @@ namespace Radiant {
 	void OpenGLRendering::Clear(float r, float g, float b)
 	{
 		glClearColor(r, g, b, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 }
