@@ -26,13 +26,19 @@ namespace Radiant
 	{
 		CompositeData CompositeInfo;
 		GeometryData GeometryInfo;
+
 		Memory::Shared<Shader> QuadShader;
 		Memory::Shared<Shader> StaticShader;
 		std::vector<DrawProperties> MeshDrawList;
 		std::vector<Memory::Shared<Mesh>> MeshDrawListWithShader;
+		std::vector<Memory::Shared<TextureCube>> TextureCubeList;
 		Memory::Shared<class Material> QuadMaterial;
 
-		Camera* Camera;
+		struct
+		{
+			glm::mat4 ViewProjection;
+			glm::vec3 CameraPosition;
+		} Camera;
 	};
 
 	static SceneInfo *s_SceneInfo = nullptr;
@@ -89,9 +95,10 @@ namespace Radiant
 
 	}
 
-	void SceneRendering::SubmitScene()
+	void SceneRendering::SubmitScene(Camera* camera)
 	{
-		UpdateCamera();
+		if(camera)
+			UpdateCamera(camera);
 		Flush();
 	}
 
@@ -102,29 +109,25 @@ namespace Radiant
 
 		s_SceneInfo->MeshDrawList.clear();
 		s_SceneInfo->MeshDrawListWithShader.clear();
+		s_SceneInfo->TextureCubeList.clear();
 	}
 
 	void SceneRendering::GeometryPass()
 	{
 		Rendering::BindRenderingPass(s_SceneInfo->GeometryInfo.GeometryPass);
 		{
-			DrawSkyLight();
-			for (auto dc : s_SceneInfo->MeshDrawList)
-			{
-				glm::mat4 viewProjection;
-				glm::vec3 CameraPosition;
+			for(const auto& cube : s_SceneInfo->TextureCubeList)
+				DrawSkyLight(cube);
 
+			for (const auto& dc : s_SceneInfo->MeshDrawList)
+			{
 				Memory::Shared<Material> material;
 				material = Material::Create(s_SceneInfo->StaticShader);
 
-				if (s_SceneInfo->Camera)
-				{
-					viewProjection = s_SceneInfo->Camera->GetProjectionMatrix() * s_SceneInfo->Camera->GetViewMatrix();
-					CameraPosition = s_SceneInfo->Camera->GetPosition();
-				}
-				material->SetValue("u_ViewProjection", viewProjection, UniformTarget::Vertex);
 				material->SetValue("u_Transform", dc.Transform, UniformTarget::Vertex);
-				material->SetValue("u_CameraPosition", CameraPosition, UniformTarget::Fragment);
+
+				material->SetValue("u_ViewProjection", s_SceneInfo->Camera.ViewProjection, UniformTarget::Vertex);
+				material->SetValue("u_CameraPosition", s_SceneInfo->Camera.CameraPosition, UniformTarget::Fragment);
 
 				UpdateDirectionalLight(material);
 				Rendering::DrawMesh(dc.Mesh, material);
@@ -155,6 +158,11 @@ namespace Radiant
 		s_SceneInfo->MeshDrawListWithShader.push_back(mesh);
 	}
 
+	void SceneRendering::AddTextureCubeToDrawList(const Memory::Shared<TextureCube>& cube) const
+	{
+		s_SceneInfo->TextureCubeList.push_back(cube);
+	}
+
 	void SceneRendering::SetSceneVeiwPortSize(const glm::vec2& size)
 	{
 		if (m_ViewportWidth != size.x || m_ViewportHeight != size.y)
@@ -164,9 +172,15 @@ namespace Radiant
 
 			s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->Resize(size.x, size.y);
 			s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->Resize(size.x, size.y);
+
+
+			if (m_Context->ContainsEntityInScene(ComponentType::Camera))
+			{
+				auto& camera = m_Context->GetEntityByComponentType(ComponentType::Camera)->GetComponent(ComponentType::Camera).As<CameraComponent>()->Camera;
+				camera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), size.x, size.y, 0.1f, 10000.0f));
+			}
+
 		}
-		if(s_SceneInfo->Camera)
-			s_SceneInfo->Camera->SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), size.x, size.y, 0.1f, 10000.0f));
 	}
 
 	uint32_t SceneRendering::GetFinalPassImage()
@@ -174,19 +188,12 @@ namespace Radiant
 		return s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->GetRendererID();
 	}
 
-	void SceneRendering::DrawSkyLight() // TODO(Danya): Fix crush
+	void SceneRendering::DrawSkyLight(const Memory::Shared<TextureCube>& cube) // TODO(Danya): Fix crush(Done)
 	{
-		if (!m_Context->ContainsEntityInScene(ComponentType::Cube))
-			return;
-		auto cube = m_Context->GetEntityByComponentType(ComponentType::Cube)->GetComponent(ComponentType::Cube).As<CubeComponent>()->Cube;
-		glm::mat4 viewProjection;
-
-		if(s_SceneInfo->Camera)
-			viewProjection = s_SceneInfo->Camera->GetViewProjectionMatrix();
 		s_SceneInfo->QuadShader->Bind();
 		Rendering::DrawFullscreenQuad(s_SceneInfo->QuadMaterial);
 		cube->Bind();
-		s_SceneInfo->QuadMaterial->SetValue("u_InverseVP", glm::inverse(viewProjection), UniformTarget::Vertex);
+		s_SceneInfo->QuadMaterial->SetValue("u_InverseVP", glm::inverse(s_SceneInfo->Camera.ViewProjection), UniformTarget::Vertex);
 		Rendering::DrawIndexed(6);
 	}
 
@@ -200,15 +207,12 @@ namespace Radiant
 		}
 	}
 
-	void SceneRendering::UpdateCamera()
+	void SceneRendering::UpdateCamera(Camera* camera)
 	{
-		if (!s_SceneInfo->Camera)
-		{
-			if (m_Context->ContainsEntityInScene(ComponentType::Camera))
-				s_SceneInfo->Camera = &m_Context->GetEntityByComponentType(ComponentType::Camera)->GetComponent(ComponentType::Camera).As<CameraComponent>()->Camera;
-		}
+		s_SceneInfo->Camera.ViewProjection = camera->GetViewProjectionMatrix();
+		s_SceneInfo->Camera.CameraPosition = camera->GetPosition();
 
-		if (s_SceneInfo->Camera) s_SceneInfo->Camera->Update();
+		camera->Update();
 	}
 
 }

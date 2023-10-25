@@ -73,6 +73,9 @@ namespace Radiant
 
 		Memory::Shared<SceneRendering> render = rendering;
 		render->SetScene(this);
+
+		Camera* camera = nullptr;
+
 		for (const auto e : m_Entitys)
 		{
 			if (e->HasComponent(ComponentType::Mesh))
@@ -85,9 +88,23 @@ namespace Radiant
 						e->GetComponent(ComponentType::Transform).As<TransformComponent>()->GetTransform()
 					});
 			}
+
+			if (e->HasComponent(ComponentType::Cube))
+			{
+				const auto cube = e->GetComponent(ComponentType::Cube).As<CubeComponent>()->Cube;
+				if (!cube) break;
+				rendering->AddTextureCubeToDrawList(
+					{
+						cube,
+					});
+			}
+
+			if (e->HasComponent(ComponentType::Camera))
+				camera = &e->GetComponent(ComponentType::Camera).As<CameraComponent>()->Camera;
+
 		}
 
-		render->SubmitScene();
+		render->SubmitScene(camera);
 	}
 
 	/*======================== SceneManager ======================*/
