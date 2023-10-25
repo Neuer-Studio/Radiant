@@ -41,6 +41,11 @@ namespace Radiant
 		return Set(name, (std::byte*)&value, type, RadiantType::Int);
 	}
 
+	bool OpenGLMaterial::SetValue(const std::string& name, uint32_t value, UniformTarget type)
+	{
+		return Set(name, (std::byte*)&value, type, RadiantType::Uint);
+	}
+
 	float OpenGLMaterial::GetFloat(const std::string& name, UniformTarget type)
 	{
 		return Get<float>(name, type, RadiantType::Float);

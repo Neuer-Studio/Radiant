@@ -141,6 +141,7 @@ namespace Radiant
 		Rendering::BindRenderingPass(s_SceneInfo->CompositeInfo.CompositePass);
 		{
 			s_SceneInfo->CompositeInfo.CompositeMaterial->SetValue("u_Exposure", m_Context->m_Exposure, UniformTarget::Fragment);
+			s_SceneInfo->CompositeInfo.CompositeMaterial->SetValue("u_TextureSamples", (int)s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->GetSpecification().Samples, UniformTarget::Fragment);
 			s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->BindTexture();
 
 		}

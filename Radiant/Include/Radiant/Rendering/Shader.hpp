@@ -17,7 +17,7 @@ namespace Radiant
 		None = 0, 
 
 		sampler1D = 1, sampler2D, sampler3D, // Sampler
-		Int, // Int
+		Int, Uint,// Int
 		Float, Float2, Float3, Float4, // Float 
 		Mat2, Mat3, Mat4, // Mat
 	};
@@ -113,6 +113,10 @@ namespace Radiant
 			{
 			case RadiantType::Float:
 				return sizeof(float);
+			case RadiantType::Int:
+				return sizeof(int);
+			case RadiantType::Uint:
+				return sizeof(uint32_t); // 32 bits!
 			case RadiantType::Float2:
 				return sizeof(glm::vec2);
 			case RadiantType::Float3:
@@ -133,6 +137,8 @@ namespace Radiant
 
 			if (uniform == "int")
 				return RadiantType::Int;
+			if (uniform == "uint")
+				return RadiantType::Uint;
 			if (uniform == "float")
 				return RadiantType::Float;
 			if (uniform == "vec2")

@@ -8,6 +8,24 @@
 namespace Radiant
 {
 
+	namespace Utils
+	{
+		static GLenum TextureTarget(bool multisampled)
+		{
+			return multisampled ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+		}
+
+		static void CreateTextures(bool multisampled, RendererID* outID, uint32_t count)
+		{
+			glCreateTextures(TextureTarget(multisampled), 1, outID);
+		}
+
+		static void BindTexture(bool multisampled, RendererID id)
+		{
+			glBindTexture(TextureTarget(multisampled), id);
+		}
+	}
+
 	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferSpecification& spec)
 		: m_Specification(spec)
 	{
@@ -29,42 +47,13 @@ namespace Radiant
 		m_Specification.Width = width;
 		m_Specification.Height = height;
 
-		Rendering::SubmitCommand([this]()
+		Memory::Shared<OpenGLFramebuffer> instance = this;
+		Rendering::SubmitCommand([instance]()
 			{
-				if (m_RendererID)
-				{
-					glDeleteFramebuffers(1, &m_RendererID);
-					glDeleteTextures(1, &m_ColorAttachment);
-					glDeleteTextures(1, &m_DepthAttachment);
-				}
+				bool multisampled = instance->m_Specification.Samples > 1;
+				int samples = instance->m_Specification.Samples;
+
 				
-				glGenFramebuffers(1, &m_RendererID);
-				glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
-
-				glGenTextures(1, &m_ColorAttachment);
-				glBindTexture(GL_TEXTURE_2D, m_ColorAttachment);
-
-				auto format = Utils::OpenGLImageInternalFormat(m_Specification.Format);
-				auto type = Utils::OpenGLFormatDataType(m_Specification.Format);
-
-				glTexImage2D(GL_TEXTURE_2D, 0, format, m_Specification.Width, m_Specification.Height, 0, GL_RGBA, type, NULL);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_ColorAttachment, 0);
-
-				glGenTextures(1, &m_DepthAttachment);
-				glBindTexture(GL_TEXTURE_2D, m_DepthAttachment);
-				glTexImage2D(
-					GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, m_Specification.Width, m_Specification.Height, 0,
-					GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL
-				);
-
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_DepthAttachment, 0);
-
-
-				if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-					RADIANT_VERIFY(false, "Framebuffer is incomplete!");
 			});
 
 	}

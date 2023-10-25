@@ -13,6 +13,7 @@ namespace Radiant
 		virtual Memory::Shared<Shader> GetShader() { return m_Shader; }
 	public:
 		virtual bool SetValue(const std::string& name, float value, UniformTarget type) override;
+		virtual bool SetValue(const std::string& name, uint32_t value, UniformTarget type) override;
 		virtual bool SetValue(const std::string& name, int value, UniformTarget type) override;
 		virtual bool SetValue(const std::string& name, const glm::vec2& value, UniformTarget type) override;
 		virtual bool SetValue(const std::string& name, const glm::vec3& value, UniformTarget type) override;

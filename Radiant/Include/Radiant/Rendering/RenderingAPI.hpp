@@ -19,7 +19,7 @@ namespace Radiant
 		std::string Version;
 
 		int MaxSamples = 0;
-		float MaxAnisotropy = 0.0f;
+		float MaxAnisotropy = 0.0f; // Texture filtering
 		int MaxTextureUnits = 0;
 	};
 
