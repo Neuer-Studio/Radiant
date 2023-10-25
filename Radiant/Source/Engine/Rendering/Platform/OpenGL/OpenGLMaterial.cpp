@@ -46,6 +46,31 @@ namespace Radiant
 		return Set(name, (std::byte*)&value, type, RadiantType::Uint);
 	}
 
+	bool OpenGLMaterial::SetValue(const std::string& name, const Memory::Shared<Texture2D>& texture)
+	{
+		if (!m_Shader->HasBufferUniform(name, UniformTarget::Sampler))
+		{
+			RADIANT_VERIFY(false, "");
+			return false;
+		}
+
+		ShaderUniformDeclaration& uniform = m_Shader->GetBufferUniform(name, UniformTarget::Sampler);
+		RadiantType uType = uniform.Type;
+		if (uType != RadiantType::sampler2D)
+		{
+			RADIANT_VERIFY(false);
+			return false;
+		}
+
+		m_Textures2D.push_back({ uniform.Position, texture});
+		return true;
+	}
+
+	bool OpenGLMaterial::SetValue(const std::string& name, const Memory::Shared<TextureCube>& texture)
+	{
+		return true;
+	}
+
 	float OpenGLMaterial::GetFloat(const std::string& name, UniformTarget type)
 	{
 		return Get<float>(name, type, RadiantType::Float);
@@ -140,10 +165,16 @@ namespace Radiant
 		Rendering::SubmitCommand([instance]() mutable
 			{
 				glUseProgram(instance->m_Shader.As<OpenGLShader>()->GetRendererID());
-				for (auto buffer : instance->m_OverrideValues)
+				for (const auto buffer : instance->m_OverrideValues)
 				{
 					instance->m_Shader.As<OpenGLShader>()->UpdateShaderValue(buffer);
 				}
+
+				for (const auto texture : instance->m_Textures2D)
+				{
+					texture.texture->Bind(texture.position);
+				}
+
 				instance->m_OverrideValues.clear();
 			});
 	}

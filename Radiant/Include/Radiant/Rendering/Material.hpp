@@ -25,6 +25,8 @@ namespace Radiant
 		virtual bool SetValue(const std::string& name, const glm::vec3& value, UniformTarget type) = 0;
 		virtual bool SetValue(const std::string& name, const glm::vec4& value, UniformTarget type) = 0;
 		virtual bool SetValue(const std::string& name, const glm::mat4& value, UniformTarget type) = 0;
+		virtual bool SetValue(const std::string& name, const Memory::Shared<Texture2D>& texture) = 0;
+		virtual bool SetValue(const std::string& name, const Memory::Shared<TextureCube>& texture) = 0;
 
 		virtual float GetFloat(const std::string& name, UniformTarget type) = 0;
 		virtual float& GetFloatRef(const std::string& name, UniformTarget type) = 0;

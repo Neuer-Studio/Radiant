@@ -203,9 +203,11 @@ namespace Radiant
 
 		auto fragmentUniforms = Utils::ExtractUniformNames(fragmentSource);
 
-		// Parsing Fragment shader
+		// Parsing Fragment shader (Sampler include)
 		{
-			int32_t uIndex = 0;
+			int32_t uIndex = 0; // regular uniform
+			int32_t sIndex = 0; // sampler uniform
+
 			for (auto name : fragmentUniforms)
 			{
 				RadiantType Type = fragmentUniforms[uIndex].Type;
@@ -214,7 +216,7 @@ namespace Radiant
 				// Extract samplers
 				if (Type == RadiantType::sampler1D || Type == RadiantType::sampler2D || Type == RadiantType::sampler3D)
 				{
-					m_SamplerUniforms.Uniforms[Name] = { Type, UniformTarget::Sampler, Name, uIndex };
+					m_SamplerUniforms.Uniforms[Name] = { Type, UniformTarget::Sampler, Name, sIndex++ };
 				}
 
 				// Extract regular uniforms
@@ -265,10 +267,14 @@ namespace Radiant
 
 	void OpenGLShader::UploadSamplerUniforms()
 	{
-		for (const auto& [Name, Uniform] : m_SamplerUniforms.Uniforms)
-		{
-			glUniform1i(GetExternalUniformPosition(Name.c_str()), Uniform.Position);
-		}
+		Memory::Shared<OpenGLShader> instance = this;
+		Rendering::SubmitCommand([instance]() mutable
+			{
+				for (const auto& [Name, Uniform] : instance->m_SamplerUniforms.Uniforms)
+				{
+					glUniform1i(instance->GetExternalUniformPosition(Name.c_str()), Uniform.Position);
+				}
+			});
 	}
 
 	OpenGLShader::OpenGLShader(const std::filesystem::path& path)
@@ -377,8 +383,8 @@ namespace Radiant
 		Rendering::SubmitCommand([=]()
 			{
 				CompileAndUploadShader();
-				UploadSamplerUniforms();
 				Parse();
+				UploadSamplerUniforms();
 			});
 
 	}

@@ -111,6 +111,7 @@ namespace Radiant
 
 	void SceneRendering::GeometryPass()
 	{
+		static auto texture = Texture2D::Create("Resources/Meshes/Laminate floor/textures/laminate_floor_02_diff_4k.jpg");
 		Rendering::BindRenderingPass(s_SceneInfo->GeometryInfo.GeometryPass);
 		{
 			for(const auto& cube : s_SceneInfo->TextureCubeList)
@@ -125,6 +126,7 @@ namespace Radiant
 
 				material->SetValue("u_ViewProjection", s_SceneInfo->Camera.ViewProjection, UniformTarget::Vertex);
 				material->SetValue("u_CameraPosition", s_SceneInfo->Camera.CameraPosition, UniformTarget::Fragment);
+				material->SetValue("u_Texture", texture);
 
 				UpdateDirectionalLight(material);
 				Rendering::DrawMesh(dc.Mesh, material);
