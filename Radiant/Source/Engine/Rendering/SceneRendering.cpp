@@ -34,6 +34,8 @@ namespace Radiant
 		std::vector<Memory::Shared<TextureCube>> TextureCubeList;
 		Memory::Shared<class Material> QuadMaterial;
 
+		uint32_t Samples;
+
 		struct
 		{
 			glm::mat4 ViewProjection;
@@ -64,9 +66,6 @@ namespace Radiant
 
 		{
 			FramebufferSpecification FrameBufferComposite;
-			FrameBufferComposite.Height = 1;
-			FrameBufferComposite.Width = 1;
-			FrameBufferComposite.Samples = 1;
 			FrameBufferComposite.ClearColor = glm::vec4(0.5f);
 			FrameBufferComposite.Format = ImageFormat::RGBA8;
 
@@ -74,7 +73,7 @@ namespace Radiant
 			PassComposite.TargetFramebuffer = Framebuffer::Create(FrameBufferComposite);
 			s_SceneInfo->CompositeInfo.CompositePass = RenderingPass::Create(PassComposite);
 
-			s_SceneInfo->CompositeInfo.CompositeShader = Shader::Create("Resources/Shaders/hdr.rads");
+			s_SceneInfo->CompositeInfo.CompositeShader = Shader::Create("Resources/Shaders/Scene.rads");
 			s_SceneInfo->CompositeInfo.CompositeMaterial = Material::Create(s_SceneInfo->CompositeInfo.CompositeShader);
 		}
 
@@ -82,11 +81,9 @@ namespace Radiant
 
 		{
 			FramebufferSpecification FrameBufferGeometry;
-			FrameBufferGeometry.Height = 1;
-			FrameBufferGeometry.Width = 1;
-			FrameBufferGeometry.Samples = 1;
 			FrameBufferGeometry.ClearColor = glm::vec4(0.5f); 
-			FrameBufferGeometry.Format = ImageFormat::RGB16AF;
+			FrameBufferGeometry.Format = ImageFormat::RGBA16F;
+			s_SceneInfo->Samples = FrameBufferGeometry.Samples = 16;
 
 			RenderingPassSpecification PassGeometry;
 			PassGeometry.TargetFramebuffer = Framebuffer::Create(FrameBufferGeometry);
@@ -141,7 +138,7 @@ namespace Radiant
 		Rendering::BindRenderingPass(s_SceneInfo->CompositeInfo.CompositePass);
 		{
 			s_SceneInfo->CompositeInfo.CompositeMaterial->SetValue("u_Exposure", m_Context->m_Exposure, UniformTarget::Fragment);
-			s_SceneInfo->CompositeInfo.CompositeMaterial->SetValue("u_TextureSamples", (int)s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->GetSpecification().Samples, UniformTarget::Fragment);
+			s_SceneInfo->CompositeInfo.CompositeMaterial->SetValue("u_TextureSamples", (uint32_t)s_SceneInfo->Samples, UniformTarget::Fragment);
 			s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->BindTexture();
 
 		}
@@ -214,6 +211,16 @@ namespace Radiant
 		s_SceneInfo->Camera.CameraPosition = camera->GetPosition();
 
 		camera->Update();
+	}
+
+	uint32_t SceneRendering::GetSamplesCount()
+	{
+		return s_SceneInfo->Samples;
+	}
+
+	void SceneRendering::SetSampelsCount(uint32_t count)
+	{
+		s_SceneInfo->Samples = count;
 	}
 
 }

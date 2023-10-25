@@ -25,6 +25,9 @@ namespace Radiant
 		void SubmitScene(Camera* camera);
 
 		uint32_t GetFinalPassImage(); // TODO(Danya): Set result type Image2D
+
+		uint32_t GetSamplesCount();
+		void SetSampelsCount(uint32_t count = 2u);
 	private:
 		void AddMeshToDrawList(DrawProperties component) const;
 		void AddMeshToDrawListWithShader(const Memory::Shared<Mesh>& mesh) const;
@@ -43,7 +46,7 @@ namespace Radiant
 	private:
 		std::size_t m_ViewportWidth = -1, m_ViewportHeight = -1;
 		Memory::Shared<Scene> m_Context;
-
 		friend Scene;
+		friend SceneRenderingPanel;
 	};
 }

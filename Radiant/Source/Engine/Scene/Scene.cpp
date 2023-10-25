@@ -68,6 +68,8 @@ namespace Radiant
 
 	void Scene::UpdateScene(const Memory::Shared<SceneRendering>& rendering, SceneType type) // TODO(Danya): Update scene render 
 	{
+		m_SceneRendering = rendering;
+
 		m_ViewportWidth = rendering->m_ViewportWidth;
 		m_ViewportHeight = rendering->m_ViewportHeight;
 

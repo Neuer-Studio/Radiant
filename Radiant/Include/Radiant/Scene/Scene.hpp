@@ -36,6 +36,8 @@ namespace Radiant
 		Entity* m_SelectedEntity = nullptr; // NOTE(Danya): Using for panels
 		std::vector<Entity*> m_Entitys;
 
+		Memory::Shared<SceneRendering> m_SceneRendering;
+
 		std::string m_SceneName;
 		Utils::UUID m_UUID;
 

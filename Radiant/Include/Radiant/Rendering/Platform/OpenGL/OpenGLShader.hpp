@@ -31,6 +31,7 @@ namespace Radiant
 		void Parse();
 	private:
 		void UploadUniformInt(int32_t location, int value, UniformTarget type);
+		void UploadUniformUint(int32_t location, int value, UniformTarget type);
 
 		void UploadUniformFloat(int32_t location, float value, UniformTarget type);
 		void UploadUniformFloat2(int32_t location, const glm::vec2& values, UniformTarget type);

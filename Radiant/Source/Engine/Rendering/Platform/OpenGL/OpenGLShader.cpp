@@ -458,6 +458,14 @@ namespace Radiant
 			LOG_UNIFORM("Uniform 'X' not found!");
 	}
 
+	void OpenGLShader::UploadUniformUint(int32_t location, int value, UniformTarget type)
+	{
+		if (location != -1)
+			glUniform1ui(location, value);
+		else
+			LOG_UNIFORM("Uniform 'X' not found!");
+	}
+
 	void OpenGLShader::UploadUniformFloat(int32_t location, float value, UniformTarget type)
 	{
 		if (location != -1)
@@ -501,6 +509,18 @@ namespace Radiant
 
 	void OpenGLShader::UpdateShaderValue(const ShaderUniformDeclaration& decl)
 	{
+		if (decl.Type == RadiantType::Int)
+		{
+			UploadUniformInt(decl.Position, *(int*)&decl.Value, decl.Target);
+			return;
+		}
+
+		if (decl.Type == RadiantType::Uint)
+		{
+			UploadUniformUint(decl.Position, *(uint32_t*)&decl.Value, decl.Target);
+			return;
+		}
+
 		if (decl.Type == RadiantType::Float)
 		{
 			UploadUniformFloat(decl.Position, *(float*)&decl.Value, decl.Target);

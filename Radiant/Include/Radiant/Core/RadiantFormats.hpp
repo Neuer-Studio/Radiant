@@ -7,7 +7,7 @@ namespace Radiant
 		None = 0,
 		RGBA8,
 		RGBA,
-		RGB16AF,
+		RGBA16F,
 		RGBA32F,
 	};
 }
