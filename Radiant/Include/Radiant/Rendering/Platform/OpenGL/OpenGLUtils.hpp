@@ -13,7 +13,7 @@ namespace Radiant
 		{
 			switch (format)
 			{
-			case ImageFormat::RGBA8:		return GL_RGBA8;
+			case ImageFormat::RGBA8:	return GL_RGBA8;
 			case ImageFormat::RGBA:		return GL_RGBA;
 			case ImageFormat::RGBA16F:	return GL_RGBA16F;
 			case ImageFormat::RGBA32F:	return GL_RGBA32F;

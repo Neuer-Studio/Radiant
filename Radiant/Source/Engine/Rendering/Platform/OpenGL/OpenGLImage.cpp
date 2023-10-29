@@ -32,25 +32,19 @@ namespace Radiant
 			Release();
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_RenderingID);
-		//GLenum internalFormat = Utils::OpenGLImageInternalFormat(m_Format);
-		uint32_t mipCount = Utils::CalculateMipCount(m_Width, m_Height);
-		glTextureStorage2D(m_RenderingID, mipCount, GL_RGB8, m_Width, m_Height);
+		glBindTexture(GL_TEXTURE_2D, m_RenderingID);
 
-		if (m_ImageData)
-		{
-			GLenum format = Utils::OpenGLImageInternalFormat(m_Format);
-			GLenum dataType = Utils::OpenGLFormatDataType(m_Format);
-			glTextureSubImage2D(m_RenderingID, 0, 0, 0, m_Width, m_Height, format, dataType, m_ImageData.Data);
-			glGenerateTextureMipmap(m_RenderingID); // TODO: optional
-		}
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		glCreateSamplers(1, &m_SamplerRenderingID);
-		glSamplerParameteri(m_SamplerRenderingID, GL_TEXTURE_MIN_FILTER, m_ImageData ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
-		glSamplerParameteri(m_SamplerRenderingID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glSamplerParameteri(m_SamplerRenderingID, GL_TEXTURE_WRAP_R, GL_REPEAT);
-		glSamplerParameteri(m_SamplerRenderingID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glSamplerParameteri(m_SamplerRenderingID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		GLenum format = Utils::OpenGLImageInternalFormat(m_Format);
 
+		glTexImage2D(GL_TEXTURE_2D, 0, format, m_Width, m_Height, 0, format, GL_UNSIGNED_BYTE, m_ImageData.As<void*>());
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 	}
 	

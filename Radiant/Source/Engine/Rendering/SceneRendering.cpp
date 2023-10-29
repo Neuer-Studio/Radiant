@@ -123,8 +123,9 @@ namespace Radiant
 
 				material->SetValue("u_Transform", dc.Transform, UniformTarget::Vertex);
 				material->SetValue("u_ViewProjection", s_SceneInfo->Camera.ViewProjection, UniformTarget::Vertex);
+
 				material->SetValue("u_CameraPosition", s_SceneInfo->Camera.CameraPosition, UniformTarget::Fragment);
-				material->SetValue("u_Textursdfsdfsdfs", texture);
+				material->SetValue("u_AlbedoTexture", texture);
 
 				UpdateDirectionalLight(material);
 				Rendering::DrawMesh(dc.Mesh, material);
