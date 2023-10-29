@@ -38,6 +38,9 @@ namespace Radiant
 
 		inline const std::string& GetFilePath() const { return m_FilePath; }
 		inline const std::string& GetName() const { return m_Name; }
+		inline Memory::Shared<Material>& GetMaterial() { return m_Material; }
+		inline const Memory::Shared<Shader>& GetShader() { return m_Shader; }
+		inline void SetShader(const Memory::Shared<Shader>& shader) { m_Shader = shader; }
 	private:
 		std::string m_FilePath;
 		std::string m_Name;

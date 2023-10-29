@@ -35,6 +35,8 @@ struct Light
 uniform Light u_Light;
 uniform vec3 u_CameraPosition;
 
+uniform sampler2D u_Texture;
+
 out vec4 o_Color;
 
 vec3 Lighting()
@@ -72,6 +74,7 @@ vec3 Lighting()
 
 void main()
 {
-    vec3 light = Lighting();
+    vec3 ambient = vec3(texture(u_Texture, vec2(0.1, 0.1)));
+    vec3 light = Lighting() * ambient;
     o_Color = vec4(light, 1.0);
 }

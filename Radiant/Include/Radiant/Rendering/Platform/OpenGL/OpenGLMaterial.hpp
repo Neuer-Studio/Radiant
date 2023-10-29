@@ -16,7 +16,11 @@ namespace Radiant
 		OpenGLMaterial(const Memory::Shared<Shader> shader);
 		virtual ~OpenGLMaterial() override = default;
 
+		virtual void GetShader(const Memory::Shared<Shader>& shader) override { m_Shader = shader; }
+
 		virtual Memory::Shared<Shader> GetShader() { return m_Shader; }
+	public:
+		virtual std::size_t GetOverridedValuesSize() { return m_OverrideValues.size(); }
 	public:
 		virtual bool SetValue(const std::string& name, float value, UniformTarget type) override;
 		virtual bool SetValue(const std::string& name, uint32_t value, UniformTarget type) override;

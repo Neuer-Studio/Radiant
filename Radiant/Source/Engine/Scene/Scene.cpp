@@ -84,11 +84,13 @@ namespace Radiant
 			{
 				const auto mesh = e->GetComponent(ComponentType::Mesh).As<MeshComponent>()->Mesh;
 				if (!mesh) break;
-				rendering->AddMeshToDrawList(
-					{ 
+				const auto& material = e->GetComponent(ComponentType::Material).As<MaterialComponent>()->Material;
+				rendering->AddMeshToDrawList
+				({
 						mesh,
-						e->GetComponent(ComponentType::Transform).As<TransformComponent>()->GetTransform()
-					});
+						e->GetComponent(ComponentType::Transform).As<TransformComponent>()->GetTransform(),
+						material
+				});
 			}
 
 			if (e->HasComponent(ComponentType::Cube))

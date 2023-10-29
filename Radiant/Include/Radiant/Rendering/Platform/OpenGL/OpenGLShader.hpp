@@ -17,8 +17,6 @@ namespace Radiant
 		virtual void Bind() override;
 		virtual void Unbind() override;
 
-		virtual Memory::Shared<Material> GetMaterialInstance() const { return m_Material; }
-
 		virtual const std::string& GetName() const override { return m_Name; }
 		virtual const std::filesystem::path& GetPath() const override { return m_AssetPath; }
 		virtual RendererID GetRendererID() const override { return m_RenderingID; };
@@ -48,7 +46,6 @@ namespace Radiant
 		RendererID m_RenderingID = 0;
 		std::filesystem::path m_AssetPath;
 		std::string m_Name;
-		Memory::Shared<Material> m_Material;
 
 		std::unordered_map<GLenum, std::string> m_ShaderSource;
 	private:

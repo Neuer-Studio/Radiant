@@ -73,7 +73,6 @@ namespace Radiant
 		virtual const std::string& GetName() const = 0;
 		virtual const std::filesystem::path& GetPath() const = 0;
 		virtual RendererID GetRendererID() const = 0;
-		virtual Memory::Shared<Material> GetMaterialInstance() const = 0;
 
 		static Memory::Shared<Shader> Create(const std::filesystem::path& path);
 	public:

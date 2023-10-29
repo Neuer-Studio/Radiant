@@ -8,7 +8,6 @@ namespace Radiant
 	OpenGLMaterial::OpenGLMaterial(const Memory::Shared<Shader> shader)
 		:m_Shader(shader)
 	{
-		m_Shader.As<OpenGLShader>()->m_Material = this;
 	}
 
 	bool OpenGLMaterial::SetValue(const std::string& name, float value, UniformTarget type)
@@ -176,6 +175,7 @@ namespace Radiant
 				}
 
 				instance->m_OverrideValues.clear();
+				instance->m_Textures2D.clear();
 			});
 	}
 }

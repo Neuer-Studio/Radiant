@@ -117,16 +117,14 @@ namespace Radiant
 			for(const auto& cube : s_SceneInfo->TextureCubeList)
 				DrawSkyLight(cube);
 
-			for (const auto& dc : s_SceneInfo->MeshDrawList)
+			for (auto& dc : s_SceneInfo->MeshDrawList)
 			{
-				Memory::Shared<Material> material;
-				material = Material::Create(s_SceneInfo->StaticShader);
+				Memory::Shared<Material>& material = dc.Material;
 
 				material->SetValue("u_Transform", dc.Transform, UniformTarget::Vertex);
-
 				material->SetValue("u_ViewProjection", s_SceneInfo->Camera.ViewProjection, UniformTarget::Vertex);
 				material->SetValue("u_CameraPosition", s_SceneInfo->Camera.CameraPosition, UniformTarget::Fragment);
-				material->SetValue("u_Texture", texture);
+				material->SetValue("u_Textursdfsdfsdfs", texture);
 
 				UpdateDirectionalLight(material);
 				Rendering::DrawMesh(dc.Mesh, material);

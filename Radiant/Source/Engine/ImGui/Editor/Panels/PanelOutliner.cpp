@@ -345,6 +345,10 @@ namespace Radiant
 					if (!file.empty())
 					{
 						mesh = Memory::Shared<Mesh>::Create(file);
+
+						auto& material = mesh->GetMaterial();
+						auto materialComponent = CreateNewComponent<MaterialComponent>(material);
+						entity->AddComponent(materialComponent);
 					}
 				}
 
@@ -364,6 +368,12 @@ namespace Radiant
 				DrawVec3UI("Radiance", component.As<DirectionLightComponent>()->DirLight.Radiance);
 			});
 
+
+		DrawComponentUI(ComponentType::Material, "Material", entity, [=](Memory::Shared<Component>& component) mutable
+			{
+				auto a = component.As<MaterialComponent>()->Material->GetOverridedValuesSize();
+				ImGui::Text("Test Material %u", component.As<MaterialComponent>()->Material->GetOverridedValuesSize());
+			});
 
 		/* New Component */
 

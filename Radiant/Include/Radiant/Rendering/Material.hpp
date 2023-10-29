@@ -17,6 +17,9 @@ namespace Radiant
 		virtual ~Material() = default;
 
 		virtual Memory::Shared<Shader> GetShader() = 0;
+		virtual void GetShader(const Memory::Shared<Shader>& shader) = 0;
+	public:
+		virtual std::size_t GetOverridedValuesSize() = 0;
 	public:
 		virtual bool SetValue(const std::string& name, float value, UniformTarget type) = 0;
 		virtual bool SetValue(const std::string& name, uint32_t value, UniformTarget type) = 0;
