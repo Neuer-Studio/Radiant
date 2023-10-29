@@ -171,7 +171,8 @@ namespace Radiant
 
 				for (const auto texture : instance->m_Textures2D)
 				{
-					texture.texture->Bind(texture.position);
+					auto id = texture.texture->GetImage()->GetImageID();
+					glBindTextureUnit(texture.position,id);
 				}
 
 				instance->m_OverrideValues.clear();

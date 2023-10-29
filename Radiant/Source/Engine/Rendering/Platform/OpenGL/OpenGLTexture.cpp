@@ -64,7 +64,12 @@ namespace Radiant
 
 	void OpenGLTexture2D::Bind(uint32_t slot) const
 	{
-		glBindTextureUnit(slot, m_Image.As<OpenGLImage2D>()->GetRenderingID());
+		Memory::Shared<OpenGLImage2D> image = m_Image.As<OpenGLImage2D>();
+		Rendering::SubmitCommand([slot, image]() 
+			{
+				glBindTextureUnit(slot, image->GetRenderingID());
+			});
+
 	}
 
 	/*********************** Texture Cube ***********************/
