@@ -45,8 +45,10 @@ namespace Radiant
 	Mesh::Mesh(const std::string& filepath)
 		: m_FilePath(filepath), m_Name(Utils::FileSystem::GetFileName(filepath))
 	{
+		LogStream::Initialize();
+
 		RADIANT_VERIFY(Utils::FileSystem::Exists(filepath));
-		RA_INFO("Loading mesh: {0}", filepath.c_str());
+		RA_INFO("Loading static mesh: {0}", filepath.c_str());
 
 		Assimp::Importer importer;
 
@@ -69,6 +71,15 @@ namespace Radiant
 			Vertex vertex;
 			vertex.Position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
 			vertex.Normals = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
+
+			if (mesh->HasTangentsAndBitangents())
+			{
+				vertex.Tangent = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };
+				vertex.Binormal = { mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z };
+			}
+
+			if (mesh->HasTextureCoords(0))
+				vertex.TexCoords = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
 
 			m_Vertices.push_back(vertex);
 		}

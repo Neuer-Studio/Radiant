@@ -11,7 +11,7 @@ namespace Radiant
 		OpenGLTexture2D(const std::filesystem::path& path, bool srgb);
 		virtual ~OpenGLTexture2D() override;
 
-		virtual void Bind(uint32_t slot ) const;
+		virtual void Bind(uint32_t slot) const;
 
 		virtual Memory::Shared<Image2D> GetImage() const override { return m_Image; }
 		virtual ImageFormat GetImageFormat() const { return m_Image->GetFormat(); }
