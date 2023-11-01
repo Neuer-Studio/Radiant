@@ -10,8 +10,8 @@ namespace Radiant
 	class OpenGLImage2D final : public Image2D
 	{
 	public:
-		OpenGLImage2D(ImageFormat format, std::size_t width, std::size_t height, Memory::Buffer buffer);
-		OpenGLImage2D(ImageFormat format, std::size_t width, std::size_t height, const void* data);
+		OpenGLImage2D(ImageFormat format, std::size_t width, std::size_t height, Memory::Buffer buffer, uint32_t samples);
+		OpenGLImage2D(ImageFormat format, std::size_t width, std::size_t height, const void* data, uint32_t samples);
 		virtual ~OpenGLImage2D() override;
 
 		virtual void Release() override;
@@ -30,6 +30,7 @@ namespace Radiant
 		ImageFormat m_Format;
 		std::uint32_t m_Width;
 		std::uint32_t m_Height;
+		std::uint32_t m_SamplersCount = 1;
 		Memory::Buffer m_ImageData;
 
 		RendererID m_RenderingID = 0;

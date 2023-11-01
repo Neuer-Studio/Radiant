@@ -24,7 +24,8 @@ namespace Radiant
 		
 		void SubmitScene(Camera* camera);
 
-		uint32_t GetFinalPassImage(); // TODO(Danya): Set result type Image2D
+		Memory::Shared<Image2D> GetFinalPassImage(); // TODO(Danya): Set result type Image2D
+		Memory::Shared<Image2D> GetFinalDepthImage(); // TODO(Danya): Set result type Image2D
 
 		uint32_t GetSamplesCount();
 		void SetSampelsCount(uint32_t count = 2u);

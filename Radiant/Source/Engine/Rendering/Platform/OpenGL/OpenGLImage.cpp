@@ -7,15 +7,32 @@
 
 namespace Radiant
 {
+	namespace Utils
+	{
+		static GLenum TextureTarget(bool multisampled)
+		{
+			return multisampled ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+		}
 
-	OpenGLImage2D::OpenGLImage2D(ImageFormat format, std::size_t width, std::size_t height, Memory::Buffer buffer)
-		: m_Format(format), m_Width(width), m_Height(height), m_ImageData(buffer)
+		static void CreateTextures(bool multisampled, RendererID* outID, uint32_t count)
+		{
+			glCreateTextures(TextureTarget(multisampled), count, outID);
+		}
+
+		static void BindTexture(bool multisampled, RendererID id)
+		{
+			glBindTexture(TextureTarget(multisampled), id);
+		}
+	}
+
+	OpenGLImage2D::OpenGLImage2D(ImageFormat format, std::size_t width, std::size_t height, Memory::Buffer buffer, uint32_t samples)
+		: m_Format(format), m_Width(width), m_Height(height), m_ImageData(buffer), m_SamplersCount(samples)
 	{
 		
 	}
 
-	OpenGLImage2D::OpenGLImage2D(ImageFormat format, std::size_t width, std::size_t height, const void *data)
-		: m_Format(format), m_Width(width), m_Height(height)
+	OpenGLImage2D::OpenGLImage2D(ImageFormat format, std::size_t width, std::size_t height, const void *data, uint32_t samples)
+		: m_Format(format), m_Width(width), m_Height(height), m_SamplersCount(samples)
 	{
 		if (data)
 			m_ImageData = Memory::Buffer::Copy(data, Utils::GetImageMemorySize(format, width, height));
@@ -26,25 +43,47 @@ namespace Radiant
 		Release();
 	}
 
-	void OpenGLImage2D::Invalidate() // TODO: Many seetings
+	void OpenGLImage2D::Invalidate() // TODO: clean up
 	{
 		if (m_RenderingID)
 			Release();
 
-		glCreateTextures(GL_TEXTURE_2D, 1, &m_RenderingID);
-		glBindTexture(GL_TEXTURE_2D, m_RenderingID);
+		bool ms = m_SamplersCount > 1;
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		Utils::CreateTextures(ms, &m_RenderingID, 1);
+		Utils::BindTexture(ms, m_RenderingID);
 
-		GLenum format = Utils::OpenGLImageInternalFormat(m_Format);
+		GLenum internal = Utils::OpenGLImageInternalFormat(m_Format);
+		if (ms)
+		{
+			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_SamplersCount, internal, m_Width, m_Height, GL_FALSE);
+		}
 
-		glTexImage2D(GL_TEXTURE_2D, 0, format, m_Width, m_Height, 0, format, GL_UNSIGNED_BYTE, m_ImageData.As<void*>());
-		glGenerateMipmap(GL_TEXTURE_2D);
+		else
+		{
+			// Only RGBA aaccess for now
+			GLenum format = Utils::OpenGLFormatDataType(m_Format);
+			if (Utils::IsDepthFormat(m_Format))
+			{
+				glTexStorage2D(GL_TEXTURE_2D, 1, format, m_Width, m_Height);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			}
+			else 
+			{
+				glTexImage2D(GL_TEXTURE_2D, 0, internal, m_Width, m_Height, 0, GL_RGBA, format, m_ImageData ? m_ImageData.As<void*>() : nullptr);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			}
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+			if (!Utils::IsDepthFormat(m_Format))
+				glGenerateMipmap(GL_TEXTURE_2D);
+		}
+
+
+		Utils::BindTexture(ms, 0);
 
 	}
 	

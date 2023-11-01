@@ -130,6 +130,24 @@ namespace Radiant
 		return GetRef<glm::mat4>(name, type, RadiantType::Mat4);
 	}
 
+	Memory::Shared<Texture2D> OpenGLMaterial::GetTexture2D(const std::string& name)
+	{
+		if (!m_Shader->HasBufferUniform(name, UniformTarget::Sampler))
+			RADIANT_VERIFY(false, "");
+
+		ShaderUniformDeclaration& uniform = m_Shader->GetBufferUniform(name, UniformTarget::Sampler);
+		uint32_t position = uniform.Position;
+
+		for (const auto& unit : m_Textures2D)
+		{
+			if (unit.position == position)
+				return unit.texture;
+		}
+
+		RADIANT_VERIFY(false, "Texture doesnt found!");
+		return {};
+	}
+
 	// ========================================================
 
 	bool OpenGLMaterial::Set(const std::string& name, const std::byte* value, UniformTarget type, RadiantType uniformType)

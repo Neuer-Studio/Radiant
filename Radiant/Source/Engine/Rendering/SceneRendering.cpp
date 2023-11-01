@@ -182,10 +182,16 @@ namespace Radiant
 		}
 	}
 
-	uint32_t SceneRendering::GetFinalPassImage()
+	Memory::Shared<Image2D> SceneRendering::GetFinalPassImage()
 	{
-		return s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->GetRendererID();
+		return s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->GetImage();
 	}
+
+	Memory::Shared<Image2D> SceneRendering::GetFinalDepthImage()
+	{
+		return s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->GetDepthImage();
+	}
+
 
 	void SceneRendering::DrawSkyLight(const Memory::Shared<TextureCube>& cube) // TODO(Danya): Fix crush(Done)
 	{

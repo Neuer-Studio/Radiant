@@ -49,6 +49,8 @@ namespace Radiant
 		virtual glm::mat4 GetMat4(const std::string& name, UniformTarget type) = 0;
 		virtual glm::mat4& GetMat4Ref(const std::string& name, UniformTarget type) = 0;
 
+		virtual Memory::Shared<Texture2D> GetTexture2D(const std::string& name) = 0;
+
 		virtual void UpdateForRendering() = 0; // NOTE(Danya): Does we need this function?
 	public:
 		uint32_t GetFlags() const { return m_MaterialFlags; }

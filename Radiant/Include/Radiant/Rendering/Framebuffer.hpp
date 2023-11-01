@@ -45,7 +45,6 @@ namespace Radiant
 		virtual uint32_t GetHeight() const = 0;
 
 		virtual RendererID GetRendererID() const = 0;
-		virtual RendererID GetDepth() const = 0; // temp
 
 		virtual Memory::Shared<Image2D> GetImage() const = 0;
 		virtual Memory::Shared<Image2D> GetDepthImage() const = 0;

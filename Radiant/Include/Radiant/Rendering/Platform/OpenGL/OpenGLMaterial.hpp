@@ -50,6 +50,8 @@ namespace Radiant
 		virtual glm::mat4 GetMat4(const std::string& name, UniformTarget type) override;
 		virtual glm::mat4& GetMat4Ref(const std::string& name, UniformTarget type) override;
 
+		virtual Memory::Shared<Texture2D> GetTexture2D(const std::string& name) override;
+
 		virtual void UpdateForRendering() override;
 	private:
 		bool Set(const std::string& name, const std::byte* value, UniformTarget type, RadiantType uniformType);

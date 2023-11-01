@@ -113,7 +113,7 @@ namespace Radiant
 					m_TestScene->GetEntityByComponentType(ComponentType::Camera)->GetComponent(ComponentType::Camera).As<CameraComponent>()->Camera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), viewportSize.x, viewportSize.y, 0.1f, 1000.0f));
 				}
 
-				ImGui::Image((void*)m_Rendering->GetFinalPassImage(), viewportSize, {0, 1}, {1, 0});
+				ImGui::Image((void*)m_Rendering->GetFinalPassImage()->GetImageID(), viewportSize, {0, 1}, {1, 0});
 
 
 				static int counter = 0;

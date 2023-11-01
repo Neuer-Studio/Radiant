@@ -24,14 +24,14 @@ namespace Radiant
 		virtual FramebufferSpecification GetSpecification() { return m_Specification; }
 		virtual const FramebufferSpecification GetSpecification() const { return m_Specification; }
 
-		virtual RendererID GetDepth() const { return m_DepthAttachment; }
-		virtual RendererID GetRendererID() const override { return m_ColorAttachment; } //NOTE: Temp (move to GetImage)
+		virtual Memory::Shared<Image2D> GetImage() const override { return m_ColorAttachment; }
+		virtual Memory::Shared<Image2D> GetDepthImage() const override { return m_DepthAttachment; }
 
-		virtual Memory::Shared<Image2D> GetImage() const override { return {}; }
-		virtual Memory::Shared<Image2D> GetDepthImage() const override { return {}; }
+		virtual RendererID GetRendererID() const override { return m_RendererID; }
+
 	private:
 		FramebufferSpecification m_Specification;
-		RendererID m_ColorAttachment, m_DepthAttachment;
+		Memory::Shared<Image2D> m_ColorAttachment, m_DepthAttachment;
 		RendererID m_RendererID;
 	};
 }

@@ -9,5 +9,11 @@ namespace Radiant
 		RGBA,
 		RGBA16F,
 		RGBA32F,
+
+		// Depth
+		DEPTH32F, 
+
+		// Depth and stencil
+		DEPTH24STENCIL8
 	};
 }
