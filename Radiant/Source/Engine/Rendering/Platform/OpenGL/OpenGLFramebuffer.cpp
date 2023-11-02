@@ -70,16 +70,19 @@ namespace Radiant
 				}
 
 				if (instance->m_ColorAttachment)
-					instance->m_ColorAttachment->Release();
-				if(instance->m_DepthAttachment)
-					instance->m_DepthAttachment->Release();
+				{
+					auto id = instance->m_ColorAttachment->GetImageID();
+					glDeleteTextures(1, (GLuint*)&id);
+				}
+
+				if (instance->m_DepthAttachment)
+				{
+					auto id = instance->m_DepthAttachment->GetImageID();
+					glDeleteTextures(1, (GLuint*)&id);
+				}
 
 				glGenFramebuffers(1, (GLuint*) & instance->m_RendererID);
 				glBindFramebuffer(GL_FRAMEBUFFER, instance->m_RendererID);
-
-				auto InternalFormat = Utils::OpenGLImageInternalFormat(instance->m_Specification.Format);
-				auto type = Utils::OpenGLFormatDataType(instance->m_Specification.Format);
-
 
 				instance->m_ColorAttachment = Utils::CreateAndAttachColorTexture(samples, instance->m_Specification.Format, instance->m_Specification.Width, instance->m_Specification.Height, 0);
 				instance->m_DepthAttachment = Utils::CreateAndAttachDepthTexture(samples, ImageFormat::DEPTH24STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT, instance->m_Specification.Width, instance->m_Specification.Height);

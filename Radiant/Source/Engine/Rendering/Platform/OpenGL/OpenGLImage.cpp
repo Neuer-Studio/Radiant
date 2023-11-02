@@ -49,10 +49,16 @@ namespace Radiant
 			Release();
 
 		bool ms = m_SamplersCount > 1;
+
+		glCreateTextures(Utils::TextureTarget(ms), 1, &m_RenderingID);
+		glBindTexture(Utils::TextureTarget(ms), m_RenderingID);
+
 		if (!ms)
 			Invalidate2D();
 		else
 			Invalidate2DMS();
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	
 	void OpenGLImage2D::Release()
@@ -71,12 +77,35 @@ namespace Radiant
 
 	void OpenGLImage2D::Invalidate2D()
 	{
-		// TODO: Iml.
+		auto InternalFormat = Utils::OpenGLImageInternalFormat(m_Format);
+		auto type = Utils::OpenGLFormatDataType(m_Format);
+
+		if (!Utils::IsDepthFormat(m_Format))
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, InternalFormat, m_Width, m_Height, 0, GL_RGBA, type, m_ImageData ? m_ImageData.As<void*>() : nullptr);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+
+		else
+		{
+			glTexStorage2D(GL_TEXTURE_2D, 1, InternalFormat, m_Width, m_Height);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		}
 	}
 
 	void OpenGLImage2D::Invalidate2DMS()
 	{
-		// TODO: Iml.
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_SamplersCount, Utils::OpenGLImageInternalFormat(m_Format), m_Width, m_Height, GL_FALSE);
 	}
 
 	/************************** Image Cube **************************/
