@@ -115,7 +115,7 @@ namespace Radiant
 	{
 		Rendering::SubmitCommand([=]()
 			{
-				glBindTextureUnit(slot, m_ColorAttachment);
+				glBindTextureUnit(slot, m_ColorAttachment->GetImageID());
 			});
 	}
 }
