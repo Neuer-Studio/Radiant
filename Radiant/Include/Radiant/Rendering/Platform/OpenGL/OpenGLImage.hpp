@@ -17,6 +17,9 @@ namespace Radiant
 		virtual void Release() override;
 		virtual void Invalidate() override;
 
+		void Invalidate2D();
+		void Invalidate2DMS();
+
 		RendererID GetRenderingID() const { return m_RenderingID; }
 		virtual uint32_t GetWidth() const override { return m_Width; }
 		virtual uint32_t GetHeight() const override { return m_Height; }

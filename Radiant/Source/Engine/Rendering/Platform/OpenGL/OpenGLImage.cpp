@@ -49,42 +49,10 @@ namespace Radiant
 			Release();
 
 		bool ms = m_SamplersCount > 1;
-
-		Utils::CreateTextures(ms, &m_RenderingID, 1);
-		Utils::BindTexture(ms, m_RenderingID);
-
-		GLenum internal = Utils::OpenGLImageInternalFormat(m_Format);
-		if (ms)
-		{
-			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_SamplersCount, internal, m_Width, m_Height, GL_FALSE);
-		}
-
+		if (!ms)
+			Invalidate2D();
 		else
-		{
-			// Only RGBA aaccess for now
-			GLenum format = Utils::OpenGLFormatDataType(m_Format);
-			if (Utils::IsDepthFormat(m_Format))
-			{
-				glTexStorage2D(GL_TEXTURE_2D, 1, format, m_Width, m_Height);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			}
-			else 
-			{
-				glTexImage2D(GL_TEXTURE_2D, 0, internal, m_Width, m_Height, 0, GL_RGBA, format, m_ImageData ? m_ImageData.As<void*>() : nullptr);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			}
-
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-			if (!Utils::IsDepthFormat(m_Format))
-				glGenerateMipmap(GL_TEXTURE_2D);
-		}
-
-
-		Utils::BindTexture(ms, 0);
-
+			Invalidate2DMS();
 	}
 	
 	void OpenGLImage2D::Release()
@@ -101,6 +69,15 @@ namespace Radiant
 
 	}
 
+	void OpenGLImage2D::Invalidate2D()
+	{
+		// TODO: Iml.
+	}
+
+	void OpenGLImage2D::Invalidate2DMS()
+	{
+		// TODO: Iml.
+	}
 
 	/************************** Image Cube **************************/
 
