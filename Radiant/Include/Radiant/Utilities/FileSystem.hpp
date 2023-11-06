@@ -26,6 +26,8 @@ namespace Radiant::Utils
 		static bool CreateDirectory(const std::string& directory);
 		static bool Exists(const std::filesystem::path& filepath);
 		static bool Exists(const std::string& filepath);
+		static std::string GetFileDirectoryString(const std::filesystem::path& filepath);
+		static std::filesystem::path GetFileDirectory(const std::filesystem::path& filepath);
 	public:
 		static std::filesystem::path OpenFileDialog(const char* filter = "All\0*.*\0");
 		static std::filesystem::path OpenFolderDialog(const char* initialFolder = "");

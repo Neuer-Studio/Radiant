@@ -5,33 +5,67 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include <imgui/imgui.h>
+#include <Radiant/Core/Events/Event.hpp>
 
 #define M_PI 3.14159f
 
 namespace Radiant
 {
-	Camera::Camera()
+	Camera::Camera(const glm::mat4& projectionMatrix)
+		: m_ProjectionMatrix(projectionMatrix)
 	{
-		// Sensible defaults
-		m_PanSpeed = 0.0015f;
-		m_RotationSpeed = 0.002f;
-		m_ZoomSpeed = 0.2f;
-
-		m_Position = { -10, 10, 10 };
 		m_Rotation = glm::vec3(90.0f, 0.0f, 0.0f);
-
 		m_FocalPoint = glm::vec3(0.0f);
-		m_Distance = glm::distance(m_Position, m_FocalPoint);
+
+		glm::vec3 position = { -5, 5, 5 };
+		m_Distance = glm::distance(position, m_FocalPoint);
+
 		m_Yaw = 3.0f * (float)M_PI / 4.0f;
 		m_Pitch = M_PI / 4.0f;
 
+		UpdateCameraView();
+	}
+
+	void Camera::UpdateCameraView()
+	{
+		m_Position = CalculatePosition();
+
+		glm::quat orientation = GetOrientation();
+		m_Rotation = glm::eulerAngles(orientation) * (180.0f / (float)M_PI);
+		m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(orientation);
+		m_ViewMatrix = glm::inverse(m_ViewMatrix);
 	}
 
 	void Camera::Focus()
 	{
 	}
 
-	void Camera::Update()
+	std::pair<float, float> Camera::PanSpeed() const
+	{
+		float x = std::min(m_ViewportWidth / 1000.0f, 2.4f); // max = 2.4f
+		float xFactor = 0.0366f * (x * x) - 0.1778f * x + 0.3021f;
+
+		float y = std::min(m_ViewportHeight / 1000.0f, 2.4f); // max = 2.4f
+		float yFactor = 0.0366f * (y * y) - 0.1778f * y + 0.3021f;
+
+		return { xFactor, yFactor };
+	}
+
+	float Camera::RotationSpeed() const
+	{
+		return 0.8f;
+	}
+
+	float Camera::ZoomSpeed() const
+	{
+		float distance = m_Distance * 0.2f;
+		distance = std::max(distance, 0.0f);
+		float speed = distance * distance;
+		speed = std::min(speed, 100.0f); // max speed = 100
+		return speed;
+	}
+
+	void Camera::OnUpdate(Timestep ts)
 	{
 		if (Input::IsKeyPressed(KeyCode::LeftAlt))
 		{
@@ -39,38 +73,42 @@ namespace Radiant
 			glm::vec2 delta = mouse - m_InitialMousePosition;
 			m_InitialMousePosition = mouse;
 
-			if (Input::IsMouseButtonPressed(Button::Middle))
+			delta *= ts.GetSeconds();
+
+			if (Input::IsMouseButtonPressed(MouseButton::Middle))
 				MousePan(delta);
-			else if (Input::IsMouseButtonPressed(Button::Left))
+			else if (Input::IsMouseButtonPressed(MouseButton::Left))
 				MouseRotate(delta);
-			else if (Input::IsMouseButtonPressed(Button::Right))
+			else if (Input::IsMouseButtonPressed(MouseButton::Right))
 				MouseZoom(delta.y);
 		}
 
-		m_Position = CalculatePosition();
+		UpdateCameraView();
+	}
 
-		glm::quat orientation = GetOrientation();
-		m_Rotation = glm::eulerAngles(orientation) * (180.0f / (float)M_PI);
-		m_ViewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 1)) * glm::toMat4(glm::conjugate(orientation)) * glm::translate(glm::mat4(1.0f), -m_Position);
-
+	void Camera::OnEvent(Event& e)
+	{
+		EventDispatcher dispatcher(e);
 	}
 
 	void Camera::MousePan(const glm::vec2& delta)
 	{
-		m_FocalPoint += -GetRightDirection() * delta.x * m_PanSpeed * m_Distance;
-		m_FocalPoint += GetRightDirection() * delta.y * m_PanSpeed * m_Distance;
+		auto [xSpeed, ySpeed] = PanSpeed();
+		m_FocalPoint += -GetRightDirection() * delta.x * xSpeed * m_Distance;
+		m_FocalPoint += GetUpDirection() * delta.y * ySpeed * m_Distance;
 	}
 
 	void Camera::MouseRotate(const glm::vec2& delta)
 	{
 		float yawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
-		m_Yaw += yawSign * delta.x * m_RotationSpeed;
+		m_Yaw += yawSign * delta.x * RotationSpeed();
+		m_Pitch += delta.y * RotationSpeed();
 	}
 
 	void Camera::MouseZoom(float delta)
 	{
-		m_Distance -= delta * m_ZoomSpeed;
-		if (m_Distance <= 1.0f)
+		m_Distance -= delta * ZoomSpeed();
+		if (m_Distance < 1.0f)
 		{
 			m_FocalPoint += GetForwardDirection();
 			m_Distance = 1.0f;
@@ -100,15 +138,5 @@ namespace Radiant
 	glm::quat Camera::GetOrientation()
 	{
 		return glm::quat(glm::vec3(-m_Pitch, -m_Yaw, 0.0f));
-	}
-
-	void Camera::OnImGuiRendering() 
-	{
-		ImGui::Begin("Camera");
-		ImGui::Text("Position");
-		ImGui::DragFloat("X", &m_FocalPoint.x, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::DragFloat("Y", &m_FocalPoint.y, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::DragFloat("Y", &m_FocalPoint.z, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::End();
 	}
 }

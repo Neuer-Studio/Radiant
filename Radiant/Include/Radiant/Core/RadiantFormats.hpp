@@ -5,9 +5,17 @@ namespace Radiant
 	enum class ImageFormat
 	{
 		None = 0,
-		RGB8,
+		RGB,
+		SRGB8,
+		RGBA8,
 		RGBA,
-		RGB16F,
+		RGBA16F,
 		RGBA32F,
+
+		// Depth
+		DEPTH32F, 
+
+		// Depth and stencil
+		DEPTH24STENCIL8
 	};
 }

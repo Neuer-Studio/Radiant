@@ -1,6 +1,7 @@
 #include <Radiant/ImGui/Editor/Panels/SceneRenderingPanel.hpp>
 #include <Radiant/ImGui/Utilities/API/ImGuiAPI.hpp>
 #include <Radiant/Rendering/RenderingAPI.hpp>
+#include <Radiant/Rendering/SceneRendering.hpp>
 #include <Radiant/ImGui/Utilities/Utilities.hpp>
 
 namespace Radiant
@@ -28,7 +29,21 @@ namespace Radiant
 					Utils::ImGui::Text(viewport);
 					Utils::ImGui::Text(graphicInfo);
 
-					Utils::ImGui::Slider("Exposure", &m_Context->m_Exposure);
+					Utils::ImGui::SliderFloat("Exposure", &m_Context->m_Exposure);
+
+					int samples = (int)m_Context->m_SceneRendering->GetSamplesCount();
+					float lod = (float)m_Context->m_SceneRendering->GetSkyboxLod();
+
+					Utils::ImGui::SliderUint("Samples", &samples, 16);
+					Utils::ImGui::SliderFloat("Skybox Lod", &lod, 0, 11);
+
+					m_Context->m_SceneRendering->SetSampelsCount((uint32_t)samples);
+					m_Context->m_SceneRendering->SetSkyboxLod((float)lod);
+
+					if (m_Context->m_SelectedEntity)
+					{
+
+					}
 				}
 			});
 	}

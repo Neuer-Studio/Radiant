@@ -12,6 +12,14 @@
 
 namespace Radiant
 {
+#define MESH_DEBUG_LOG 1
+#if MESH_DEBUG_LOG
+#define MESH_LOG(...) RA_INFO(__VA_ARGS__)
+#else
+#define MESH_LOG(...)
+#endif
+
+
 	namespace {
 		const unsigned int ImportFlags =
 			aiProcess_CalcTangentSpace |
@@ -42,47 +50,194 @@ namespace Radiant
 		}
 	};
 
-	Mesh::Mesh(const std::string& filename)
+	Mesh::Mesh(const std::string& filepath)
+		: m_FilePath(filepath), m_Name(Utils::FileSystem::GetFileName(filepath))
 	{
-		RADIANT_VERIFY(Utils::FileSystem::Exists(filename));
-		RA_INFO("Loading mesh: {0}", filename.c_str());
+		LogStream::Initialize();
+
+		RADIANT_VERIFY(Utils::FileSystem::Exists(filepath));
+		RA_INFO("Loading static mesh: {0}", filepath.c_str());
 
 		Assimp::Importer importer;
 
-		const aiScene* scene = importer.ReadFile(filename, ImportFlags);
+		const aiScene* scene = importer.ReadFile(filepath, ImportFlags);
 		if (!scene || !scene->HasMeshes())
-			RADIANT_VERIFY("Failed to load mesh file: {0}", filename);
-
-		aiMesh* mesh = scene->mMeshes[0];
-
-		RADIANT_VERIFY(mesh->HasPositions(), "Meshes require positions.");
-		RADIANT_VERIFY(mesh->HasNormals(), "Meshes require normals.");
+			RADIANT_VERIFY("Failed to load mesh file: {0}", filepath);
 
 		m_Shader = Rendering::GetShaderLibrary()->Get("Static_Shader.rads");
 
-		m_Vertices.reserve(mesh->mNumVertices);
+		uint32_t vertexCount = 0;
+		uint32_t indexCount = 0;
 
-		// Extract vertices from model
-		for (size_t i = 0; i < m_Vertices.capacity(); i++)
+		m_Submeshes.reserve(scene->mNumMeshes);
+		m_Materials.resize(scene->mNumMeshes);
+		m_Textures.resize(scene->mNumMeshes);
+
+		for (int i = 0; i < scene->mNumMeshes; i++)
 		{
-			Vertex vertex;
-			vertex.Position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
-			vertex.Normals = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
+			aiMesh* mesh = scene->mMeshes[i];
+			Submesh submesh;
+			submesh.Vertex = vertexCount;
+			submesh.Index = indexCount;
+			submesh.MaterialIndex = mesh->mMaterialIndex;
+			submesh.IndexCount = mesh->mNumFaces * 3;
+			submesh.Name = mesh->mName.C_Str();
 
-			m_Vertices.push_back(vertex);
+			m_Submeshes.push_back(submesh);
+
+			vertexCount += mesh->mNumVertices;
+			indexCount += submesh.IndexCount;
+
+			RADIANT_VERIFY(mesh->HasPositions(), "Meshes require positions.");
+			RADIANT_VERIFY(mesh->HasNormals(), "Meshes require normals.");
+
+			// Extract vertices from model
+			for (size_t i = 0; i < mesh->mNumVertices; i++)
+			{
+				Vertex vertex;
+				vertex.Position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
+				vertex.Normals = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
+
+				if (mesh->HasTangentsAndBitangents())
+				{
+					vertex.Tangent = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };
+					vertex.Binormal = { mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z };
+				}
+
+				if (mesh->HasTextureCoords(0))
+					vertex.TexCoords = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
+
+				m_Vertices.push_back(vertex);
+			}
+
+			// Extract indices from model
+			for (size_t i = 0; i < mesh->mNumFaces; i++)
+			{
+				RADIANT_VERIFY(mesh->mFaces[i].mNumIndices == 3, "Must have 3 indices.");
+				m_Indices.push_back({ mesh->mFaces[i].mIndices[0], mesh->mFaces[i].mIndices[1], mesh->mFaces[i].mIndices[2] });
+			}
+		}
+
+		if (scene->HasMaterials())
+		{
+			MESH_LOG("=====================================", filepath);
+			MESH_LOG("====== Materials - {0} ======", filepath);
+			MESH_LOG("=====================================", filepath);
+
+			for (uint32_t i = 0; i < scene->mNumMaterials; i++)
+			{
+				auto aiMaterial = scene->mMaterials[i];
+				auto aiMaterialName = aiMaterial->GetName();
+
+				auto materialInstance = Material::Create(m_Shader, aiMaterialName.C_Str());
+
+				aiString aiTexPath;
+				glm::vec3 albedoColor(0.8f);
+				aiColor3D aiColor;
+				if (aiMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aiColor) == aiReturn_SUCCESS)
+					albedoColor = { aiColor.r, aiColor.g, aiColor.b };
+
+				bool hasAlbedoTexture = aiMaterial->GetTexture(aiTextureType::aiTextureType_DIFFUSE, 0, &aiTexPath) == AI_SUCCESS;
+				if (hasAlbedoTexture)
+				{
+					std::filesystem::path imagePath = Utils::FileSystem::GetFileDirectory(filepath) / std::filesystem::path(aiTexPath.C_Str());
+					MESH_LOG("		Albedo path = {}", imagePath.string());
+
+					auto texture = Texture2D::Create(imagePath, true);
+					if (texture->Loaded())
+					{
+						m_Textures[i] = texture;
+						materialInstance->SetValue("u_AlbedoTexture", texture);
+						materialInstance->SetValue("u_AlbedoTexToggle", true, UniformTarget::Fragment);
+					}
+
+					else
+					{
+						materialInstance->SetValue("u_MaterialUniform.AlbedoColor", albedoColor, UniformTarget::Fragment);
+						MESH_LOG("		No albedo texture");
+
+					}
+
+				}
+				else
+				{
+					materialInstance->SetValue("u_AlbedoTexToggle", false, UniformTarget::Fragment);
+					materialInstance->SetValue("u_MaterialUniform.AlbedoColor", albedoColor, UniformTarget::Fragment);
+				}
+
+				// Normal texture
+				bool hasNormalTexture = aiMaterial->GetTexture(aiTextureType::aiTextureType_NORMALS, 0, &aiTexPath) == AI_SUCCESS;
+				if (hasNormalTexture)
+				{
+					std::filesystem::path imagePath = Utils::FileSystem::GetFileDirectory(filepath) / std::filesystem::path(aiTexPath.C_Str());
+					MESH_LOG("		Normal path = {}", imagePath.string());
+
+					auto texture = Texture2D::Create(imagePath, true);
+					if (texture->Loaded())
+					{
+						m_Textures[i] = texture;
+						materialInstance->SetValue("u_NormalTexture", texture);
+						materialInstance->SetValue("u_NormalTexToggle", true, UniformTarget::Fragment);
+					}
+
+					else
+					{
+						MESH_LOG("		No Normal texture");
+
+					}
+				}
+
+				// Shininess Texture
+				bool hasShininessTexture = aiMaterial->GetTexture(aiTextureType::aiTextureType_SHININESS, 0, &aiTexPath) == AI_SUCCESS;
+				if (hasShininessTexture)
+				{
+					std::filesystem::path imagePath = Utils::FileSystem::GetFileDirectory(filepath) / std::filesystem::path(aiTexPath.C_Str());
+					MESH_LOG("		Shininess path = {}", imagePath.string());
+
+					auto texture = Texture2D::Create(imagePath, true);
+					if (texture->Loaded())
+					{
+						m_Textures[i] = texture;
+						materialInstance->SetValue("u_RoughnessTexture", texture);
+					}
+
+					else
+					{
+						MESH_LOG("		No Shininess texture");
+						materialInstance->SetValue("u_MaterialUniform.Roughness", 1.0f, UniformTarget::Fragment);
+						materialInstance->SetValue("u_RoughnessTexToggle", true, UniformTarget::Fragment);
+					}
+				}
+
+				if (aiMaterial->Get("$raw.ReflectionFactor|file", aiPTI_String, 0, aiTexPath) == AI_SUCCESS)
+				{
+					std::filesystem::path imagePath = Utils::FileSystem::GetFileDirectory(filepath) / std::filesystem::path(aiTexPath.C_Str());
+					MESH_LOG("		Metalness path = {}", imagePath.string());
+
+					auto texture = Texture2D::Create(imagePath, true);
+					if (texture->Loaded())
+					{
+						m_Textures[i] = texture;
+						materialInstance->SetValue("u_MetalnessTexture", texture);
+						materialInstance->SetValue("u_MetalnessTexToggle", true, UniformTarget::Fragment);
+					}
+
+					else
+					{
+						MESH_LOG("		No Metalness texture");
+						materialInstance->SetValue("u_MaterialUniform.Metalness", 0.5f, UniformTarget::Fragment);
+						materialInstance->SetValue("u_MetalnessTexToggle", true, UniformTarget::Fragment);
+					}
+				}
+
+				m_Materials[i] = materialInstance;
+			}
 		}
 
 		Memory::Buffer buffer((std::byte*)m_Vertices.data(), m_Vertices.size() * sizeof(Vertex));
 		m_VertexBuffer = VertexBuffer::Create("Mesh", buffer);
 
-		// Extract indices from model
-		m_Indices.reserve(mesh->mNumFaces);
-		for (size_t i = 0; i < m_Indices.capacity(); i++)
-		{
-			RADIANT_VERIFY(mesh->mFaces[i].mNumIndices == 3, "Must have 3 indices.");
-			m_Indices.push_back({ mesh->mFaces[i].mIndices[0], mesh->mFaces[i].mIndices[1], mesh->mFaces[i].mIndices[2] });
-		}
-
 		m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), m_Indices.size() * sizeof(Index));
+
 	}
 }

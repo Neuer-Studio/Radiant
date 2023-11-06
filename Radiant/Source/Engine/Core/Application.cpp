@@ -3,6 +3,7 @@
 
 #include <Radiant/ImGui/ImGuiLayer.hpp>
 #include <imgui/imgui.h>
+#include <GLFW/glfw3.h>
 
 namespace Radiant
 {
@@ -44,6 +45,7 @@ namespace Radiant
 	{
 		EventDispatcher dispather(event);
 		dispather.Dispatch<WindowCloseEvent>(BIND_FN(OnWindowClose));
+		dispather.Dispatch<WindowResizeEvent>(BIND_FN(OnWindowResize));
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
@@ -51,6 +53,14 @@ namespace Radiant
 		m_Run = false;
 		return true;
 	}
+
+	bool Application::OnWindowResize(WindowResizeEvent& e)
+	{
+		int width = e.GetWidth(), height = e.GetHeight();
+
+		return false;
+	}
+
 
 	void Application::PushLayer(Layer* layer)
 	{
@@ -81,12 +91,18 @@ namespace Radiant
 		while (m_Run)
 		{
 			for (Layer* layer : m_LayerStack)
-				layer->OnUpdate();
+				layer->OnUpdate(m_Frametime);
 
 			Rendering::ExecuteCommand();
 			RenderImGui();
 
 			m_Window->OnUpdate();
+
+			float time = glfwGetTime(); // temp, shoud use Raidant::Window system method
+			m_Frametime = time - m_LastFrameTime;
+			m_TimeStep = std::min((float)m_Frametime, 0.0333f);
+			m_LastFrameTime = time;
+
 		}
 	}
 }

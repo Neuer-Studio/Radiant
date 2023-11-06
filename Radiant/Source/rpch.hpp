@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef RADIANT_PLATFORM_WINDOWS
+#include <Windows.h>
+#endif	
+
 #include <iostream>
 #include <fstream>
 #include <sstream>

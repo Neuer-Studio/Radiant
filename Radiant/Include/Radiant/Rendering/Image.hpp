@@ -27,8 +27,8 @@ namespace Radiant
 	class Image2D : public Image
 	{
 	public:
-		static Memory::Shared<Image2D> Create(ImageFormat format, std::size_t width, std::size_t height, Memory::Buffer buffer);
-		static Memory::Shared<Image2D> Create(ImageFormat format, std::size_t width, std::size_t height, const void* buffer = nullptr);
+		static Memory::Shared<Image2D> Create(ImageFormat format, std::size_t width, std::size_t height, Memory::Buffer buffer, uint32_t samples = 1);
+		static Memory::Shared<Image2D> Create(ImageFormat format, std::size_t width, std::size_t height, const void* buffer = nullptr, uint32_t samples = 1);
 	};
 
 	class ImageCube : public Image

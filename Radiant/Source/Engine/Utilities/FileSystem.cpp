@@ -1,4 +1,5 @@
 #include <Radiant/Utilities/FileSystem.hpp>
+#include <Radiant/Platform/Filesystem/Windows/WindowsFileSystem.hpp>
 
 #include <filesystem>
 
@@ -6,6 +7,7 @@ namespace fs = std::filesystem;
 
 namespace Radiant::Utils
 {
+	class WindowsFileSystem;
 	bool FileSystem::CreateDirectory(const std::filesystem::path& directory)
 	{
 		return fs::create_directory(directory);
@@ -33,7 +35,21 @@ namespace Radiant::Utils
 
 	std::string FileSystem::GetFileName(const std::string& filepath)
 	{
-		return GetFileName(std::filesystem::path(filepath).string());
+		return std::filesystem::path(filepath).filename().string();
 	}
 
+	std::filesystem::path FileSystem::OpenFileDialog(const char* filter)
+	{
+		return WindowsFileSystem::OpenFileDialog(filter);
+	}
+
+	std::filesystem::path FileSystem::GetFileDirectory(const std::filesystem::path& filepath)
+	{
+		return filepath.parent_path();
+	}
+
+	std::string FileSystem::GetFileDirectoryString(const std::filesystem::path& filepath)
+	{
+		return filepath.parent_path().string();
+	}
 }

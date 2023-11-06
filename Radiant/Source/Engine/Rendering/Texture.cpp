@@ -17,6 +17,17 @@ namespace Radiant
 		return nullptr;
 	}
 
+	Memory::Shared<Texture2D> Texture2D::Create(ImageFormat format, uint32_t width, uint32_t height, const void* data)
+	{
+		switch (RenderingAPI::GetAPI())
+		{
+		case RenderingAPIType::None:    return nullptr;
+		case RenderingAPIType::OpenGL:  return Memory::Shared<OpenGLTexture2D>::Create(format, width, height, data);
+		}
+		RADIANT_VERIFY(false, "Unknown RenderingAPI");
+		return nullptr;
+	}
+
 	Memory::Shared<TextureCube> TextureCube::Create(const std::filesystem::path& path)
 	{
 		switch (RenderingAPI::GetAPI())
@@ -28,4 +39,14 @@ namespace Radiant
 		return nullptr;
 	}
 
+	Memory::Shared<TextureCube> TextureCube::Create(ImageFormat format, uint32_t width, uint32_t height)
+	{
+		switch (RenderingAPI::GetAPI())
+		{
+		case RenderingAPIType::None:    return nullptr;
+		case RenderingAPIType::OpenGL:  return Memory::Shared<OpenGLTextureCube>::Create(format, width, height);
+		}
+		RADIANT_VERIFY(false, "Unknown RenderingAPI");
+		return nullptr;
+	}
 }

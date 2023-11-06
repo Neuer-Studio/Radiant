@@ -9,9 +9,11 @@ namespace Radiant
 	{
 	public:
 		OpenGLTexture2D(const std::filesystem::path& path, bool srgb);
+		OpenGLTexture2D(ImageFormat format, uint32_t width, uint32_t height, const void* data);
+
 		virtual ~OpenGLTexture2D() override;
 
-		virtual void Bind(uint32_t slot ) const;
+		virtual void Bind(uint32_t slot) const;
 
 		virtual Memory::Shared<Image2D> GetImage() const override { return m_Image; }
 		virtual ImageFormat GetImageFormat() const { return m_Image->GetFormat(); }
@@ -19,6 +21,8 @@ namespace Radiant
 		virtual std::size_t GetWidth() const { return m_Width;  }
 		virtual std::size_t GetHeight() const { return m_Height; }
 		virtual const std::filesystem::path& GetPath() const { return m_FilePath; }
+
+		virtual bool Loaded() const override { return m_Loaded; }
 
 		virtual uint32_t GetMipLevelCount() const { return m_MipCount; }
 	public:
@@ -29,12 +33,14 @@ namespace Radiant
 		RendererID m_RenderingID = 0;
 		std::size_t m_Width;
 		std::size_t m_Height;
+		bool m_Loaded = false;
 	};
 
 	class OpenGLTextureCube final : public TextureCube
 	{
 	public:
 		OpenGLTextureCube(const std::filesystem::path& path);
+		OpenGLTextureCube(ImageFormat format, uint32_t width, uint32_t height);
 		virtual ~OpenGLTextureCube() override;
 
 		virtual void Bind(uint32_t slot) const;
@@ -46,17 +52,17 @@ namespace Radiant
 		virtual std::size_t GetHeight() const { return m_Height; }
 		virtual const std::filesystem::path& GetPath() const { return m_FilePath; }
 
+		virtual bool Loaded() const override { return m_Loaded; }
+
 		virtual uint32_t GetMipLevelCount() const { return m_MipCount; }
 	public:
 		Memory::Shared<ImageCube> m_Image;
 		std::filesystem::path m_FilePath;
-
+		uint32_t m_Width;
+		uint32_t m_Height;
+		ImageFormat m_Format;
 		uint32_t m_MipCount;
-		RendererID m_RenderingID = 0;
-		std::size_t m_Width;
-		std::size_t m_Height;
-
-		std::byte* m_ImageData;
+		bool m_Loaded = false;
 	};
 
 }

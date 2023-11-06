@@ -1,6 +1,8 @@
 #include <Radiant/ImGui/Editor/Panels/PanelOutliner.hpp>
 #include <Radiant/Scene/Entity.hpp>
 #include <Radiant/Scene/Component.hpp>
+#include <Radiant/ImGui/Utilities/UI.hpp>
+#include <Radiant/Rendering/SceneRendering.hpp>
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -61,7 +63,7 @@ namespace Radiant
 
 			ImGuiIO& io = ImGui::GetIO();
 			auto boldFont = io.Fonts->Fonts[0];
-
+			
 			ImGui::PushID(label.c_str());
 
 			ImGui::Columns(2);
@@ -140,7 +142,7 @@ namespace Radiant
 	}
 
 	PanelOutliner::PanelOutliner(const Memory::Shared<Scene>& context)
-		: m_Context(context), m_SelectedEntity(nullptr)
+		: m_Context(context)
 	{
 	}
 
@@ -161,7 +163,7 @@ namespace Radiant
 
 		ImGui::Begin("Properties");
 
-		if (m_SelectedEntity)
+		if (m_Context->m_SelectedEntity)
 			DrawPropertiesUI();
 
 		ImGui::End();
@@ -193,8 +195,8 @@ namespace Radiant
 				if (ImGui::MenuItem("Camera"))
 				{
 					Entity* entity = m_Context->CreateEntity("Camera");
-					auto camera = CreateNewComponent<CameraComponent>();
-					camera->Camera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), (float)1600.f, (float)1600.f, 10.1f, 10000.0f));
+					auto& camera = CreateNewComponent<CameraComponent>();
+					camera->Camera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 10000.0f));
 					entity->AddComponent(camera);
 
 				}
@@ -205,7 +207,6 @@ namespace Radiant
 				{
 					Entity* entity = m_Context->CreateEntity("Mesh");
 					auto mesh = CreateNewComponent<MeshComponent>();
-					mesh->Mesh = Memory::Shared<Mesh>::Create("Resources/Meshes/Cube1m.fbx");
 					entity->AddComponent(mesh);
 				}
 
@@ -229,15 +230,19 @@ namespace Radiant
 					if (ImGui::MenuItem("Sky Light"))
 					{
 						Entity* entity = m_Context->CreateEntity("SkyLight");
-						auto cube = CreateNewComponent<CubeComponent>();
-						cube->Cube = TextureCube::Create("Resources/Envorement/Arches_E_PineTree_Radiance.tga");
-						entity->AddComponent(cube);
+						auto skybox = CreateNewComponent<SkyBoxComponent>();
+						auto [radiance, irradiance] = SceneRendering::CreateEnvironmentMap("Resources/Envorement/HDR/birchwood_4k.hdr");
+						skybox->Environment = Memory::Shared<Environment>::Create(radiance, irradiance);
+						entity->AddComponent(skybox);
 					}
 
 					ImGui::Spacing();
 
 					if (ImGui::MenuItem("Directional Light"))
 					{
+						Entity* entity = m_Context->CreateEntity("Directional Light");
+						auto light = CreateNewComponent<DirectionLightComponent>();
+						entity->AddComponent(light);
 					}
 
 					ImGui::Spacing();
@@ -262,13 +267,13 @@ namespace Radiant
 		if (!entity->GetName().empty())	
 			name = entity->GetName().c_str();
 
-		ImGuiTreeNodeFlags flags = (entity == m_SelectedEntity ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+		ImGuiTreeNodeFlags flags = (entity == m_Context->m_SelectedEntity ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 		bool opened = ImGui::TreeNodeEx((void*)entity, flags, name);
 
 		if (ImGui::IsItemClicked())
 		{
-			m_SelectedEntity = entity;
+			m_Context->m_SelectedEntity = entity;
 		}
 
 		if (opened)
@@ -280,12 +285,13 @@ namespace Radiant
 
 	void PanelOutliner::DrawPropertiesUI()
 	{
+		Entity* entity = m_Context->m_SelectedEntity;
 		ImGui::AlignTextToFramePadding();
 		// ...
 		ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
-		auto& name = m_SelectedEntity->m_Name;
-		if (m_SelectedEntity->m_Name.empty())
+		auto& name = m_Context->m_SelectedEntity->m_Name;
+		if (m_Context->m_SelectedEntity->m_Name.empty())
 			name = "Unnamed Entity";
 		char buffer[256];
 		memset(buffer, 0, 256);
@@ -297,21 +303,78 @@ namespace Radiant
 			name = std::string(buffer);
 		}
 
-		std::string TextUUID("UUID: " + m_SelectedEntity->m_UUID.ToString());
+		std::string TextUUID("UUID: " + m_Context->m_SelectedEntity->m_UUID.ToString());
 
 		ImGui::Text(TextUUID.c_str());
 		ImGui::Unindent(contentRegionAvailable.x * 0.05f);
 		ImGui::PopItemWidth();
 
 
-		DrawComponentUI(ComponentType::Transform, "Transform", m_SelectedEntity, [=](Memory::Shared<Component>& component) mutable
+		DrawComponentUI(ComponentType::Transform, "Transform", entity, [=](Memory::Shared<Component>& component) mutable
 			{
-				DrawVec3UI("Translation", component.As<TransformComponent>()->Position);
+				DrawVec3UI("Translation", component.As<TransformComponent>()->Translation);
+				glm::vec3 rotation = glm::degrees(component.As<TransformComponent>()->Rotation);
+				DrawVec3UI("Rotation", rotation);
+				component.As<TransformComponent>()->Rotation = glm::radians(rotation);
+				DrawVec3UI("Scale", component.As<TransformComponent>()->Scale, 1.0f);
 			});
 
-		DrawComponentUI(ComponentType::Mesh, "Mesh", m_SelectedEntity, [=](Memory::Shared<Component>& component) mutable
+		DrawComponentUI(ComponentType::Mesh, "Mesh", entity, [=](Memory::Shared<Component>& component) mutable
 			{
-				//DrawVec3UI("Translation", component.As<TransformComponent>()->Position);
+				auto& mesh = component.As<MeshComponent>()->Mesh;
+				UI::BeginPropertyGrid();
+
+				ImGui::Text(entity->GetName().c_str());
+				ImGui::NextColumn();
+				ImGui::PushItemWidth(-1);
+
+				ImVec2 originalButtonTextAlign = ImGui::GetStyle().ButtonTextAlign;
+				ImGui::GetStyle().ButtonTextAlign = { 0.0f, 0.5f };
+				float width = ImGui::GetContentRegionAvail().x - 0.0f;
+				UI::PushID();
+
+				float itemHeight = 28.0f;
+
+				std::string buttonName;
+				if (mesh)
+					buttonName = mesh->GetName();
+				else
+					buttonName = "Null";
+
+				if (ImGui::Button(buttonName.c_str(), { width, itemHeight }))
+				{
+					std::string file = Utils::FileSystem::OpenFileDialog().string();
+					if (!file.empty())
+					{
+						mesh = Memory::Shared<Mesh>::Create(file);
+
+						Memory::Shared<Material> mi = mesh->GetMaterial();
+						auto materialComponent = CreateNewComponent<MaterialComponent>(mi);
+						entity->AddComponent(materialComponent);
+					}
+				}
+
+				UI::PopID();
+				ImGui::GetStyle().ButtonTextAlign = originalButtonTextAlign;
+				ImGui::PopItemWidth();
+
+				UI::EndPropertyGrid();
+
+				UI::BeginPropertyGrid();
+				UI::EndPropertyGrid();
+			});
+
+		DrawComponentUI(ComponentType::DirectionLight, "DirectionLight", entity, [=](Memory::Shared<Component>& component) mutable
+			{
+				DrawVec3UI("Direction", component.As<DirectionLightComponent>()->DirLight.Direction);
+				DrawVec3UI("Radiance", component.As<DirectionLightComponent>()->DirLight.Radiance);
+			});
+
+
+		DrawComponentUI(ComponentType::Material, "Material", entity, [=](Memory::Shared<Component>& component) mutable
+			{
+				auto a = component.As<MaterialComponent>()->Material->GetOverridedValuesSize();
+				ImGui::Text("Test Material %u", component.As<MaterialComponent>()->Material->GetOverridedValuesSize());
 			});
 
 		/* New Component */

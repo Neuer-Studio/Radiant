@@ -7,8 +7,10 @@
 namespace Radiant
 {
 	class TextureCube;
+	class Texture2D;
 	class OpenGLRenderingPass;
 	class SceneRenderingPanel;
+	class SceneRendering;
 
 	class Rendering 
 	{
@@ -16,10 +18,12 @@ namespace Radiant
 		static void Init();
 		static void Shutdown();
 
-		static void DrawMesh(Memory::Shared<Mesh> mesh);
+		static void DrawMesh(Memory::Shared<Mesh> mesh, Memory::Shared<Material> material) ;
 		static void DrawMeshWithShader(Memory::Shared<Mesh> mesh, Memory::Shared<Shader> shader);
 
-		static void DrawFullscreenQuad();
+		static void DrawFullscreenQuad(Memory::Shared<Material> material);
+
+		static Memory::Shared<Texture2D> GetWhiteTexture();
 
 		static void BindRenderingPass(const Memory::Shared<RenderingPass>& pass);
 		static void UnbindRenderingPass();
@@ -29,7 +33,7 @@ namespace Radiant
 
 		static const Memory::Shared<ShaderLibrary>& GetShaderLibrary();
 	private:
-		static void DrawIndexed(std::size_t count, PrimitiveType type = PrimitiveType::Triangles, bool depthTest = false);
+		static void DrawIndexed(std::size_t count, PrimitiveType type = PrimitiveType::Triangles, bool depthTest = true);
 		static void Clear(float r, float g, float b);
 	private:
 	private:
@@ -38,5 +42,6 @@ namespace Radiant
 		friend Mesh;
 		friend OpenGLRenderingPass;
 		friend SceneRenderingPanel;
+		friend SceneRendering;
 	};
 }

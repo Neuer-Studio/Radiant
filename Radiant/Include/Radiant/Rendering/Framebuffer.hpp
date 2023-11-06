@@ -17,10 +17,11 @@ namespace Radiant
 
 	struct FramebufferSpecification
 	{
-		uint32_t Width = 0;
-		uint32_t Height = 0;
+		uint32_t Width = 1920;
+		uint32_t Height = 1080;
 		glm::vec4 ClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 		uint32_t Samples = 1; // multisampling
+		bool NoResize = false;
 
 		ImageFormat Format;
 	};
@@ -35,7 +36,7 @@ namespace Radiant
 
 		virtual void Resize(uint32_t width, uint32_t height, bool forceRecreate = false) = 0;
 
-		virtual void BindTexture(uint32_t attachmentIndex = 0, uint32_t slot = 0) const = 0;
+		virtual void BindTexture(uint32_t slot = 0) const = 0;
 
 		virtual FramebufferSpecification GetSpecification() = 0;
 		virtual const FramebufferSpecification GetSpecification() const = 0;
@@ -44,7 +45,6 @@ namespace Radiant
 		virtual uint32_t GetHeight() const = 0;
 
 		virtual RendererID GetRendererID() const = 0;
-		virtual RendererID GetDepth() const = 0; // temp
 
 		virtual Memory::Shared<Image2D> GetImage() const = 0;
 		virtual Memory::Shared<Image2D> GetDepthImage() const = 0;
@@ -57,7 +57,7 @@ namespace Radiant
 	public:
 		static void Add(Memory::Shared<Framebuffer> framebuffer);
 
-		static const std::vector<Memory::Shared<Framebuffer>>& GetAll() { return m_Pool; }
+		static std::vector<Memory::Shared<Framebuffer>>& GetAll() { return m_Pool; }
 	private:
 		static std::vector<Memory::Shared<Framebuffer>> m_Pool;
 	};

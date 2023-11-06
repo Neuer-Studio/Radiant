@@ -19,7 +19,7 @@ namespace Radiant
 		std::string Version;
 
 		int MaxSamples = 0;
-		float MaxAnisotropy = 0.0f;
+		float MaxAnisotropy = 0.0f; // Texture filtering
 		int MaxTextureUnits = 0;
 	};
 
@@ -37,7 +37,7 @@ namespace Radiant
 
 		static RenderingAPIType GetAPI() { return s_RendererAPI; }
 	private:
-		virtual void DrawIndexed(uint32_t count, PrimitiveType type = PrimitiveType::Triangles, bool depthTest = false) = 0;
+		virtual void DrawIndexed(uint32_t count, PrimitiveType type, bool depthTest) = 0;
 		virtual void Clear(float r, float g, float b) = 0;
 	private:
 		inline static RenderingAPIType s_RendererAPI = RenderingAPIType::OpenGL;

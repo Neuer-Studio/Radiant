@@ -30,6 +30,15 @@ namespace Radiant {
 		glDebugMessageCallback(OpenGLLogMessage, nullptr);
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_CULL_FACE);
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		glFrontFace(GL_CCW);
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		glEnable(GL_MULTISAMPLE);
 
 		auto& info = RenderingAPI::GetGraphicsInfo();
 
@@ -58,7 +67,6 @@ namespace Radiant {
 	{
 		if (!depthTest)
 			glDisable(GL_DEPTH_TEST);
-		else glEnable(GL_DEPTH_TEST);
 
 		GLenum gltype = 0;
 		switch (type)
@@ -72,12 +80,15 @@ namespace Radiant {
 		}
 
 		glDrawElements(gltype, count, GL_UNSIGNED_INT, nullptr);
+
+		if (!depthTest)
+			glEnable(GL_DEPTH_TEST);
 	}
 
 	void OpenGLRendering::Clear(float r, float g, float b)
 	{
 		glClearColor(r, g, b, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 }

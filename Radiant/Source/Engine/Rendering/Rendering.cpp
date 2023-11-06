@@ -7,6 +7,10 @@
 #include <Rendering/Pipeline.hpp>
 #include <Rendering/Shader.hpp>
 
+
+#include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
+
 namespace Radiant
 {
 	struct QuadData
@@ -26,6 +30,7 @@ namespace Radiant
 		Memory::Shared<RenderingPass> ActiveRenderingPass;
 		Memory::Shared<Pipeline> PiplineStaticMesh;
 		Memory::Shared<Pipeline> PiplineDynamicMesh;
+		Memory::Shared<Texture2D> WhiteTexture;
 
 		QuadData QuadInfo;
 	};
@@ -93,7 +98,10 @@ namespace Radiant
 		PipelineSpecification pipelineSpecificationStaticMesh;
 		pipelineSpecificationStaticMesh.Layout = {
 			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float3, "a_Normals" }
+			{ ShaderDataType::Float3, "a_Normals" },
+			{ ShaderDataType::Float3, "a_Tangent" },
+			{ ShaderDataType::Float3, "a_Binormal" },
+			{ ShaderDataType::Float2, "a_TexCoords" },
 		};
 		s_Data->PiplineStaticMesh = Pipeline::Create(pipelineSpecificationStaticMesh);
 
@@ -101,6 +109,11 @@ namespace Radiant
 			s_Data->RenderingShaders = Memory::Shared<ShaderLibrary>::Create();
 			s_Data->RenderingShaders->Load("Resources/Shaders/Static_Shader.rads");
 			s_Data->RenderingShaders->Load("Resources/Shaders/Quad.rads");
+		}
+
+		{
+			uint32_t whiteTextureData = 0xfffffff;
+			s_Data->WhiteTexture = Texture2D::Create(ImageFormat::RGBA, 1, 1, &whiteTextureData);
 		}
 	}
 
@@ -125,13 +138,24 @@ namespace Radiant
 		s_Data->ActiveRenderingPass = nullptr;
 	}
 
-	void Rendering::DrawFullscreenQuad()
+	void Rendering::DrawFullscreenQuad(Memory::Shared<Material> material)
 	{
+		bool depthTest = true;
+		if (material.Ptr() != nullptr)
+		{
+			depthTest = material->GetFlag(MaterialFlag::DepthTest);
+			material->UpdateForRendering();
+		}
+
 		s_Data->QuadInfo.FullscreenQuadVertexBuffer->Bind();
 		s_Data->QuadInfo.FullscreenQuadPipeline->Bind();
 		s_Data->QuadInfo.FullscreenQuadIndexBuffer->Bind();
+		DrawIndexed(s_Data->QuadInfo.FullscreenQuadIndexBuffer->GetCount(), PrimitiveType::Triangles, depthTest);
+	}
 
-		DrawIndexed(s_Data->QuadInfo.FullscreenQuadIndexBuffer->GetCount());
+	Memory::Shared<Texture2D> Rendering::GetWhiteTexture()
+	{
+		return s_Data->WhiteTexture;
 	}
 
 	void Rendering::SubmitCommand(std::function<void()> func)
@@ -165,13 +189,12 @@ namespace Radiant
 			});
 	}
 
-	void Rendering::DrawMesh(Memory::Shared<Mesh> mesh)
+	void Rendering::DrawMesh(Memory::Shared<Mesh> mesh, Memory::Shared<Material> material)
 	{
 		mesh->m_VertexBuffer->Bind();
 		s_Data->PiplineStaticMesh->Bind();
 		mesh->m_IndexBuffer->Bind();
-
-		mesh->m_Shader->Bind();
+		material->UpdateForRendering();
 
 		DrawIndexed(mesh->m_IndexBuffer->GetCount());
 	}

@@ -2,6 +2,8 @@
 #include <Radiant/Scene/Entity.hpp>
 #include <Radiant/Rendering/SceneRendering.hpp>
 
+#include <glm/glm.hpp>
+
 namespace Radiant
 {
 	/*=========== Scene ============*/
@@ -42,7 +44,7 @@ namespace Radiant
 		}
 		return nullptr;
 	}
-	
+
 	Entity* Scene::GetEntityByComponentType(ComponentType type)
 	{
 		for (auto e : m_Entitys)
@@ -66,22 +68,51 @@ namespace Radiant
 		return false;
 	}
 
-	void Scene::UpdateScene(const Memory::Shared<SceneRendering>& rendering, SceneType type) // TODO(Danya): Update scene render 
+	void Scene::UpdateScene(Timestep ts, const Memory::Shared<SceneRendering>& rendering, SceneType type) // TODO(Danya): Update scene render 
 	{
+		m_SceneRendering = rendering;
+
 		m_ViewportWidth = rendering->m_ViewportWidth;
 		m_ViewportHeight = rendering->m_ViewportHeight;
 
+		Camera* camera = &Camera();
+
 		Memory::Shared<SceneRendering> render = rendering;
 		render->SetScene(this);
+		
 		for (const auto e : m_Entitys)
 		{
 			if (e->HasComponent(ComponentType::Mesh))
 			{
-				rendering->AddMeshToDrawList(e->GetComponent(ComponentType::Mesh).As<MeshComponent>()->Mesh);
+				const auto mesh = e->GetComponent(ComponentType::Mesh).As<MeshComponent>()->Mesh;
+				if (!mesh) continue;
+				const auto& material = e->GetComponent(ComponentType::Material).As<MaterialComponent>()->Material;
+				rendering->AddMeshToDrawList
+				({
+						mesh,
+						e->GetComponent(ComponentType::Transform).As<TransformComponent>()->GetTransform(),
+						material
+				});
+			}
+
+			if (e->HasComponent(ComponentType::SkyBox))
+			{
+				const auto cube = e->GetComponent(ComponentType::SkyBox).As<SkyBoxComponent>()->Environment;
+				if (!cube) continue;
+				rendering->SetEnvRadiance(cube->RadianceMap);
+				rendering->SetEnvIrradiance(cube->IrradianceMap);
+			}
+
+			if (e->HasComponent(ComponentType::Camera))
+			{
+				camera = &e->GetComponent(ComponentType::Camera).As<CameraComponent>()->Camera;
 			}
 		}
-
-		render->SubmitScene();
+		
+		camera->SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+		camera->SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), (float)m_ViewportWidth, (float)m_ViewportHeight, 0.1f, 10000.0f));
+		camera->OnUpdate(ts);
+		render->SubmitScene(camera);
 	}
 
 	/*======================== SceneManager ======================*/

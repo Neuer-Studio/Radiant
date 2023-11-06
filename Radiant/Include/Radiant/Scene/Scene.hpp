@@ -1,12 +1,15 @@
 #pragma once
 
 #include <Radiant/Utilities/UUID.hpp>
+#include <glm/glm.hpp>
+#include <Radiant/Core/Camera.hpp>
 
 namespace Radiant
 {
 	class SceneRendering;
 	class SceneRenderingPanel;
 	class SceneManager;
+	class PanelOutliner;
 	class Entity;
 	enum class ComponentType;
 
@@ -26,23 +29,27 @@ namespace Radiant
 		Entity* GetEntityByUUID(uint64_t uuid);
 		Entity* GetEntityByComponentType(ComponentType type);
 		bool ContainsEntityInScene(ComponentType type);
-
 		std::vector<Entity*> GetEntityList() { return m_Entitys; }
 
-		void UpdateScene(const Memory::Shared<SceneRendering>& rendering, SceneType type = SceneType::Editor);
+		void UpdateScene(Timestep ts, const Memory::Shared<SceneRendering>& rendering, SceneType type = SceneType::Editor);
 	private:
+		Entity* m_SelectedEntity = nullptr; // NOTE(Danya): Using for panels
 		std::vector<Entity*> m_Entitys;
+
+		Memory::Shared<SceneRendering> m_SceneRendering;
+
 		std::string m_SceneName;
 		Utils::UUID m_UUID;
 
 		std::size_t m_ViewportWidth = 0;
 		std::size_t m_ViewportHeight = 0;
 
-		float m_Exposure = 0.f; // NOTE(Danya): Using in SceneRendering
-
+		float m_Exposure = 1.0f; // NOTE(Danya): Using in SceneRendering
+	private:
 		friend SceneManager;
 		friend SceneRenderingPanel;
 		friend SceneRendering;
+		friend PanelOutliner;
 	};
 
 	class SceneManager

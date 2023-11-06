@@ -5,23 +5,23 @@
 
 namespace Radiant
 {
-	Memory::Shared<Image2D> Image2D::Create(ImageFormat format, std::size_t width, std::size_t height, Memory::Buffer buffer)
+	Memory::Shared<Image2D> Image2D::Create(ImageFormat format, std::size_t width, std::size_t height, Memory::Buffer buffer, uint32_t samples)
 	{
 		switch (RenderingAPI::GetAPI())
 		{
 			case RenderingAPIType::None: return nullptr;
-			case RenderingAPIType::OpenGL: return Memory::Shared<OpenGLImage2D>::Create(format, width, height, buffer);
+			case RenderingAPIType::OpenGL: return Memory::Shared<OpenGLImage2D>::Create(format, width, height, buffer, samples);
 		}
 		RADIANT_VERIFY(false, "Unknown RenderingAPI");
 		return nullptr;
 	}
 
-	Memory::Shared<Image2D> Image2D::Create(ImageFormat format, std::size_t width, std::size_t height, const void* buffer /*= nullptr*/)
+	Memory::Shared<Image2D> Image2D::Create(ImageFormat format, std::size_t width, std::size_t height, const void* buffer /*= nullptr*/, uint32_t samples)
 	{
 		switch (RenderingAPI::GetAPI())
 		{
 		case RenderingAPIType::None: return nullptr;
-		case RenderingAPIType::OpenGL: return Memory::Shared<OpenGLImage2D>::Create(format, width, height, buffer);
+		case RenderingAPIType::OpenGL: return Memory::Shared<OpenGLImage2D>::Create(format, width, height, buffer, samples);
 		}
 		RADIANT_VERIFY(false, "Unknown RenderingAPI");
 		return nullptr;

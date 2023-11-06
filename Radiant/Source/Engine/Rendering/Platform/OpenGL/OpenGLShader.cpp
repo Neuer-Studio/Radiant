@@ -1,6 +1,7 @@
 #include <Rendering/Platform/OpenGL/OpenGLShader.hpp>
 
 #include <Rendering/Rendering.hpp>	
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Radiant
 {
@@ -21,46 +22,6 @@ namespace Radiant
 
 	namespace Utils
 	{
-		static const uint32_t GetGLMDataSizeFromRadiant(RadiantType type)
-		{
-			switch (type)
-			{
-				case RadiantType::Float:
-					return sizeof(float);
-				case RadiantType::Float2:
-					return sizeof(glm::vec2);
-				case RadiantType::Float3:
-					return sizeof(glm::vec3);
-				case RadiantType::Mat4:
-					return sizeof(glm::mat4);
-			}
-			RADIANT_VERIFY(false);
-			return 0u;
-		}
-
-		static const RadiantType OpenGLUniformTypeToRaiantUniformType(const std::string& uniform)
-		{
-			if (uniform == "sampler2D")
-				return RadiantType::sampler2D;
-			if (uniform == "sampler3D")
-				return RadiantType::sampler3D;
-
-			if (uniform == "float")
-				return RadiantType::Float;
-			if (uniform == "vec2")
-				return RadiantType::Float2;
-			if (uniform == "vec3")
-				return RadiantType::Float3;
-			if (uniform == "vec4")
-				return RadiantType::Float4;
-
-			if (uniform == "mat4")
-				return RadiantType::Mat4;
-
-			return RadiantType::None;
-		}
-
-
 		static GLenum ShaderTypeFromString(const std::string& type)
 		{
 			if (type == "vertex")
@@ -71,36 +32,6 @@ namespace Radiant
 				return GL_COMPUTE_SHADER;
 
 			return GL_NONE;
-		}
-
-		static std::unordered_map<GLenum, std::string> PreProcess(const std::string& source)
-		{
-			std::unordered_map<GLenum, std::string> shaderSource;
-			const char* tokenType = "#type";
-			const std::size_t sizeTokenType = strlen(tokenType);
-			std::size_t pos = source.find(tokenType, 0);
-
-			while (pos != std::string::npos)
-			{
-				std::size_t eol = source.find_first_of("\r\n", pos);
-				RADIANT_VERIFY(eol != std::string::npos, "Syntax error");
-				std::size_t begin = pos + sizeTokenType + 1;
-				std::string type = source.substr(begin, eol - begin);
-				RADIANT_VERIFY(type == "vertex" || type == "fragment" || type == "pixel" || type == "compute", "Invalid shader type specified");
-
-				std::size_t nextLinePos = source.find_first_not_of("\r\n", eol);
-				pos = source.find(tokenType, nextLinePos);
-				auto shaderType = ShaderTypeFromString(type);
-
-				shaderSource[shaderType] = source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));
-
-				if (shaderType == GL_COMPUTE_SHADER)
-				{
-					RADIANT_VERIFY(false);
-				}
-			}
-
-			return shaderSource;
 		}
 
 		static std::vector<UniformsSpecification> ExtractUniformNames(const std::string& shaderCode)
@@ -186,8 +117,8 @@ namespace Radiant
 		}
 
 		/*
-		* std::string = Uniform Name
-		* ShaderStructDeclaration = Sturct declaration (fields)
+		*@ std::string = Uniform Name
+		*@ ShaderStructDeclaration = Sturct declaration (fields)
 		*/
 		static std::unordered_map<std::string, ShaderStructDeclaration> ExtractShaderStruct(const std::string& shaderCode)
 		{
@@ -235,6 +166,37 @@ namespace Radiant
 
 	// ================================== Utils end ==========================
 
+	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(const std::string& source)
+	{
+		std::unordered_map<GLenum, std::string> shaderSource;
+		const char* tokenType = "#type";
+		const std::size_t sizeTokenType = strlen(tokenType);
+		std::size_t pos = source.find(tokenType, 0);
+
+		while (pos != std::string::npos)
+		{
+			std::size_t eol = source.find_first_of("\r\n", pos);
+			RADIANT_VERIFY(eol != std::string::npos, "Syntax error");
+			std::size_t begin = pos + sizeTokenType + 1;
+			std::string type = source.substr(begin, eol - begin);
+			RADIANT_VERIFY(type == "vertex" || type == "fragment" || type == "pixel" || type == "compute", "Invalid shader type specified");
+
+			std::size_t nextLinePos = source.find_first_not_of("\r\n", eol);
+			pos = source.find(tokenType, nextLinePos);
+			auto shaderType = Utils::ShaderTypeFromString(type);
+
+			shaderSource[shaderType] = source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));
+
+			if (shaderType == GL_COMPUTE_SHADER)
+			{
+				m_IsCompute = true;
+				break;
+			}
+		}
+
+		return shaderSource;
+	}
+
 	void OpenGLShader::Parse()
 	{
 		auto& vertexSource = m_ShaderSource[GL_VERTEX_SHADER];
@@ -242,18 +204,20 @@ namespace Radiant
 
 		auto fragmentUniforms = Utils::ExtractUniformNames(fragmentSource);
 
-		// Parsing Fragment shader
+		// Parsing Fragment shader (Sampler include)
 		{
-			int32_t uIndex = 0;
+			int32_t uIndex = 0; // regular uniform
+			int32_t sIndex = 0; // sampler uniform
+
 			for (auto name : fragmentUniforms)
 			{
 				RadiantType Type = fragmentUniforms[uIndex].Type;
 				std::string Name = fragmentUniforms[uIndex].UniformName;
 
 				// Extract samplers
-				if (Type == RadiantType::sampler1D || Type == RadiantType::sampler2D || Type == RadiantType::sampler3D)
+				if (Utils::IsSampler(Type))
 				{
-					m_SamplerUniforms.Uniforms[Name] = { Type, UniformTarget::Sampler, Name, uIndex };
+					m_SamplerUniforms.Uniforms[Name] = { Type, UniformTarget::Sampler, Name, sIndex++ };
 				}
 
 				// Extract regular uniforms
@@ -282,11 +246,11 @@ namespace Radiant
 			}
 		}
 
-		m_StructUnfiforms.Uniforms = Utils::ExtractShaderStruct(fragmentSource);
+		auto fragmentUniformsStruct = Utils::ExtractShaderStruct(fragmentSource);
 
 		// Parsing struct uniforms
 		{
-			for (auto& [name, structDecl] : m_StructUnfiforms.Uniforms)
+			for (auto& [name, structDecl] : fragmentUniformsStruct)
 			{
 				for (auto& field : structDecl.Fields)
 				{
@@ -294,7 +258,7 @@ namespace Radiant
 					field.Position = GetExternalUniformPosition(GLSLName);
 					field.GLSLName = GLSLName;
 
-					m_FragmentStructUnfiforms.Uniforms[GLSLName] = { field.Type, UniformTarget::Fragment, GLSLName, field.Position };
+					m_FragmentUniforms.Uniforms[GLSLName] = { field.Type, UniformTarget::Fragment, GLSLName, field.Position };
 
 				}
 			}
@@ -411,28 +375,33 @@ namespace Radiant
 	{
 		RADIANT_VERIFY(!m_RenderingID);
 
-		m_ShaderSource = Utils::PreProcess(source);
+		m_ShaderSource = PreProcess(source);
 
-		Rendering::SubmitCommand([=]()
+		Memory::Shared<OpenGLShader> instace = this;
+		Rendering::SubmitCommand([instace]() mutable
 			{
-				CompileAndUploadShader();
-				UploadSamplerUniforms();
-				Parse();
+				if (instace->m_RenderingID)
+					glDeleteShader(instace->m_RenderingID);
+
+				instace->CompileAndUploadShader();
+
+				if(!instace->m_IsCompute)
+				{
+					instace->Parse();
+					instace->UploadSamplerUniforms();
+				}
+
+				instace->m_Loaded = true;
 			});
 
 	}
 
 	void OpenGLShader::Bind()
 	{
-		RendererID id = m_RenderingID;
 		Memory::Shared<OpenGLShader> instance = this;
-		Rendering::SubmitCommand([id]()
+		Rendering::SubmitCommand([instance]()
 			{
-				glUseProgram(id);
-			});
-		Rendering::SubmitCommand([instance]() mutable
-			{
-				instance->UpdateValues();
+				glUseProgram(instance->m_RenderingID);
 			});
 	}
 
@@ -491,62 +460,28 @@ namespace Radiant
 		return m_FragmentUniforms.Uniforms[0];
 	}
 
-
-	bool OpenGLShader::SetValue(const std::string& name, float value, UniformTarget type)
-	{
-		return BSetValue(name, (std::byte*)&value, type, RadiantType::Float);
-	}
-
-	bool OpenGLShader::SetValue(const std::string& name, const glm::vec2& value, UniformTarget type)
-	{
-		return BSetValue(name, (std::byte*)&value, type, RadiantType::Float2);
-	}
-
-	bool OpenGLShader::SetValue(const std::string& name, const glm::vec3& value, UniformTarget type)
-	{
-		return BSetValue(name, (std::byte*)&value, type, RadiantType::Float3);
-	}
-
-	bool OpenGLShader::SetValue(const std::string& name, const glm::vec4& value, UniformTarget type)
-	{
-		return BSetValue(name, (std::byte*)&value, type, RadiantType::Float4);
-	}
-
-	bool OpenGLShader::SetValue(const std::string& name, const glm::mat4& value, UniformTarget type)
-	{
-		return BSetValue(name, (std::byte*)&value, type, RadiantType::Mat4);
-	}
-
-	// ========================================================
-
-	bool OpenGLShader::BSetValue(const std::string& name, const std::byte* value, UniformTarget type, RadiantType uniformType)
-	{
-		if (!HasBufferUniform(name, type))
-			return false;
-
-		ShaderUniformDeclaration& uniform = GetBufferUniform(name, type);
-		RadiantType uType = uniform.Type;
-		if (uniformType != uType)
-		{
-			RADIANT_VERIFY(false);
-			return false;
-		}
-		uniform.isChanged = true;
-		uint32_t size = Utils::GetGLMDataSizeFromRadiant(uniformType);
-
-		std::memcpy(uniform.Value, value, size);
-
-		m_OverrideValues.push_back(uniform);
-
-		return true;
-	}
-
 	//====================== Unifrom ==========================
 
 	void OpenGLShader::UploadUniformInt(int32_t location, int value, UniformTarget type)
 	{
 		if (location != -1)
 			glUniform1i(location, value);
+		else
+			LOG_UNIFORM("Uniform 'X' not found!");
+	}
+
+	void OpenGLShader::UploadUniformUint(int32_t location, int value, UniformTarget type)
+	{
+		if (location != -1)
+			glUniform1ui(location, value);
+		else
+			LOG_UNIFORM("Uniform 'X' not found!");
+	}
+
+	void OpenGLShader::UploadUniformBool(int32_t location, bool value, UniformTarget type)
+	{
+		if (location != -1)
+			glUniform1i(location, value ? 1 : 0);
 		else
 			LOG_UNIFORM("Uniform 'X' not found!");
 	}
@@ -579,7 +514,7 @@ namespace Radiant
 	void OpenGLShader::UploadUniformMat4(int32_t location, const glm::mat4& values, UniformTarget type)
 	{
 		if (location != -1)
-			glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)&values);
+			glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(values));
 		else
 			LOG_UNIFORM("Uniform 'X' not found!");
 	}
@@ -592,18 +527,26 @@ namespace Radiant
 
 	// ========================================================================
 
-	void OpenGLShader::UpdateValues() 
+	void OpenGLShader::UpdateShaderValue(const ShaderUniformDeclaration& decl)
 	{
-		for (auto& buffer : m_OverrideValues)
+		if (decl.Type == RadiantType::Int)
 		{
-			UpdateGLMValues(buffer);
-			buffer.isChanged = false;
+			UploadUniformInt(decl.Position, *(int*)&decl.Value, decl.Target);
+			return;
 		}
-		m_OverrideValues.clear();
-	}
 
-	void OpenGLShader::UpdateGLMValues(const ShaderUniformDeclaration& decl)
-	{
+		if (decl.Type == RadiantType::Bool)
+		{
+			UploadUniformBool(decl.Position, *(bool*)&decl.Value, decl.Target);
+			return;
+		}
+
+		if (decl.Type == RadiantType::Uint)
+		{
+			UploadUniformUint(decl.Position, *(uint32_t*)&decl.Value, decl.Target);
+			return;
+		}
+
 		if (decl.Type == RadiantType::Float)
 		{
 			UploadUniformFloat(decl.Position, *(float*)&decl.Value, decl.Target);
