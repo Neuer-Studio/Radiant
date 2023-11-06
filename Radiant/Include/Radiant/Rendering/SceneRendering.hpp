@@ -33,6 +33,8 @@ namespace Radiant
 
 		uint32_t GetSamplesCount();
 		void SetSampelsCount(uint32_t count = 2u);
+		float GetSkyboxLod();
+		void SetSkyboxLod(float value = 0.0f);
 	private:
 		void AddMeshToDrawList(DrawProperties component) const;
 		void AddMeshToDrawListWithShader(const Memory::Shared<Mesh>& mesh) const;
@@ -45,7 +47,6 @@ namespace Radiant
 	private:
 		void UpdateSkyLight();
 		void UpdateDirectionalLight(Memory::Shared<Material>& material);
-		void UpdateCamera(Camera* camera);
 	private:
 		std::size_t m_ViewportWidth = -1, m_ViewportHeight = -1;
 		Memory::Shared<Scene> m_Context;

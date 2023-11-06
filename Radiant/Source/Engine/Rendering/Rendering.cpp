@@ -140,13 +140,17 @@ namespace Radiant
 
 	void Rendering::DrawFullscreenQuad(Memory::Shared<Material> material)
 	{
+		bool depthTest = true;
+		if (material.Ptr() != nullptr)
+		{
+			depthTest = material->GetFlag(MaterialFlag::DepthTest);
+			material->UpdateForRendering();
+		}
+
 		s_Data->QuadInfo.FullscreenQuadVertexBuffer->Bind();
 		s_Data->QuadInfo.FullscreenQuadPipeline->Bind();
 		s_Data->QuadInfo.FullscreenQuadIndexBuffer->Bind();
-		if (material.Ptr() != nullptr)
-			material->UpdateForRendering();
-
-		DrawIndexed(s_Data->QuadInfo.FullscreenQuadIndexBuffer->GetCount(), PrimitiveType::Triangles, false);
+		DrawIndexed(s_Data->QuadInfo.FullscreenQuadIndexBuffer->GetCount(), PrimitiveType::Triangles, depthTest);
 	}
 
 	Memory::Shared<Texture2D> Rendering::GetWhiteTexture()

@@ -2,6 +2,8 @@
 #include <Radiant/Scene/Entity.hpp>
 #include <Radiant/Rendering/SceneRendering.hpp>
 
+#include <glm/glm.hpp>
+
 namespace Radiant
 {
 	/*=========== Scene ============*/
@@ -42,7 +44,7 @@ namespace Radiant
 		}
 		return nullptr;
 	}
-	
+
 	Entity* Scene::GetEntityByComponentType(ComponentType type)
 	{
 		for (auto e : m_Entitys)
@@ -73,11 +75,11 @@ namespace Radiant
 		m_ViewportWidth = rendering->m_ViewportWidth;
 		m_ViewportHeight = rendering->m_ViewportHeight;
 
+		Camera* camera = &Camera();
+
 		Memory::Shared<SceneRendering> render = rendering;
 		render->SetScene(this);
-
-		Camera* camera = nullptr;
-
+		
 		for (const auto e : m_Entitys)
 		{
 			if (e->HasComponent(ComponentType::Mesh))
@@ -102,10 +104,14 @@ namespace Radiant
 			}
 
 			if (e->HasComponent(ComponentType::Camera))
+			{
 				camera = &e->GetComponent(ComponentType::Camera).As<CameraComponent>()->Camera;
-
+			}
 		}
-
+		
+		camera->SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+		camera->SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), (float)m_ViewportWidth, (float)m_ViewportHeight, 0.1f, 10000.0f));
+		camera->OnUpdate();
 		render->SubmitScene(camera);
 	}
 

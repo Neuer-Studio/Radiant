@@ -58,7 +58,18 @@ namespace Radiant
 		virtual void UpdateForRendering() = 0; // NOTE(Danya): Does we need this function?
 	public:
 		uint32_t GetFlags() const { return m_MaterialFlags; }
-		void SetFlag(MaterialFlag flag) { m_MaterialFlags |= (uint32_t)flag; }
+		bool GetFlag(MaterialFlag flag) const { return (uint32_t)flag & m_MaterialFlags; }
+		void SetFlag(MaterialFlag flag, bool value) 
+		{
+			if (value)
+			{
+				m_MaterialFlags |= (uint32_t)flag;
+			}
+			else
+			{
+				m_MaterialFlags &= ~(uint32_t)flag;
+			}
+		}
 	public:
 		static Memory::Shared<Material> Create(const Memory::Shared<Shader>& shader, const std::string& name = "");
 	protected:

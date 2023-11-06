@@ -2,6 +2,7 @@
 
 #include <Radiant/Utilities/UUID.hpp>
 #include <glm/glm.hpp>
+#include <Radiant/Core/Camera.hpp>
 
 namespace Radiant
 {
@@ -44,7 +45,7 @@ namespace Radiant
 		std::size_t m_ViewportHeight = 0;
 
 		float m_Exposure = 1.0f; // NOTE(Danya): Using in SceneRendering
-
+	private:
 		friend SceneManager;
 		friend SceneRenderingPanel;
 		friend SceneRendering;

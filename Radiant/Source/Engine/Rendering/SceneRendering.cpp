@@ -33,17 +33,14 @@ namespace Radiant
 		std::vector<Memory::Shared<Mesh>> MeshDrawListWithShader;
 		Memory::Shared<TextureCube> EnvRadiance;
 		Memory::Shared<TextureCube> EnvIrradiance;
-		Memory::Shared<class Material> QuadMaterial;
+		Memory::Shared<class Material> SkyboxMaterial;
 
 		Memory::Shared<Texture2D> BRDFLUTTexture;
 
 		uint32_t Samples;
+		float SkyboxLod = 0.0f;
 
-		struct
-		{
-			glm::mat4 ViewProjection;
-			glm::vec3 CameraPosition;
-		} Camera;
+		Camera Camera;
 	};
 
 	static SceneInfo *s_SceneInfo = nullptr;
@@ -64,7 +61,8 @@ namespace Radiant
 		s_SceneInfo = new SceneInfo();
 		s_SceneInfo->QuadShader = Rendering::GetShaderLibrary()->Get("Quad.rads");
 		s_SceneInfo->StaticShader = Rendering::GetShaderLibrary()->Get("Static_Shader.rads");
-		s_SceneInfo->QuadMaterial = Material::Create(s_SceneInfo->QuadShader);
+		s_SceneInfo->SkyboxMaterial = Material::Create(s_SceneInfo->QuadShader);
+		s_SceneInfo->SkyboxMaterial->SetFlag(MaterialFlag::DepthTest, false);
 		/* Composite Pass */
 
 		{
@@ -78,6 +76,7 @@ namespace Radiant
 
 			s_SceneInfo->CompositeInfo.CompositeShader = Shader::Create("Resources/Shaders/Scene.rads");
 			s_SceneInfo->CompositeInfo.CompositeMaterial = Material::Create(s_SceneInfo->CompositeInfo.CompositeShader);
+			s_SceneInfo->CompositeInfo.CompositeMaterial->SetFlag(MaterialFlag::DepthTest, false);
 		}
 
 		/* Geometry Pass */
@@ -99,8 +98,7 @@ namespace Radiant
 
 	void SceneRendering::SubmitScene(Camera* camera)
 	{
-		if(camera)
-			UpdateCamera(camera);
+		s_SceneInfo->Camera = *(Camera*)camera;
 		Flush();
 	}
 
@@ -125,9 +123,9 @@ namespace Radiant
 				Memory::Shared<Material>& material = dc.Material;
 
 				material->SetValue("u_Transform", dc.Transform, UniformTarget::Vertex);
-				material->SetValue("u_ViewProjection", s_SceneInfo->Camera.ViewProjection, UniformTarget::Vertex);
+				material->SetValue("u_ViewProjection",s_SceneInfo->Camera.GetViewProjection(), UniformTarget::Vertex);
 
-				material->SetValue("u_CameraPosition", s_SceneInfo->Camera.CameraPosition, UniformTarget::Fragment);
+				material->SetValue("u_CameraPosition", s_SceneInfo->Camera.GetPosition(), UniformTarget::Fragment);
 				material->SetValue("u_BRDFLUTTexture", s_SceneInfo->BRDFLUTTexture);
 
 				if(s_SceneInfo->EnvRadiance)
@@ -149,7 +147,6 @@ namespace Radiant
 			s_SceneInfo->CompositeInfo.CompositeMaterial->SetValue("u_Exposure", m_Context->m_Exposure, UniformTarget::Fragment);
 			s_SceneInfo->CompositeInfo.CompositeMaterial->SetValue("u_TextureSamples", (uint32_t)s_SceneInfo->Samples, UniformTarget::Fragment);
 			s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->BindTexture();
-
 		}
 		Rendering::DrawFullscreenQuad(s_SceneInfo->CompositeInfo.CompositeMaterial);
 		Rendering::UnbindRenderingPass();
@@ -194,6 +191,7 @@ namespace Radiant
 	void SceneRendering::SetEnvRadiance(const Memory::Shared<TextureCube>& envRadiance) const
 	{
 		s_SceneInfo->EnvRadiance = envRadiance;
+		s_SceneInfo->SkyboxMaterial->SetValue("u_Texture", envRadiance);
 	}
 
 	void SceneRendering::SetEnvIrradiance(const Memory::Shared<TextureCube>& envIrradiance) const
@@ -213,11 +211,8 @@ namespace Radiant
 
 	void SceneRendering::UpdateSkyLight() // TODO(Danya): Fix crush(Done)
 	{
-		s_SceneInfo->QuadShader->Bind();
-		Rendering::DrawFullscreenQuad(s_SceneInfo->QuadMaterial);
-		s_SceneInfo->EnvRadiance->Bind();
-		s_SceneInfo->QuadMaterial->SetValue("u_InverseVP", glm::inverse(s_SceneInfo->Camera.ViewProjection), UniformTarget::Vertex);
-		Rendering::DrawIndexed(6);
+		s_SceneInfo->SkyboxMaterial->SetValue("u_InverseVP", glm::inverse(s_SceneInfo->Camera.GetViewProjection()), UniformTarget::Vertex);
+		Rendering::DrawFullscreenQuad(s_SceneInfo->SkyboxMaterial);
 	}
 
 	void SceneRendering::UpdateDirectionalLight(Memory::Shared<Material>& material)
@@ -230,19 +225,21 @@ namespace Radiant
 		}
 	}
 
-	void SceneRendering::UpdateCamera(Camera* camera)
-	{
-		s_SceneInfo->Camera.ViewProjection = camera->GetViewProjectionMatrix();
-		s_SceneInfo->Camera.CameraPosition = camera->GetPosition();
-
-		camera->Update();
-	}
-
 	uint32_t SceneRendering::GetSamplesCount()
 	{
 		return s_SceneInfo->Samples;
 	}
+	
+	float SceneRendering::GetSkyboxLod()
+	{
+		return s_SceneInfo->SkyboxLod;
+	}
 
+	void SceneRendering::SetSkyboxLod(float value)
+	{
+		s_SceneInfo->SkyboxLod = value;
+	}
+	
 	void SceneRendering::SetSampelsCount(uint32_t count)
 	{
 		s_SceneInfo->Samples = count;

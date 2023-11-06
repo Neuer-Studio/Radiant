@@ -195,8 +195,8 @@ namespace Radiant
 				if (ImGui::MenuItem("Camera"))
 				{
 					Entity* entity = m_Context->CreateEntity("Camera");
-					auto camera = CreateNewComponent<CameraComponent>();
-					camera->Camera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), (float)1600.f, (float)1600.f, 10.1f, 10000.0f));
+					auto& camera = CreateNewComponent<CameraComponent>();
+					camera->Camera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 10000.0f));
 					entity->AddComponent(camera);
 
 				}
@@ -231,7 +231,7 @@ namespace Radiant
 					{
 						Entity* entity = m_Context->CreateEntity("SkyLight");
 						auto skybox = CreateNewComponent<SkyBoxComponent>();
-						auto [radiance, irradiance] = SceneRendering::CreateEnvironmentMap("Resources/Envorement/HDR/pink_sunrise_4k.hdr");
+						auto [radiance, irradiance] = SceneRendering::CreateEnvironmentMap("Resources/Envorement/HDR/birchwood_4k.hdr");
 						skybox->Environment = Memory::Shared<Environment>::Create(radiance, irradiance);
 						entity->AddComponent(skybox);
 					}
