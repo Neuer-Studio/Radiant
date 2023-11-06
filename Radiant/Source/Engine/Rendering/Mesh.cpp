@@ -132,18 +132,12 @@ namespace Radiant
 				auto materialInstance = Material::Create(m_Shader, aiMaterialName.C_Str());
 
 				aiString aiTexPath;
-				uint32_t textureCount = aiMaterial->GetTextureCount(aiTextureType::aiTextureType_DIFFUSE);
-
-				MESH_LOG("{0}    TextureCount = {1}", aiMaterialName.C_Str(), textureCount);
-
 				glm::vec3 albedoColor(0.8f);
 				aiColor3D aiColor;
-				if (aiMaterial->Get("$clr.diffuse", 0, 0, aiColor) == aiReturn_SUCCESS)
+				if (aiMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aiColor) == aiReturn_SUCCESS)
 					albedoColor = { aiColor.r, aiColor.g, aiColor.b };
 
-				materialInstance->SetValue("u_MaterialColorsUniform.AlbedoColor", albedoColor, UniformTarget::Fragment);
-
-				bool hasAlbedoTexture = aiMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &aiTexPath) == AI_SUCCESS;
+				bool hasAlbedoTexture = aiMaterial->GetTexture(aiTextureType::aiTextureType_DIFFUSE, 0, &aiTexPath) == AI_SUCCESS;
 				if (hasAlbedoTexture)
 				{
 					std::filesystem::path imagePath = Utils::FileSystem::GetFileDirectory(filepath) / std::filesystem::path(aiTexPath.C_Str());
@@ -154,17 +148,25 @@ namespace Radiant
 					{
 						m_Textures[i] = texture;
 						materialInstance->SetValue("u_AlbedoTexture", texture);
+						materialInstance->SetValue("u_AlbedoTexToggle", true, UniformTarget::Fragment);
 					}
 
 					else
 					{
+						materialInstance->SetValue("u_MaterialUniform.AlbedoColor", albedoColor, UniformTarget::Fragment);
 						MESH_LOG("		No albedo texture");
 
 					}
 
 				}
+				else
+				{
+					materialInstance->SetValue("u_AlbedoTexToggle", false, UniformTarget::Fragment);
+					materialInstance->SetValue("u_MaterialUniform.AlbedoColor", albedoColor, UniformTarget::Fragment);
+				}
 
-				bool hasNormalTexture = aiMaterial->GetTexture(aiTextureType_NORMALS, 0, &aiTexPath) == AI_SUCCESS;
+				// Normal texture
+				bool hasNormalTexture = aiMaterial->GetTexture(aiTextureType::aiTextureType_NORMALS, 0, &aiTexPath) == AI_SUCCESS;
 				if (hasNormalTexture)
 				{
 					std::filesystem::path imagePath = Utils::FileSystem::GetFileDirectory(filepath) / std::filesystem::path(aiTexPath.C_Str());
@@ -175,6 +177,7 @@ namespace Radiant
 					{
 						m_Textures[i] = texture;
 						materialInstance->SetValue("u_NormalTexture", texture);
+						materialInstance->SetValue("u_NormalTexToggle", true, UniformTarget::Fragment);
 					}
 
 					else
@@ -184,7 +187,8 @@ namespace Radiant
 					}
 				}
 
-				bool hasShininessTexture = aiMaterial->GetTexture(aiTextureType_SHININESS, 0, &aiTexPath) == AI_SUCCESS;
+				// Shininess Texture
+				bool hasShininessTexture = aiMaterial->GetTexture(aiTextureType::aiTextureType_SHININESS, 0, &aiTexPath) == AI_SUCCESS;
 				if (hasShininessTexture)
 				{
 					std::filesystem::path imagePath = Utils::FileSystem::GetFileDirectory(filepath) / std::filesystem::path(aiTexPath.C_Str());
@@ -194,18 +198,18 @@ namespace Radiant
 					if (texture->Loaded())
 					{
 						m_Textures[i] = texture;
-						materialInstance->SetValue("u_ShininessTexture", texture);
+						materialInstance->SetValue("u_RoughnessTexture", texture);
 					}
 
 					else
 					{
 						MESH_LOG("		No Shininess texture");
-
+						materialInstance->SetValue("u_MaterialUniform.Roughness", 1.0f, UniformTarget::Fragment);
+						materialInstance->SetValue("u_RoughnessTexToggle", true, UniformTarget::Fragment);
 					}
 				}
 
-				bool hasMetalnessTexture = aiMaterial->GetTexture(aiTextureType_METALNESS, 0, &aiTexPath) == AI_SUCCESS;
-				if (hasMetalnessTexture)
+				if (aiMaterial->Get("$raw.ReflectionFactor|file", aiPTI_String, 0, aiTexPath) == AI_SUCCESS)
 				{
 					std::filesystem::path imagePath = Utils::FileSystem::GetFileDirectory(filepath) / std::filesystem::path(aiTexPath.C_Str());
 					MESH_LOG("		Metalness path = {}", imagePath.string());
@@ -215,12 +219,14 @@ namespace Radiant
 					{
 						m_Textures[i] = texture;
 						materialInstance->SetValue("u_MetalnessTexture", texture);
+						materialInstance->SetValue("u_MetalnessTexToggle", true, UniformTarget::Fragment);
 					}
 
 					else
 					{
 						MESH_LOG("		No Metalness texture");
-
+						materialInstance->SetValue("u_MaterialUniform.Metalness", 0.5f, UniformTarget::Fragment);
+						materialInstance->SetValue("u_MetalnessTexToggle", true, UniformTarget::Fragment);
 					}
 				}
 

@@ -97,8 +97,8 @@ namespace Radiant
 	{
 		struct
 		{
-			glm::vec3 Direction;
-			glm::vec3 Radiance;
+			glm::vec3 Direction = glm::vec3(1.0f);
+			glm::vec3 Radiance = glm::vec3(1.0f);
 		} DirLight;
 
 	protected:

@@ -348,7 +348,7 @@ namespace Radiant
 					{
 						mesh = Memory::Shared<Mesh>::Create(file);
 
-						Memory::Shared<Material> mi = Material::Create(mesh->GetShader());
+						Memory::Shared<Material> mi = mesh->GetMaterial();
 						auto materialComponent = CreateNewComponent<MaterialComponent>(mi);
 						entity->AddComponent(materialComponent);
 					}

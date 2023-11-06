@@ -22,8 +22,9 @@ namespace Radiant
 
 		void SetScene(const Memory::Shared<Scene>& scene) { m_Context = scene; }
 		void SetSceneVeiwPortSize(const glm::vec2& size);
-		void SetSkyBox(const Memory::Shared<TextureCube>& skybox) const;
-		void SetEnvironment(const Environment& environment);
+		void SetEnvRadiance(const Memory::Shared<TextureCube>& envRadiance) const;
+		void SetEnvIrradiance(const Memory::Shared<TextureCube>& envIrradiance) const;
+		void SetEnvironment(const Environment& environment) const;
 		static std::pair<Memory::Shared<TextureCube>, Memory::Shared<TextureCube>> CreateEnvironmentMap(const std::string& filepath);
 		void SubmitScene(Camera* camera);
 
@@ -42,12 +43,11 @@ namespace Radiant
 		void GeometryPass();
 		void Flush();
 	private:
-		void DrawSkyBox();
+		void UpdateSkyLight();
 		void UpdateDirectionalLight(Memory::Shared<Material>& material);
 		void UpdateCamera(Camera* camera);
 	private:
 		std::size_t m_ViewportWidth = -1, m_ViewportHeight = -1;
-		Environment m_Environment;
 		Memory::Shared<Scene> m_Context;
 		friend Scene;
 		friend SceneRenderingPanel;

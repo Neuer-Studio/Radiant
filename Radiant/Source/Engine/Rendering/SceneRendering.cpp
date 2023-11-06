@@ -31,8 +31,11 @@ namespace Radiant
 		Memory::Shared<Shader> StaticShader;
 		std::vector<DrawProperties> MeshDrawList;
 		std::vector<Memory::Shared<Mesh>> MeshDrawListWithShader;
-		Memory::Shared<TextureCube> SkyBox;
+		Memory::Shared<TextureCube> EnvRadiance;
+		Memory::Shared<TextureCube> EnvIrradiance;
 		Memory::Shared<class Material> QuadMaterial;
+
+		Memory::Shared<Texture2D> BRDFLUTTexture;
 
 		uint32_t Samples;
 
@@ -90,6 +93,8 @@ namespace Radiant
 			s_SceneInfo->GeometryInfo.GeometryPass = RenderingPass::Create(PassGeometry);
 		}
 
+		s_SceneInfo->BRDFLUTTexture = Texture2D::Create("Resources/Textures/BRDF_LUT.tga");
+
 	}
 
 	void SceneRendering::SubmitScene(Camera* camera)
@@ -112,8 +117,8 @@ namespace Radiant
 	{
 		Rendering::BindRenderingPass(s_SceneInfo->GeometryInfo.GeometryPass);
 		{
-			if(s_SceneInfo->SkyBox)
-				DrawSkyBox();
+			if(s_SceneInfo->EnvRadiance)
+				UpdateSkyLight();
 
 			for (auto& dc : s_SceneInfo->MeshDrawList)
 			{
@@ -123,10 +128,12 @@ namespace Radiant
 				material->SetValue("u_ViewProjection", s_SceneInfo->Camera.ViewProjection, UniformTarget::Vertex);
 
 				material->SetValue("u_CameraPosition", s_SceneInfo->Camera.CameraPosition, UniformTarget::Fragment);
-				material->SetValue("u_AlbedoTexture", dc.Mesh->GetAlbedoMaterial()->GetTexture2D("u_AlbedoTexture"));
-				material->SetValue("u_AlbedoTexToggle", true, UniformTarget::Fragment);
-				material->SetValue("u_MetalnessTexToggle", false, UniformTarget::Fragment);
-				material->SetValue("u_RoughnessTexToggle", false, UniformTarget::Fragment);
+				material->SetValue("u_BRDFLUTTexture", s_SceneInfo->BRDFLUTTexture);
+
+				if(s_SceneInfo->EnvRadiance)
+					material->SetValue("u_EnvRadianceTex", s_SceneInfo->EnvRadiance);
+				if (s_SceneInfo->EnvIrradiance)
+					material->SetValue("u_EnvIrradianceTex", s_SceneInfo->EnvIrradiance);
 
 				UpdateDirectionalLight(material);
 				Rendering::DrawMesh(dc.Mesh, material);
@@ -178,15 +185,20 @@ namespace Radiant
 		}
 	}
 
-	void SceneRendering::SetEnvironment(const Environment& environment)
+	void SceneRendering::SetEnvironment(const Environment& environment) const
 	{
-		m_Environment = environment;
-		SetSkyBox(environment.RadianceMap);
+		SetEnvRadiance(environment.RadianceMap);
+		SetEnvIrradiance(environment.IrradianceMap);
 	}
 
-	void SceneRendering::SetSkyBox(const Memory::Shared<TextureCube>& skybox) const
+	void SceneRendering::SetEnvRadiance(const Memory::Shared<TextureCube>& envRadiance) const
 	{
-		s_SceneInfo->SkyBox = skybox;
+		s_SceneInfo->EnvRadiance = envRadiance;
+	}
+
+	void SceneRendering::SetEnvIrradiance(const Memory::Shared<TextureCube>& envIrradiance) const
+	{
+		s_SceneInfo->EnvIrradiance = envIrradiance;
 	}
 
 	Memory::Shared<Image2D> SceneRendering::GetFinalPassImage()
@@ -199,11 +211,11 @@ namespace Radiant
 		return s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->GetDepthImage();
 	}
 
-	void SceneRendering::DrawSkyBox() // TODO(Danya): Fix crush(Done)
+	void SceneRendering::UpdateSkyLight() // TODO(Danya): Fix crush(Done)
 	{
 		s_SceneInfo->QuadShader->Bind();
 		Rendering::DrawFullscreenQuad(s_SceneInfo->QuadMaterial);
-		s_SceneInfo->SkyBox->Bind();
+		s_SceneInfo->EnvRadiance->Bind();
 		s_SceneInfo->QuadMaterial->SetValue("u_InverseVP", glm::inverse(s_SceneInfo->Camera.ViewProjection), UniformTarget::Vertex);
 		Rendering::DrawIndexed(6);
 	}

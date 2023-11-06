@@ -97,7 +97,8 @@ namespace Radiant
 			{
 				const auto cube = e->GetComponent(ComponentType::SkyBox).As<SkyBoxComponent>()->Environment;
 				if (!cube) continue;
-				rendering->SetSkyBox(cube->RadianceMap);
+				rendering->SetEnvRadiance(cube->RadianceMap);
+				rendering->SetEnvIrradiance(cube->IrradianceMap);
 			}
 
 			if (e->HasComponent(ComponentType::Camera))

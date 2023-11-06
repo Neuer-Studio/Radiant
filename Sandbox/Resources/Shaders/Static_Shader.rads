@@ -72,9 +72,11 @@ struct Light
 struct MaterialColors
 {
     vec3 AlbedoColor;
+	float Metalness;
+	float Roughness;
 };
 
-uniform MaterialColors u_MaterialColorsUniform;
+uniform MaterialColors u_MaterialUniform;
 uniform Light u_LightUniform;
 uniform vec3 u_CameraPosition;
 
@@ -91,10 +93,6 @@ uniform samplerCube u_EnvIrradianceTex;
 
 // BRDF LUT
 uniform sampler2D u_BRDFLUTTexture;
-
-uniform vec3 u_AlbedoColor;
-uniform float u_Metalness;
-uniform float u_Roughness;
 
 uniform float u_EnvMapRotation;
 
@@ -302,9 +300,9 @@ vec3 IBL(vec3 F0, vec3 Lr)
 void main()
 {
 	// Standard PBR inputs
-	m_Params.Albedo = u_AlbedoTexToggle ? texture(u_AlbedoTexture, vs_Input.TexCoord).rgb : u_AlbedoColor; 
-	m_Params.Metalness = u_MetalnessTexToggle ? texture(u_MetalnessTexture, vs_Input.TexCoord).r : u_Metalness;
-	m_Params.Roughness = u_RoughnessTexToggle ?  texture(u_RoughnessTexture, vs_Input.TexCoord).r : u_Roughness;
+	m_Params.Albedo = u_AlbedoTexToggle ? texture(u_AlbedoTexture, vs_Input.TexCoord).rgb : u_MaterialUniform.AlbedoColor; 
+	m_Params.Metalness = u_MetalnessTexToggle ? texture(u_MetalnessTexture, vs_Input.TexCoord).r : u_MaterialUniform.Metalness;
+	m_Params.Roughness = u_RoughnessTexToggle ?  texture(u_RoughnessTexture, vs_Input.TexCoord).r : u_MaterialUniform.Roughness;
     m_Params.Roughness = max(m_Params.Roughness, 0.05); // Minimum roughness of 0.05 to keep specular highlight
 
 	// Normals (either from vertex or map)

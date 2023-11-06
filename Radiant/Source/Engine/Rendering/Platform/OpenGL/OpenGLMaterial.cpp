@@ -60,20 +60,64 @@ namespace Radiant
 
 		ShaderUniformDeclaration& uniform = m_Shader->GetBufferUniform(name, UniformTarget::Sampler);
 		RadiantType uType = uniform.Type;
-		if (uType != RadiantType::sampler2D)
+		if (uType != RadiantType::sampler2D) // texture == Texture2D
 		{
 			RADIANT_VERIFY(false);
 			return false;
 		}
 
+		uint32_t i = 0;
+		for (auto& decl : m_Textures2D)
+		{
+			if (decl.decl.Name == uniform.Name)
+			{
+				m_Textures2D[i] = { uniform, texture };
+				return true;
+			}
+			i++;
+		}
 		m_Textures2D.push_back({ uniform, texture});
 		return true;
 	}
 
 	bool OpenGLMaterial::SetValue(const std::string& name, const Memory::Shared<TextureCube>& texture)
 	{
-		RADIANT_VERIFY(false);
+		if (!m_Shader->HasBufferUniform(name, UniformTarget::Sampler))
+		{
+			RADIANT_VERIFY(false, "");
+			return false;
+		}
+
+		ShaderUniformDeclaration& uniform = m_Shader->GetBufferUniform(name, UniformTarget::Sampler);
+		RadiantType uType = uniform.Type;
+		if (uType != RadiantType::samplerCube) // texture == TextureCube
+		{
+			RADIANT_VERIFY(false);
+			return false;
+		}
+
+		uint32_t i = 0;
+		for (auto& decl : m_TexturesCube)
+		{
+			if (decl.decl.Name == uniform.Name)
+			{
+				m_TexturesCube[i] = { uniform, texture };
+				return true;
+			}
+			i++;
+		}
+		m_TexturesCube.push_back({ uniform, texture });
 		return true;
+	}
+
+	bool OpenGLMaterial::GetBool(const std::string& name, UniformTarget type)
+	{
+		return Get<bool>(name, type, RadiantType::Bool);
+	}
+
+	bool& OpenGLMaterial::GetBoolRef(const std::string& name, UniformTarget type)
+	{
+		return GetRef<bool>(name, type, RadiantType::Bool);
 	}
 
 	float OpenGLMaterial::GetFloat(const std::string& name, UniformTarget type)
@@ -175,6 +219,16 @@ namespace Radiant
 		uint32_t size = Utils::GetGLMDataSizeFromRadiant(uniformType);
 		std::memcpy(uniform.Value, value, size);
 
+		uint32_t i = 0;
+		for (auto& decl : m_OverrideValues)
+		{
+			if (decl.Name == uniform.Name)
+			{
+				m_OverrideValues[i] = uniform;
+				return true;
+			}
+			i++;
+		}
 		m_OverrideValues.push_back(uniform);
 		return true;
 	}
@@ -192,13 +246,19 @@ namespace Radiant
 					instance->m_Shader.As<OpenGLShader>()->UpdateShaderValue(buffer);
 				}
 
-				for (const auto texture : instance->m_Textures2D)
+				for (const auto& texture : instance->m_Textures2D) // Update sampler2D
 				{
-					auto id = texture.texture->GetImage()->GetImageID();
+					auto id = texture.texture.As<Texture2D>()->GetImage()->GetImageID();
 					glBindTextureUnit(texture.decl.Position,id);
 				}
-				instance->m_OverrideValues.clear();
-				instance->m_Textures2D.clear();
+
+				for (const auto& texture : instance->m_TexturesCube) // Update samplerCube
+				{
+					auto id = texture.texture.As<TextureCube>()->GetImage()->GetImageID();
+					glBindTextureUnit(texture.decl.Position, id);
+				}
+				//instance->m_OverrideValues.clear();
+				//instance->m_Textures2D.clear();
 			});
 	}
 }

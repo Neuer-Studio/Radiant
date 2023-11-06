@@ -146,7 +146,7 @@ namespace Radiant
 		if (material.Ptr() != nullptr)
 			material->UpdateForRendering();
 
-		DrawIndexed(s_Data->QuadInfo.FullscreenQuadIndexBuffer->GetCount());
+		DrawIndexed(s_Data->QuadInfo.FullscreenQuadIndexBuffer->GetCount(), PrimitiveType::Triangles, false);
 	}
 
 	Memory::Shared<Texture2D> Rendering::GetWhiteTexture()
