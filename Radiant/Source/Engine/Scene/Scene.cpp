@@ -68,7 +68,7 @@ namespace Radiant
 		return false;
 	}
 
-	void Scene::UpdateScene(const Memory::Shared<SceneRendering>& rendering, SceneType type) // TODO(Danya): Update scene render 
+	void Scene::UpdateScene(Timestep ts, const Memory::Shared<SceneRendering>& rendering, SceneType type) // TODO(Danya): Update scene render 
 	{
 		m_SceneRendering = rendering;
 
@@ -111,7 +111,7 @@ namespace Radiant
 		
 		camera->SetViewportSize(m_ViewportWidth, m_ViewportHeight);
 		camera->SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), (float)m_ViewportWidth, (float)m_ViewportHeight, 0.1f, 10000.0f));
-		camera->OnUpdate();
+		camera->OnUpdate(ts);
 		render->SubmitScene(camera);
 	}
 

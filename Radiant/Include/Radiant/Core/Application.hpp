@@ -4,6 +4,7 @@
 
 #include "Window.hpp"
 #include "LayerStack.hpp"
+#include <Radiant/Core/Timestep.hpp>
 #include <Radiant/ImGui/ImGuiLayer.hpp>
 
 namespace Radiant
@@ -22,7 +23,7 @@ namespace Radiant
 
 		virtual void OnInit() {}
 		virtual void OnShutdown() {}
-		virtual void OnUpdate() {}
+		virtual void OnUpdate(Timestep ts) {}
 
 		void PushLayer(Layer* layer);
 		void PopLayer(Layer* layer);
@@ -43,6 +44,10 @@ namespace Radiant
 		ImGuiLayer* m_ImGuiLayer;
 
 		bool m_Run;
+
+		Timestep m_Frametime;
+		Timestep m_TimeStep;
+		float m_LastFrameTime = 0.0f;
 	private:
 		static Application* s_Instance;
 	};

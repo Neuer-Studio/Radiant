@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <Radiant/Core/Timestep.hpp>
 
 namespace Radiant
 {
@@ -13,7 +14,7 @@ namespace Radiant
 		Camera(const glm::mat4& projectionMatrix);
 
 		void Focus();
-		void OnUpdate();
+		void OnUpdate(Timestep ts);
 		void OnEvent(Event& e);
 
 		inline float GetDistance() const { return m_Distance; }

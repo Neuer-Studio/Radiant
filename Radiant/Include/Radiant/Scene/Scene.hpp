@@ -31,7 +31,7 @@ namespace Radiant
 		bool ContainsEntityInScene(ComponentType type);
 		std::vector<Entity*> GetEntityList() { return m_Entitys; }
 
-		void UpdateScene(const Memory::Shared<SceneRendering>& rendering, SceneType type = SceneType::Editor);
+		void UpdateScene(Timestep ts, const Memory::Shared<SceneRendering>& rendering, SceneType type = SceneType::Editor);
 	private:
 		Entity* m_SelectedEntity = nullptr; // NOTE(Danya): Using for panels
 		std::vector<Entity*> m_Entitys;

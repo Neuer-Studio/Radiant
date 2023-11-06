@@ -65,7 +65,7 @@ namespace Radiant
 		return speed;
 	}
 
-	void Camera::OnUpdate()
+	void Camera::OnUpdate(Timestep ts)
 	{
 		if (Input::IsKeyPressed(KeyCode::LeftAlt))
 		{
@@ -73,7 +73,7 @@ namespace Radiant
 			glm::vec2 delta = mouse - m_InitialMousePosition;
 			m_InitialMousePosition = mouse;
 
-			delta *= 0.03;
+			delta *= ts.GetSeconds();
 
 			if (Input::IsMouseButtonPressed(MouseButton::Middle))
 				MousePan(delta);

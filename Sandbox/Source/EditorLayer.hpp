@@ -17,6 +17,7 @@
 #include <Radiant/Rendering/SceneRendering.hpp>
 #include <Radiant/ImGui/Editor/Panels/PanelOutliner.hpp>
 #include <Radiant/ImGui/Editor/Panels/SceneRenderingPanel.hpp>
+#include <Radiant/Core/Timestep.hpp>
 
 namespace Radiant
 {
@@ -52,9 +53,9 @@ namespace Radiant
 
 		}
 
-		virtual void OnUpdate() override
+		virtual void OnUpdate(Timestep ts) override
 		{
-			m_TestScene->UpdateScene(m_Rendering);
+			m_TestScene->UpdateScene(ts, m_Rendering);
 		}
 
 		virtual void OnImGuiRender() override
