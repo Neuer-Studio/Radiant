@@ -5,6 +5,8 @@ namespace Radiant
 	enum class ImageFormat
 	{
 		None = 0,
+		RGB,
+		SRGB8,
 		RGBA8,
 		RGBA,
 		RGBA16F,

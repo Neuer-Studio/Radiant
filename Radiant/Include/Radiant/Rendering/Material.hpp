@@ -21,6 +21,7 @@ namespace Radiant
 	public:
 		virtual std::size_t GetOverridedValuesSize() = 0;
 	public:
+		virtual bool SetValue(const std::string& name, bool value, UniformTarget type) = 0;
 		virtual bool SetValue(const std::string& name, float value, UniformTarget type) = 0;
 		virtual bool SetValue(const std::string& name, uint32_t value, UniformTarget type) = 0;
 		virtual bool SetValue(const std::string& name, int value, UniformTarget type) = 0;
@@ -56,7 +57,7 @@ namespace Radiant
 		uint32_t GetFlags() const { return m_MaterialFlags; }
 		void SetFlag(MaterialFlag flag) { m_MaterialFlags |= (uint32_t)flag; }
 	public:
-		static Memory::Shared<Material> Create(const Memory::Shared<Shader>& shader);
+		static Memory::Shared<Material> Create(const Memory::Shared<Shader>& shader, const std::string& name = "");
 	protected:
 		uint32_t m_MaterialFlags;
 	};

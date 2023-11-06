@@ -16,14 +16,13 @@ namespace Radiant
 		int width, height, channels;
 		if (stbi_is_hdr(path.string().c_str()))
 		{
-			RADIANT_VERIFY(false);
-			RA_INFO("Loading HDR texture {}, srgb = {}", Utils::FileSystem::GetFileName(path), srgb);
+			RA_INFO("Loading HDR texture {}, srgb = {}, hdr = {}", Utils::FileSystem::GetFileName(path), srgb, true);
 
 			float* imageData = stbi_loadf(path.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
 			RADIANT_VERIFY(imageData);
 
 			Memory::Buffer buffer((std::byte*)imageData, width * height * Utils::GetImageMemorySize(ImageFormat::RGBA32F, width, height));
-			m_Image = Image2D::Create(ImageFormat::RGBA32F, width, height, buffer);
+			m_Image = Image2D::Create(ImageFormat::RGBA16F, width, height, buffer);
 		}
 	
 		else
@@ -33,7 +32,7 @@ namespace Radiant
 			auto* imageData = stbi_load(path.string().c_str(), &width, &height, &channels, srgb ? STBI_rgb : STBI_rgb_alpha);
 			RADIANT_VERIFY(imageData);
 
-			ImageFormat format = srgb ? ImageFormat::RGBA8 : ImageFormat::RGBA;
+			ImageFormat format = srgb ? ImageFormat::SRGB8 : ImageFormat::RGBA; // TODO: Should be rgba16f
 			Memory::Buffer buffer((std::byte*)imageData, width * height * Utils::GetImageMemorySize(format, width, height));
 			m_Image = Image2D::Create(format, width, height, buffer);
 
@@ -43,14 +42,19 @@ namespace Radiant
 		m_Height = height;
 
 		m_MipCount = Utils::CalculateMipCount(width, height);
-
+		m_Loaded = true;
 		auto& image = m_Image;
 		Rendering::SubmitCommand([image]() mutable
 			{
 				image->Invalidate();
-				//stbi_image_free(buffer.Data); //TODO: Should free iamge data
+				stbi_image_free(image->GetBuffer().Data);
 			});
 
+	}
+
+	OpenGLTexture2D::OpenGLTexture2D(ImageFormat format, uint32_t width, uint32_t height, const void* data)
+	{
+		m_Image = Image2D::Create(format, width, height, data);
 	}
 
 	OpenGLTexture2D::~OpenGLTexture2D()
@@ -84,8 +88,25 @@ namespace Radiant
 		const std::byte* imageData = (std::byte*)stbi_load(path.string().c_str(), &width, &height, &channels, STBI_rgb);
 		RADIANT_VERIFY(imageData);
 
+		m_Width = width;
+		m_Height = height;
+		m_Format = ImageFormat::RGBA8;
+
 		m_Image = ImageCube::Create(ImageFormat::RGBA8, width, height, imageData);
 		stbi_image_free(m_Image->GetBuffer().Data);
+
+		m_Loaded = true;
+	}
+
+	OpenGLTextureCube::OpenGLTextureCube(ImageFormat format, uint32_t width, uint32_t height)
+	{
+		m_Width = width;
+		m_Height = height;
+		m_Format = format;
+
+		m_Image = ImageCube::Create(format, width, height);
+		
+		m_Loaded = true;
 	}
 
 	OpenGLTextureCube::~OpenGLTextureCube()

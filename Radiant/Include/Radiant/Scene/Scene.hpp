@@ -28,7 +28,6 @@ namespace Radiant
 		Entity* GetEntityByUUID(uint64_t uuid);
 		Entity* GetEntityByComponentType(ComponentType type);
 		bool ContainsEntityInScene(ComponentType type);
-
 		std::vector<Entity*> GetEntityList() { return m_Entitys; }
 
 		void UpdateScene(const Memory::Shared<SceneRendering>& rendering, SceneType type = SceneType::Editor);

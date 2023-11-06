@@ -6,14 +6,14 @@ namespace Radiant
 {
 	struct Texture2DUnit
 	{
-		int position = -1;
+		ShaderUniformDeclaration decl;
 		Memory::Shared<Texture2D> texture;
 	};
 
 	class OpenGLMaterial final : public Material
 	{
 	public:
-		OpenGLMaterial(const Memory::Shared<Shader> shader);
+		OpenGLMaterial(const Memory::Shared<Shader>& shader, const std::string& name);
 		virtual ~OpenGLMaterial() override = default;
 
 		virtual void GetShader(const Memory::Shared<Shader>& shader) override { m_Shader = shader; }
@@ -22,6 +22,7 @@ namespace Radiant
 	public:
 		virtual std::size_t GetOverridedValuesSize() { return m_OverrideValues.size(); }
 	public:
+		virtual bool SetValue(const std::string& name, bool value, UniformTarget type) override;
 		virtual bool SetValue(const std::string& name, float value, UniformTarget type) override;
 		virtual bool SetValue(const std::string& name, uint32_t value, UniformTarget type) override;
 		virtual bool SetValue(const std::string& name, int value, UniformTarget type) override;
@@ -99,5 +100,6 @@ namespace Radiant
 		std::vector<ShaderUniformDeclaration> m_OverrideValues; // Vector for overriding uniforms buffer
 		std::vector<Texture2DUnit> m_Textures2D;
 		Memory::Shared<Shader> m_Shader;
+		std::string m_Name;
 	};
 }

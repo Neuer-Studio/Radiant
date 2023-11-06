@@ -7,6 +7,7 @@
 namespace Radiant
 {
 	class TextureCube;
+	class Texture2D;
 	class OpenGLRenderingPass;
 	class SceneRenderingPanel;
 	class SceneRendering;
@@ -21,6 +22,8 @@ namespace Radiant
 		static void DrawMeshWithShader(Memory::Shared<Mesh> mesh, Memory::Shared<Shader> shader);
 
 		static void DrawFullscreenQuad(Memory::Shared<Material> material);
+
+		static Memory::Shared<Texture2D> GetWhiteTexture();
 
 		static void BindRenderingPass(const Memory::Shared<RenderingPass>& pass);
 		static void UnbindRenderingPass();

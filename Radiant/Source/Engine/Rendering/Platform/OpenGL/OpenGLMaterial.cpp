@@ -5,9 +5,14 @@
 namespace Radiant
 {
 
-	OpenGLMaterial::OpenGLMaterial(const Memory::Shared<Shader> shader)
-		:m_Shader(shader)
+	OpenGLMaterial::OpenGLMaterial(const Memory::Shared<Shader>& shader, const std::string& name)
+		: m_Shader(shader), m_Name(name)
 	{
+	}
+
+	bool OpenGLMaterial::SetValue(const std::string& name, bool value, UniformTarget type)
+	{
+		return Set(name, (std::byte*)&value, type, RadiantType::Bool);
 	}
 
 	bool OpenGLMaterial::SetValue(const std::string& name, float value, UniformTarget type)
@@ -61,12 +66,13 @@ namespace Radiant
 			return false;
 		}
 
-		m_Textures2D.push_back({ uniform.Position, texture});
+		m_Textures2D.push_back({ uniform, texture});
 		return true;
 	}
 
 	bool OpenGLMaterial::SetValue(const std::string& name, const Memory::Shared<TextureCube>& texture)
 	{
+		RADIANT_VERIFY(false);
 		return true;
 	}
 
@@ -140,7 +146,7 @@ namespace Radiant
 
 		for (const auto& unit : m_Textures2D)
 		{
-			if (unit.position == position)
+			if (unit.decl.Position == position)
 				return unit.texture;
 		}
 
@@ -167,7 +173,6 @@ namespace Radiant
 		}
 		uniform.isChanged = true;
 		uint32_t size = Utils::GetGLMDataSizeFromRadiant(uniformType);
-
 		std::memcpy(uniform.Value, value, size);
 
 		m_OverrideValues.push_back(uniform);
@@ -190,9 +195,8 @@ namespace Radiant
 				for (const auto texture : instance->m_Textures2D)
 				{
 					auto id = texture.texture->GetImage()->GetImageID();
-					glBindTextureUnit(texture.position,id);
+					glBindTextureUnit(texture.decl.Position,id);
 				}
-
 				instance->m_OverrideValues.clear();
 				instance->m_Textures2D.clear();
 			});

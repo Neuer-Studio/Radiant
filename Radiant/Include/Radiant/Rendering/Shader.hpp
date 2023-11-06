@@ -15,8 +15,8 @@ namespace Radiant
 	enum class RadiantType
 	{
 		None = 0, 
-
-		sampler1D = 1, sampler2D, sampler3D, // Sampler
+		sampler1D = 1, sampler2D, sampler3D, samplerCube, // Sampler
+		Bool, // Bool
 		Int, Uint,// Int
 		Float, Float2, Float3, Float4, // Float 
 		Mat2, Mat3, Mat4, // Mat
@@ -112,6 +112,8 @@ namespace Radiant
 			{
 			case RadiantType::Float:
 				return sizeof(float);
+			case RadiantType::Bool:
+				return sizeof(bool);
 			case RadiantType::Int:
 				return sizeof(int);
 			case RadiantType::Uint:
@@ -133,6 +135,11 @@ namespace Radiant
 				return RadiantType::sampler2D;
 			if (uniform == "sampler3D")
 				return RadiantType::sampler3D;
+			if (uniform == "samplerCube")
+				return RadiantType::samplerCube;
+
+			if (uniform == "bool")
+				return RadiantType::Bool;
 
 			if (uniform == "int")
 				return RadiantType::Int;
@@ -153,5 +160,17 @@ namespace Radiant
 			return RadiantType::None;
 		}
 
+		static bool IsSampler(RadiantType type)
+		{
+			switch (type)
+			{
+				case RadiantType::sampler1D:
+				case RadiantType::sampler2D:
+				case RadiantType::sampler3D:
+				case RadiantType::samplerCube:
+					return true;
+			}
+			return false;
+		}
 	}
 }

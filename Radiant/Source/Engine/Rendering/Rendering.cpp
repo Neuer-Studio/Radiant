@@ -30,6 +30,7 @@ namespace Radiant
 		Memory::Shared<RenderingPass> ActiveRenderingPass;
 		Memory::Shared<Pipeline> PiplineStaticMesh;
 		Memory::Shared<Pipeline> PiplineDynamicMesh;
+		Memory::Shared<Texture2D> WhiteTexture;
 
 		QuadData QuadInfo;
 	};
@@ -109,6 +110,11 @@ namespace Radiant
 			s_Data->RenderingShaders->Load("Resources/Shaders/Static_Shader.rads");
 			s_Data->RenderingShaders->Load("Resources/Shaders/Quad.rads");
 		}
+
+		{
+			uint32_t whiteTextureData = 0xfffffff;
+			s_Data->WhiteTexture = Texture2D::Create(ImageFormat::RGBA, 1, 1, &whiteTextureData);
+		}
 	}
 
 	const Memory::Shared<ShaderLibrary>& Rendering::GetShaderLibrary()
@@ -137,10 +143,15 @@ namespace Radiant
 		s_Data->QuadInfo.FullscreenQuadVertexBuffer->Bind();
 		s_Data->QuadInfo.FullscreenQuadPipeline->Bind();
 		s_Data->QuadInfo.FullscreenQuadIndexBuffer->Bind();
-		if(material.Ptr() != nullptr)
+		if (material.Ptr() != nullptr)
 			material->UpdateForRendering();
 
 		DrawIndexed(s_Data->QuadInfo.FullscreenQuadIndexBuffer->GetCount());
+	}
+
+	Memory::Shared<Texture2D> Rendering::GetWhiteTexture()
+	{
+		return s_Data->WhiteTexture;
 	}
 
 	void Rendering::SubmitCommand(std::function<void()> func)

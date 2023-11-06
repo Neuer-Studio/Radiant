@@ -83,7 +83,7 @@ namespace Radiant
 			if (e->HasComponent(ComponentType::Mesh))
 			{
 				const auto mesh = e->GetComponent(ComponentType::Mesh).As<MeshComponent>()->Mesh;
-				if (!mesh) break;
+				if (!mesh) continue;
 				const auto& material = e->GetComponent(ComponentType::Material).As<MaterialComponent>()->Material;
 				rendering->AddMeshToDrawList
 				({
@@ -93,14 +93,11 @@ namespace Radiant
 				});
 			}
 
-			if (e->HasComponent(ComponentType::Cube))
+			if (e->HasComponent(ComponentType::SkyBox))
 			{
-				const auto cube = e->GetComponent(ComponentType::Cube).As<CubeComponent>()->Cube;
-				if (!cube) break;
-				rendering->AddTextureCubeToDrawList(
-					{
-						cube,
-					});
+				const auto cube = e->GetComponent(ComponentType::SkyBox).As<SkyBoxComponent>()->Environment;
+				if (!cube) continue;
+				rendering->SetSkyBox(cube->RadianceMap);
 			}
 
 			if (e->HasComponent(ComponentType::Camera))

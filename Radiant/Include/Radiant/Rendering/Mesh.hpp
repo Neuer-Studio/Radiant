@@ -20,6 +20,17 @@ namespace Radiant
 	class SceneRendering;
 	class Material;
 
+	struct Submesh
+	{
+		uint32_t Vertex;
+		uint32_t Index;
+		uint32_t MaterialIndex;
+		uint32_t IndexCount;
+		std::string Name;
+
+		glm::mat4 Transform;
+	};
+
 	struct Vertex {
 		glm::vec3 Position;
 		glm::vec3 Normals;
@@ -39,22 +50,25 @@ namespace Radiant
 		Mesh(const std::string& filepath);
 		~Mesh() {}
 
-		inline const std::string& GetFilePath() const { return m_FilePath; }
-		inline const std::string& GetName() const { return m_Name; }
-		inline Memory::Shared<Material>& GetMaterial() { return m_Material; }
-		inline const Memory::Shared<Shader>& GetShader() { return m_Shader; }
-		inline void SetShader(const Memory::Shared<Shader>& shader) { m_Shader = shader; }
+		const std::string& GetFilePath() const { return m_FilePath; }
+		const std::string& GetName() const { return m_Name; }
+		Memory::Shared<Material>& GetMaterial() { return m_Materials[0]; }
+		const Memory::Shared<Shader>& GetShader() { return m_Shader; }
+		void SetShader(const Memory::Shared<Shader>& shader) { m_Shader = shader; }
+		Memory::Shared<Material> GetAlbedoMaterial() const { return m_Materials[0]; }
 	private:
 		std::string m_FilePath;
 		std::string m_Name;
 
 		std::vector<Vertex> m_Vertices;
+		std::vector<Submesh> m_Submeshes;
 		std::vector<Index> m_Indices;
 
 		Memory::Shared<VertexBuffer> m_VertexBuffer;
 		Memory::Shared<Shader> m_Shader;
 		Memory::Shared<IndexBuffer> m_IndexBuffer;
-		Memory::Shared<Material> m_Material;
+		std::vector<Memory::Shared<Material>> m_Materials;
+		std::vector<Memory::Shared<Texture2D>> m_Textures;
 
 		friend Rendering;
 		friend SceneRendering;

@@ -50,8 +50,11 @@ namespace Radiant
 
 		bool ms = m_SamplersCount > 1;
 
-		glCreateTextures(Utils::TextureTarget(ms), 1, &m_RenderingID);
-		glBindTexture(Utils::TextureTarget(ms), m_RenderingID);
+		if (m_Format != ImageFormat::SRGB8)
+		{
+			glCreateTextures(Utils::TextureTarget(ms), 1, &m_RenderingID);
+			glBindTexture(Utils::TextureTarget(ms), m_RenderingID);
+		}
 
 		if (!ms)
 			Invalidate2D();
@@ -82,14 +85,29 @@ namespace Radiant
 
 		if (!Utils::IsDepthFormat(m_Format))
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, InternalFormat, m_Width, m_Height, 0, GL_RGBA, type, m_ImageData ? m_ImageData.As<void*>() : nullptr);
+			if (m_Format == ImageFormat::SRGB8) // SRGB (todo: issrgb())
+			{
+				glCreateTextures(GL_TEXTURE_2D, 1, &m_RenderingID);
+				int levels = Utils::CalculateMipCount(m_Width, m_Height);
+				glTextureStorage2D(m_RenderingID, levels, GL_SRGB8, m_Width, m_Height);
+				glTextureParameteri(m_RenderingID, GL_TEXTURE_MIN_FILTER, levels > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+				glTextureParameteri(m_RenderingID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTextureSubImage2D(m_RenderingID, 0, 0, 0, m_Width, m_Height, GL_RGB, GL_UNSIGNED_BYTE, m_ImageData.Data);
+				glGenerateTextureMipmap(m_RenderingID);
 
-			glGenerateMipmap(GL_TEXTURE_2D);
+			}
+			else
+			{
+				glTexImage2D(GL_TEXTURE_2D, 0, InternalFormat, m_Width, m_Height, 0, GL_RGBA, type, m_ImageData ? m_ImageData.As<void*>() : nullptr);
+
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+				glGenerateMipmap(GL_TEXTURE_2D);
+			}
 		}
 
 		else
@@ -123,7 +141,8 @@ namespace Radiant
 
 	OpenGLImageCube::OpenGLImageCube(ImageFormat format, std::size_t width, std::size_t height, const std::byte* data)
 	{
-		m_ImageData = Memory::Buffer::Copy(data, width * height * Utils::GetPixelSize(format));
+		if(data)
+			m_ImageData = Memory::Buffer::Copy(data, width * height * Utils::GetPixelSize(format));
 
 		m_Width = width;
 		m_Height = height;
@@ -150,6 +169,23 @@ namespace Radiant
 	{
 		if (m_RenderingID)
 			Release();
+
+		if (m_Format == ImageFormat::RGBA16F) // NOTE: hdr (todo: isHDR())
+		{
+			uint32_t levels = Utils::CalculateMipCount(m_Width, m_Height);
+
+			Memory::Shared<OpenGLImageCube> instance = this;
+			Rendering::SubmitCommand([instance, levels]() {
+				glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, (GLuint*)&instance->m_RenderingID);
+				glTextureStorage2D(instance->m_RenderingID, levels, Utils::OpenGLImageInternalFormat(instance->m_Format), instance->m_Width, instance->m_Height);
+				glTextureParameteri(instance->m_RenderingID, GL_TEXTURE_MIN_FILTER, levels > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+				glTextureParameteri(instance->m_RenderingID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+				});
+			return;
+		}
 
 		uint32_t faceWidth = m_Width / 4;
 		uint32_t faceHeight = m_Height / 3;

@@ -43,4 +43,13 @@ namespace Radiant::Utils
 		return WindowsFileSystem::OpenFileDialog(filter);
 	}
 
+	std::filesystem::path FileSystem::GetFileDirectory(const std::filesystem::path& filepath)
+	{
+		return filepath.parent_path();
+	}
+
+	std::string FileSystem::GetFileDirectoryString(const std::filesystem::path& filepath)
+	{
+		return filepath.parent_path().string();
+	}
 }

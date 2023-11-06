@@ -31,7 +31,7 @@ namespace Radiant
 		Memory::Shared<Shader> StaticShader;
 		std::vector<DrawProperties> MeshDrawList;
 		std::vector<Memory::Shared<Mesh>> MeshDrawListWithShader;
-		std::vector<Memory::Shared<TextureCube>> TextureCubeList;
+		Memory::Shared<TextureCube> SkyBox;
 		Memory::Shared<class Material> QuadMaterial;
 
 		uint32_t Samples;
@@ -106,16 +106,14 @@ namespace Radiant
 
 		s_SceneInfo->MeshDrawList.clear();
 		s_SceneInfo->MeshDrawListWithShader.clear();
-		s_SceneInfo->TextureCubeList.clear();
 	}
 
 	void SceneRendering::GeometryPass()
 	{
-		static auto texture = Texture2D::Create("Resources/Meshes/Laminate floor/textures/laminate_floor_02_diff_4k.jpg");
 		Rendering::BindRenderingPass(s_SceneInfo->GeometryInfo.GeometryPass);
 		{
-			for(const auto& cube : s_SceneInfo->TextureCubeList)
-				DrawSkyLight(cube);
+			if(s_SceneInfo->SkyBox)
+				DrawSkyBox();
 
 			for (auto& dc : s_SceneInfo->MeshDrawList)
 			{
@@ -125,7 +123,10 @@ namespace Radiant
 				material->SetValue("u_ViewProjection", s_SceneInfo->Camera.ViewProjection, UniformTarget::Vertex);
 
 				material->SetValue("u_CameraPosition", s_SceneInfo->Camera.CameraPosition, UniformTarget::Fragment);
-				material->SetValue("u_AlbedoTexture", texture);
+				material->SetValue("u_AlbedoTexture", dc.Mesh->GetAlbedoMaterial()->GetTexture2D("u_AlbedoTexture"));
+				material->SetValue("u_AlbedoTexToggle", true, UniformTarget::Fragment);
+				material->SetValue("u_MetalnessTexToggle", false, UniformTarget::Fragment);
+				material->SetValue("u_RoughnessTexToggle", false, UniformTarget::Fragment);
 
 				UpdateDirectionalLight(material);
 				Rendering::DrawMesh(dc.Mesh, material);
@@ -157,11 +158,6 @@ namespace Radiant
 		s_SceneInfo->MeshDrawListWithShader.push_back(mesh);
 	}
 
-	void SceneRendering::AddTextureCubeToDrawList(const Memory::Shared<TextureCube>& cube) const
-	{
-		s_SceneInfo->TextureCubeList.push_back(cube);
-	}
-
 	void SceneRendering::SetSceneVeiwPortSize(const glm::vec2& size)
 	{
 		if (m_ViewportWidth != size.x || m_ViewportHeight != size.y)
@@ -182,6 +178,17 @@ namespace Radiant
 		}
 	}
 
+	void SceneRendering::SetEnvironment(const Environment& environment)
+	{
+		m_Environment = environment;
+		SetSkyBox(environment.RadianceMap);
+	}
+
+	void SceneRendering::SetSkyBox(const Memory::Shared<TextureCube>& skybox) const
+	{
+		s_SceneInfo->SkyBox = skybox;
+	}
+
 	Memory::Shared<Image2D> SceneRendering::GetFinalPassImage()
 	{
 		return s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->GetImage();
@@ -192,12 +199,11 @@ namespace Radiant
 		return s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->GetDepthImage();
 	}
 
-
-	void SceneRendering::DrawSkyLight(const Memory::Shared<TextureCube>& cube) // TODO(Danya): Fix crush(Done)
+	void SceneRendering::DrawSkyBox() // TODO(Danya): Fix crush(Done)
 	{
 		s_SceneInfo->QuadShader->Bind();
 		Rendering::DrawFullscreenQuad(s_SceneInfo->QuadMaterial);
-		cube->Bind();
+		s_SceneInfo->SkyBox->Bind();
 		s_SceneInfo->QuadMaterial->SetValue("u_InverseVP", glm::inverse(s_SceneInfo->Camera.ViewProjection), UniformTarget::Vertex);
 		Rendering::DrawIndexed(6);
 	}
@@ -207,8 +213,8 @@ namespace Radiant
 		if (m_Context->ContainsEntityInScene(ComponentType::DirectionLight))
 		{
 			auto dirLight = m_Context->GetEntityByComponentType(ComponentType::DirectionLight)->GetComponent(ComponentType::DirectionLight).As<DirectionLightComponent>()->DirLight;
-			material->SetValue("u_Light.Direction", dirLight.Direction, UniformTarget::Fragment);
-			material->SetValue("u_Light.Radiance", dirLight.Radiance, UniformTarget::Fragment);
+			material->SetValue("u_LightUniform.Direction", dirLight.Direction, UniformTarget::Fragment);
+			material->SetValue("u_LightUniform.Radiance", dirLight.Radiance, UniformTarget::Fragment);
 		}
 	}
 
@@ -228,6 +234,69 @@ namespace Radiant
 	void SceneRendering::SetSampelsCount(uint32_t count)
 	{
 		s_SceneInfo->Samples = count;
+	}
+
+	std::pair<Memory::Shared<TextureCube>, Memory::Shared<TextureCube>> SceneRendering::CreateEnvironmentMap(const std::string& filepath)
+	{
+		static Memory::Shared<Shader> equirectangularConversionShader, envFilteringShader, envIrradianceShader;
+		const uint32_t cubemapSize = 2048;
+		const uint32_t irradianceMapSize = 32;
+
+		Memory::Shared<TextureCube> envUnfiltered = TextureCube::Create(ImageFormat::RGBA16F, cubemapSize, cubemapSize);
+		if (!equirectangularConversionShader)
+			equirectangularConversionShader = Shader::Create("Resources/Shaders/EquirectangularToCubeMap.glsl");
+		Memory::Shared<Texture2D> envEquirect = Texture2D::Create(filepath);
+		RADIANT_VERIFY(envEquirect->GetImageFormat() == ImageFormat::RGBA16F, "Texture is not HDR!");
+
+		equirectangularConversionShader->Bind();
+		envEquirect->Bind();
+		Rendering::SubmitCommand([envUnfiltered, cubemapSize, envEquirect]()
+			{
+				glBindImageTexture(0, envUnfiltered->GetImage()->GetImageID(), 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
+				glDispatchCompute(cubemapSize / 32, cubemapSize / 32, 6);
+				glGenerateTextureMipmap(envUnfiltered->GetImage()->GetImageID());
+			});
+
+
+		if (!envFilteringShader)
+			envFilteringShader = Shader::Create("Resources/Shaders/EnvironmentMipFilter.glsl");
+
+		Memory::Shared<TextureCube> envFiltered = TextureCube::Create(ImageFormat::RGBA16F, cubemapSize, cubemapSize);
+
+		Rendering::SubmitCommand([envUnfiltered, envFiltered]()
+			{
+				glCopyImageSubData(envUnfiltered->GetImage()->GetImageID(), GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+				envFiltered->GetImage()->GetImageID(), GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+				envFiltered->GetWidth(), envFiltered->GetHeight(), 6);
+			});
+
+		envFilteringShader->Bind();
+		envUnfiltered->Bind();
+
+		Rendering::SubmitCommand([envUnfiltered, envFiltered, cubemapSize]() {
+			const float deltaRoughness = 1.0f / glm::max((float)(envFiltered->GetMipLevelCount() - 1.0f), 1.0f);
+			for (int level = 1, size = cubemapSize / 2; level < envFiltered->GetMipLevelCount(); level++, size /= 2) // <= ?
+			{
+				const GLuint numGroups = glm::max(1, size / 32);
+				glBindImageTexture(0, envFiltered->GetImage()->GetImageID(), level, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
+				glProgramUniform1f(envFilteringShader->GetRendererID(), 0, level * deltaRoughness);
+				glDispatchCompute(numGroups, numGroups, 6);
+			}
+			});
+
+		if (!envIrradianceShader)
+			envIrradianceShader = Shader::Create("Resources/Shaders/EnvironmentIrradiance.glsl");
+
+		Memory::Shared<TextureCube> irradianceMap = TextureCube::Create(ImageFormat::RGBA16F, irradianceMapSize, irradianceMapSize);
+		envIrradianceShader->Bind();
+		envFiltered->Bind();
+		Rendering::SubmitCommand([irradianceMap]()
+			{
+				glBindImageTexture(0, irradianceMap->GetImage()->GetImageID(), 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
+				glDispatchCompute(irradianceMap->GetWidth() / 32, irradianceMap->GetHeight() / 32, 6);
+			});
+
+		return { envFiltered, irradianceMap };
 	}
 
 }

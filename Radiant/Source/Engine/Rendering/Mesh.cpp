@@ -12,6 +12,14 @@
 
 namespace Radiant
 {
+#define MESH_DEBUG_LOG 1
+#if MESH_DEBUG_LOG
+#define MESH_LOG(...) RA_INFO(__VA_ARGS__)
+#else
+#define MESH_LOG(...)
+#endif
+
+
 	namespace {
 		const unsigned int ImportFlags =
 			aiProcess_CalcTangentSpace |
@@ -56,47 +64,174 @@ namespace Radiant
 		if (!scene || !scene->HasMeshes())
 			RADIANT_VERIFY("Failed to load mesh file: {0}", filepath);
 
-		aiMesh* mesh = scene->mMeshes[0];
-
-		RADIANT_VERIFY(mesh->HasPositions(), "Meshes require positions.");
-		RADIANT_VERIFY(mesh->HasNormals(), "Meshes require normals.");
-
 		m_Shader = Rendering::GetShaderLibrary()->Get("Static_Shader.rads");
 
-		m_Vertices.reserve(mesh->mNumVertices);
+		uint32_t vertexCount = 0;
+		uint32_t indexCount = 0;
 
-		// Extract vertices from model
-		for (size_t i = 0; i < m_Vertices.capacity(); i++)
+		m_Submeshes.reserve(scene->mNumMeshes);
+		m_Materials.resize(scene->mNumMeshes);
+		m_Textures.resize(scene->mNumMeshes);
+
+		for (int i = 0; i < scene->mNumMeshes; i++)
 		{
-			Vertex vertex;
-			vertex.Position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
-			vertex.Normals = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
+			aiMesh* mesh = scene->mMeshes[i];
+			Submesh submesh;
+			submesh.Vertex = vertexCount;
+			submesh.Index = indexCount;
+			submesh.MaterialIndex = mesh->mMaterialIndex;
+			submesh.IndexCount = mesh->mNumFaces * 3;
+			submesh.Name = mesh->mName.C_Str();
 
-			if (mesh->HasTangentsAndBitangents())
+			m_Submeshes.push_back(submesh);
+
+			vertexCount += mesh->mNumVertices;
+			indexCount += submesh.IndexCount;
+
+			RADIANT_VERIFY(mesh->HasPositions(), "Meshes require positions.");
+			RADIANT_VERIFY(mesh->HasNormals(), "Meshes require normals.");
+
+			// Extract vertices from model
+			for (size_t i = 0; i < mesh->mNumVertices; i++)
 			{
-				vertex.Tangent = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };
-				vertex.Binormal = { mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z };
+				Vertex vertex;
+				vertex.Position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
+				vertex.Normals = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
+
+				if (mesh->HasTangentsAndBitangents())
+				{
+					vertex.Tangent = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };
+					vertex.Binormal = { mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z };
+				}
+
+				if (mesh->HasTextureCoords(0))
+					vertex.TexCoords = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
+
+				m_Vertices.push_back(vertex);
 			}
 
-			if (mesh->HasTextureCoords(0))
-				vertex.TexCoords = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
+			// Extract indices from model
+			for (size_t i = 0; i < mesh->mNumFaces; i++)
+			{
+				RADIANT_VERIFY(mesh->mFaces[i].mNumIndices == 3, "Must have 3 indices.");
+				m_Indices.push_back({ mesh->mFaces[i].mIndices[0], mesh->mFaces[i].mIndices[1], mesh->mFaces[i].mIndices[2] });
+			}
+		}
 
-			m_Vertices.push_back(vertex);
+		if (scene->HasMaterials())
+		{
+			MESH_LOG("=====================================", filepath);
+			MESH_LOG("====== Materials - {0} ======", filepath);
+			MESH_LOG("=====================================", filepath);
+
+			for (uint32_t i = 0; i < scene->mNumMaterials; i++)
+			{
+				auto aiMaterial = scene->mMaterials[i];
+				auto aiMaterialName = aiMaterial->GetName();
+
+				auto materialInstance = Material::Create(m_Shader, aiMaterialName.C_Str());
+
+				aiString aiTexPath;
+				uint32_t textureCount = aiMaterial->GetTextureCount(aiTextureType::aiTextureType_DIFFUSE);
+
+				MESH_LOG("{0}    TextureCount = {1}", aiMaterialName.C_Str(), textureCount);
+
+				glm::vec3 albedoColor(0.8f);
+				aiColor3D aiColor;
+				if (aiMaterial->Get("$clr.diffuse", 0, 0, aiColor) == aiReturn_SUCCESS)
+					albedoColor = { aiColor.r, aiColor.g, aiColor.b };
+
+				materialInstance->SetValue("u_MaterialColorsUniform.AlbedoColor", albedoColor, UniformTarget::Fragment);
+
+				bool hasAlbedoTexture = aiMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &aiTexPath) == AI_SUCCESS;
+				if (hasAlbedoTexture)
+				{
+					std::filesystem::path imagePath = Utils::FileSystem::GetFileDirectory(filepath) / std::filesystem::path(aiTexPath.C_Str());
+					MESH_LOG("		Albedo path = {}", imagePath.string());
+
+					auto texture = Texture2D::Create(imagePath, true);
+					if (texture->Loaded())
+					{
+						m_Textures[i] = texture;
+						materialInstance->SetValue("u_AlbedoTexture", texture);
+					}
+
+					else
+					{
+						MESH_LOG("		No albedo texture");
+
+					}
+
+				}
+
+				bool hasNormalTexture = aiMaterial->GetTexture(aiTextureType_NORMALS, 0, &aiTexPath) == AI_SUCCESS;
+				if (hasNormalTexture)
+				{
+					std::filesystem::path imagePath = Utils::FileSystem::GetFileDirectory(filepath) / std::filesystem::path(aiTexPath.C_Str());
+					MESH_LOG("		Normal path = {}", imagePath.string());
+
+					auto texture = Texture2D::Create(imagePath, true);
+					if (texture->Loaded())
+					{
+						m_Textures[i] = texture;
+						materialInstance->SetValue("u_NormalTexture", texture);
+					}
+
+					else
+					{
+						MESH_LOG("		No Normal texture");
+
+					}
+				}
+
+				bool hasShininessTexture = aiMaterial->GetTexture(aiTextureType_SHININESS, 0, &aiTexPath) == AI_SUCCESS;
+				if (hasShininessTexture)
+				{
+					std::filesystem::path imagePath = Utils::FileSystem::GetFileDirectory(filepath) / std::filesystem::path(aiTexPath.C_Str());
+					MESH_LOG("		Shininess path = {}", imagePath.string());
+
+					auto texture = Texture2D::Create(imagePath, true);
+					if (texture->Loaded())
+					{
+						m_Textures[i] = texture;
+						materialInstance->SetValue("u_ShininessTexture", texture);
+					}
+
+					else
+					{
+						MESH_LOG("		No Shininess texture");
+
+					}
+				}
+
+				bool hasMetalnessTexture = aiMaterial->GetTexture(aiTextureType_METALNESS, 0, &aiTexPath) == AI_SUCCESS;
+				if (hasMetalnessTexture)
+				{
+					std::filesystem::path imagePath = Utils::FileSystem::GetFileDirectory(filepath) / std::filesystem::path(aiTexPath.C_Str());
+					MESH_LOG("		Metalness path = {}", imagePath.string());
+
+					auto texture = Texture2D::Create(imagePath, true);
+					if (texture->Loaded())
+					{
+						m_Textures[i] = texture;
+						materialInstance->SetValue("u_MetalnessTexture", texture);
+					}
+
+					else
+					{
+						MESH_LOG("		No Metalness texture");
+
+					}
+				}
+
+				m_Materials[i] = materialInstance;
+			}
 		}
 
 		Memory::Buffer buffer((std::byte*)m_Vertices.data(), m_Vertices.size() * sizeof(Vertex));
 		m_VertexBuffer = VertexBuffer::Create("Mesh", buffer);
 
-		// Extract indices from model
-		m_Indices.reserve(mesh->mNumFaces);
-		for (size_t i = 0; i < m_Indices.capacity(); i++)
-		{
-			RADIANT_VERIFY(mesh->mFaces[i].mNumIndices == 3, "Must have 3 indices.");
-			m_Indices.push_back({ mesh->mFaces[i].mIndices[0], mesh->mFaces[i].mIndices[1], mesh->mFaces[i].mIndices[2] });
-		}
-
 		m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), m_Indices.size() * sizeof(Index));
 
-		m_Material = Material::Create(m_Shader);
 	}
 }

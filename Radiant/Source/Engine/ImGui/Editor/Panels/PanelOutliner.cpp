@@ -2,6 +2,7 @@
 #include <Radiant/Scene/Entity.hpp>
 #include <Radiant/Scene/Component.hpp>
 #include <Radiant/ImGui/Utilities/UI.hpp>
+#include <Radiant/Rendering/SceneRendering.hpp>
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -229,9 +230,10 @@ namespace Radiant
 					if (ImGui::MenuItem("Sky Light"))
 					{
 						Entity* entity = m_Context->CreateEntity("SkyLight");
-						auto cube = CreateNewComponent<CubeComponent>();
-						cube->Cube = TextureCube::Create("Resources/Envorement/Arches_E_PineTree_Irradiance.tga");
-						entity->AddComponent(cube);
+						auto skybox = CreateNewComponent<SkyBoxComponent>();
+						auto [radiance, irradiance] = SceneRendering::CreateEnvironmentMap("Resources/Envorement/HDR/pink_sunrise_4k.hdr");
+						skybox->Environment = Memory::Shared<Environment>::Create(radiance, irradiance);
+						entity->AddComponent(skybox);
 					}
 
 					ImGui::Spacing();
@@ -346,8 +348,8 @@ namespace Radiant
 					{
 						mesh = Memory::Shared<Mesh>::Create(file);
 
-						auto& material = mesh->GetMaterial();
-						auto materialComponent = CreateNewComponent<MaterialComponent>(material);
+						Memory::Shared<Material> mi = Material::Create(mesh->GetShader());
+						auto materialComponent = CreateNewComponent<MaterialComponent>(mi);
 						entity->AddComponent(materialComponent);
 					}
 				}

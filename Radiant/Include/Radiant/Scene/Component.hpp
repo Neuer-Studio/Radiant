@@ -12,10 +12,11 @@
 namespace Radiant
 {
 	class Entity;
+	class Environment;
 
 	enum class ComponentType
 	{
-		None = 0, Transform, Mesh, Camera, Cube, DirectionLight, Material
+		None = 0, Transform, Mesh, Camera, SkyBox, DirectionLight, Material
 	};
 
 	struct Component : public Memory::RefCounted
@@ -70,11 +71,11 @@ namespace Radiant
 		friend Entity;
 	};
 
-	struct CubeComponent : public Component
+	struct SkyBoxComponent : public Component
 	{
-		Memory::Shared<TextureCube> Cube;
+		Memory::Shared<Environment> Environment;
 	protected:
-		virtual const ComponentType GetType() const override { return ComponentType::Cube; }
+		virtual const ComponentType GetType() const override { return ComponentType::SkyBox; }
 
 		friend Entity;
 	}; 
