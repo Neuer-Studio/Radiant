@@ -54,7 +54,7 @@ namespace Radiant
 
 		virtual bool Loaded() const override { return m_Loaded; }
 
-		virtual uint32_t GetMipLevelCount() const { return 1; }
+		virtual uint32_t GetMipLevelCount() const { return m_MipCount; }
 	public:
 		Memory::Shared<ImageCube> m_Image;
 		std::filesystem::path m_FilePath;

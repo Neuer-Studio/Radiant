@@ -1,9 +1,3 @@
-// Radiant Scene Shader
-// Links:
-    /*
-        https://github.com/Nadrin/PBR/blob/master/data/shaders/glsl/tonemap_fs.glsl
-    */
-
 #type vertex
 #version 430
 
@@ -14,7 +8,7 @@ out vec2 v_TexCoord;
 
 void main()
 {
-	vec4 position = vec4(a_Position.xy, 1.0, 1.0);
+	vec4 position = vec4(a_Position.xy, 0.0, 1.0);
 	v_TexCoord = a_TexCoord;
 	gl_Position = position;
 }
@@ -47,16 +41,17 @@ void main()
 
 	ivec2 texSize = textureSize(u_Texture);
 	ivec2 texCoord = ivec2(v_TexCoord * texSize);
-	vec3 msColor = MultiSampleTexture(u_Texture, texCoord, u_TextureSamples).rgb * u_Exposure;
+	vec4 msColor = MultiSampleTexture(u_Texture, texCoord, u_TextureSamples);
 
+	vec3 color = msColor.rgb * u_Exposure;//texture(u_Texture, v_TexCoord).rgb * u_Exposure;
 	// Reinhard tonemapping operator.
 	// see: "Photographic Tone Reproduction for Digital Images", eq. 4
-	float luminance = dot(msColor, vec3(0.2126, 0.7152, 0.0722));
+	float luminance = dot(color, vec3(0.2126, 0.7152, 0.0722));
 	float mappedLuminance = (luminance * (1.0 + luminance / (pureWhite * pureWhite))) / (1.0 + luminance);
 
 	// Scale color by ratio of average luminances.
-	vec3 mappedColor = (mappedLuminance / luminance) * msColor;
+	vec3 mappedColor = (mappedLuminance / luminance) * color;
 
 	// Gamma correction.
-    o_Color = vec4(pow(mappedColor, vec3(1.0/gamma)), 1.0);
+	o_Color = vec4(pow(mappedColor, vec3(1.0 / gamma)), 1.0);
 }

@@ -27,7 +27,7 @@ namespace Radiant
 		CompositeData CompositeInfo;
 		GeometryData GeometryInfo;
 
-		Memory::Shared<Shader> QuadShader;
+		Memory::Shared<Shader> SkyBoxShader;
 		Memory::Shared<Shader> StaticShader;
 		std::vector<DrawProperties> MeshDrawList;
 		std::vector<Memory::Shared<Mesh>> MeshDrawListWithShader;
@@ -59,16 +59,15 @@ namespace Radiant
 	void SceneRendering::Init()
 	{
 		s_SceneInfo = new SceneInfo();
-		s_SceneInfo->QuadShader = Rendering::GetShaderLibrary()->Get("Quad.rads");
 		s_SceneInfo->StaticShader = Rendering::GetShaderLibrary()->Get("Static_Shader.rads");
-		s_SceneInfo->SkyboxMaterial = Material::Create(s_SceneInfo->QuadShader);
-		s_SceneInfo->SkyboxMaterial->SetFlag(MaterialFlag::DepthTest, false);
+
 		/* Composite Pass */
 
 		{
 			FramebufferSpecification FrameBufferComposite;
 			FrameBufferComposite.ClearColor = glm::vec4(0.5f);
 			FrameBufferComposite.Format = ImageFormat::RGBA8;
+			FrameBufferComposite.ClearColor = { 0.5f, 0.1f, 0.1f, 1.0f };
 
 			RenderingPassSpecification PassComposite;
 			PassComposite.TargetFramebuffer = Framebuffer::Create(FrameBufferComposite);
@@ -86,10 +85,15 @@ namespace Radiant
 			FrameBufferGeometry.ClearColor = glm::vec4(0.5f); 
 			FrameBufferGeometry.Format = ImageFormat::RGBA16F;
 			s_SceneInfo->Samples = FrameBufferGeometry.Samples = 16;
+			FrameBufferGeometry.ClearColor = { 0.1f, 0.1f, 0.1f, 1.0f };
 
 			RenderingPassSpecification PassGeometry;
 			PassGeometry.TargetFramebuffer = Framebuffer::Create(FrameBufferGeometry);
 			s_SceneInfo->GeometryInfo.GeometryPass = RenderingPass::Create(PassGeometry);
+
+			s_SceneInfo->SkyBoxShader = Rendering::GetShaderLibrary()->Get("Quad.rads");
+			s_SceneInfo->SkyboxMaterial = Material::Create(s_SceneInfo->SkyBoxShader);
+			s_SceneInfo->SkyboxMaterial->SetFlag(MaterialFlag::DepthTest, false);
 		}
 
 		s_SceneInfo->BRDFLUTTexture = Texture2D::Create("Resources/Textures/BRDF_LUT.tga");
@@ -171,14 +175,6 @@ namespace Radiant
 
 			s_SceneInfo->CompositeInfo.CompositePass->GetSpecification().TargetFramebuffer->Resize(size.x, size.y);
 			s_SceneInfo->GeometryInfo.GeometryPass->GetSpecification().TargetFramebuffer->Resize(size.x, size.y);
-
-
-			if (m_Context->ContainsEntityInScene(ComponentType::Camera))
-			{
-				auto& camera = m_Context->GetEntityByComponentType(ComponentType::Camera)->GetComponent(ComponentType::Camera).As<CameraComponent>()->Camera;
-				camera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), size.x, size.y, 0.1f, 10000.0f));
-			}
-
 		}
 	}
 
@@ -212,6 +208,7 @@ namespace Radiant
 	void SceneRendering::UpdateSkyLight() // TODO(Danya): Fix crush(Done)
 	{
 		s_SceneInfo->SkyboxMaterial->SetValue("u_InverseVP", glm::inverse(s_SceneInfo->Camera.GetViewProjection()), UniformTarget::Vertex);
+		s_SceneInfo->SkyboxMaterial->SetValue("u_TextureLod", s_SceneInfo->SkyboxLod, UniformTarget::Fragment);
 		Rendering::DrawFullscreenQuad(s_SceneInfo->SkyboxMaterial);
 	}
 

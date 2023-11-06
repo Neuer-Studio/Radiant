@@ -91,6 +91,7 @@ namespace Radiant
 		m_Width = width;
 		m_Height = height;
 		m_Format = ImageFormat::RGBA8;
+		m_MipCount = Utils::CalculateMipCount(width, height);
 
 		m_Image = ImageCube::Create(ImageFormat::RGBA8, width, height, imageData);
 		stbi_image_free(m_Image->GetBuffer().Data);
@@ -103,6 +104,7 @@ namespace Radiant
 		m_Width = width;
 		m_Height = height;
 		m_Format = format;
+		m_MipCount = Utils::CalculateMipCount(width, height);
 
 		m_Image = ImageCube::Create(format, width, height);
 		
