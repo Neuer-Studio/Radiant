@@ -8,15 +8,7 @@
 struct GLFWwindow;
 namespace Radiant
 {
-	struct WindowSpecification
-	{
-		std::string Title = "Sandbox";
-		uint32_t Width = 1600;
-		uint32_t Height = 900;
-		bool Decorated = true;
-		bool Fullscreen = false;
-		bool VSync = true;
-	};
+	struct ApplicationSpecification;
 
 	class Window : public Memory::RefCounted
 	{
@@ -38,6 +30,6 @@ namespace Radiant
 
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 
-		static Memory::Shared<Window> Create(const WindowSpecification& specification);
+		static Memory::Shared<Window> Create(const ApplicationSpecification& specification);
 	};
 }

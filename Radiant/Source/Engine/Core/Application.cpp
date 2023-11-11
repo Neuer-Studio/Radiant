@@ -14,12 +14,7 @@ namespace Radiant
 		RADIANT_VERIFY(!s_Instance, "it is not possible to create more than one instance");
 		s_Instance = this;
 
-		WindowSpecification ws;
-		ws.Width = specification.WindowWidth;
-		ws.Height = specification.WindowHeight;
-		ws.Title = specification.Name;
-
-		m_Window = Window::Create(ws);
+		m_Window = Window::Create(specification);
 
 		m_Window->SetEventCallback(BIND_FN(OnEvent));
 

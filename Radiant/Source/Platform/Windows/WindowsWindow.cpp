@@ -11,10 +11,9 @@ namespace Radiant
 
 	static bool s_GLFWInitialized = false;
 
-	WindowsWindow::WindowsWindow(const WindowSpecification& specification)
+	WindowsWindow::WindowsWindow(const ApplicationSpecification& specification)
 		: m_Specification(specification)
 	{
-		RA_INFO("[Window(Windows)] Creating window {} ({}, {})", m_Specification.Title, m_Specification.Width, m_Specification.Height);
 
 		if (!s_GLFWInitialized)
 		{
@@ -37,7 +36,18 @@ namespace Radiant
 #endif
 		}
 
-		m_Window = glfwCreateWindow((int)m_Specification.Width, (int)m_Specification.Height, m_Specification.Title.c_str(), nullptr, nullptr);
+		if (m_Specification.Fullscreen)
+		{
+			auto primaryMonitor = glfwGetPrimaryMonitor();
+			auto videoMode = glfwGetVideoMode(primaryMonitor);
+
+			glfwWindowHint(GLFW_DECORATED, false);
+			m_Specification.Width = videoMode->width;
+			m_Specification.Height = videoMode->height;
+			m_Window = glfwCreateWindow(videoMode->width, videoMode->height, m_Specification.Title.c_str(), primaryMonitor, nullptr);
+		}
+		else
+			m_Window = glfwCreateWindow((int)m_Specification.Width, (int)m_Specification.Height, m_Specification.Title.c_str(), nullptr, nullptr);
 		glfwMakeContextCurrent(m_Window);
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 
@@ -127,6 +137,7 @@ namespace Radiant
 			m_Data.Width = width;
 			m_Data.Height = height;
 		}
+		RA_INFO("[Window(Windows)] Created window {} ({}, {})", m_Specification.Title, m_Specification.Width, m_Specification.Height);
 	}
 
 	WindowsWindow::~WindowsWindow()

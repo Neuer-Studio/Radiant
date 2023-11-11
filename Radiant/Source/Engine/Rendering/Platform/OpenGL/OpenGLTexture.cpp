@@ -9,7 +9,7 @@
 namespace Radiant
 {
 	OpenGLTexture2D::OpenGLTexture2D(const std::filesystem::path& path, bool srgb)
-		: m_FilePath(path)
+		: m_FilePath(path), m_Name(Utils::FileSystem::GetFileName(path))
 	{
 		RADIANT_VERIFY(Utils::FileSystem::Exists(path), "File doesn't exist!");
 
@@ -53,6 +53,7 @@ namespace Radiant
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(ImageFormat format, uint32_t width, uint32_t height, const void* data)
+		: m_Name("")
 	{
 		m_Image = Image2D::Create(format, width, height, data);
 	}
@@ -79,7 +80,7 @@ namespace Radiant
 	/*********************** Texture Cube ***********************/
 
 	OpenGLTextureCube::OpenGLTextureCube(const std::filesystem::path& path)
-		: m_FilePath(path)
+		: m_FilePath(path), m_Name(Utils::FileSystem::GetFileName(path))
 	{
 		RA_INFO("Loading skylight texture {}, srgb = {}", Utils::FileSystem::GetFileName(path));
 		
@@ -101,6 +102,7 @@ namespace Radiant
 
 	OpenGLTextureCube::OpenGLTextureCube(ImageFormat format, uint32_t width, uint32_t height)
 	{
+		m_Name = "";
 		m_Width = width;
 		m_Height = height;
 		m_Format = format;

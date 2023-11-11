@@ -23,8 +23,8 @@ public:
 Radiant::Application* Radiant::CreateApplication(int argc, char** argv)
 {
 	Radiant::ApplicationSpecification specification;
-	specification.WindowHeight = 1600;
-	specification.WindowWidth = 1600;
-	specification.Name = "Title";
+	specification.Width = 1600;
+	specification.Height = 1600;
+	specification.Title = "Title";
 	return new Sandbox(specification);
 }

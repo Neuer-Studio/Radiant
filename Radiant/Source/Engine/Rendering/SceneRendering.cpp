@@ -242,7 +242,7 @@ namespace Radiant
 		s_SceneInfo->Samples = count;
 	}
 
-	std::pair<Memory::Shared<TextureCube>, Memory::Shared<TextureCube>> SceneRendering::CreateEnvironmentMap(const std::string& filepath)
+	Environment SceneRendering::CreateEnvironmentMap(const std::string& filepath)
 	{
 		static Memory::Shared<Shader> equirectangularConversionShader, envFilteringShader, envIrradianceShader;
 		const uint32_t cubemapSize = 2048;

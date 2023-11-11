@@ -25,7 +25,7 @@ namespace Radiant
 		void SetEnvRadiance(const Memory::Shared<TextureCube>& envRadiance) const;
 		void SetEnvIrradiance(const Memory::Shared<TextureCube>& envIrradiance) const;
 		void SetEnvironment(const Environment& environment) const;
-		static std::pair<Memory::Shared<TextureCube>, Memory::Shared<TextureCube>> CreateEnvironmentMap(const std::string& filepath);
+		static Environment CreateEnvironmentMap(const std::string& filepath);
 		void SubmitScene(Camera* camera);
 
 		Memory::Shared<Image2D> GetFinalPassImage(); // TODO(Danya): Set result type Image2D

@@ -1,4 +1,5 @@
 #include <Radiant/Rendering/Mesh.hpp>
+#include <Radiant/Rendering/ShaderConstants.hpp>
 
 #include <glad/glad.h>
 
@@ -53,6 +54,7 @@ namespace Radiant
 	Mesh::Mesh(const std::string& filepath)
 		: m_FilePath(filepath), m_Name(Utils::FileSystem::GetFileName(filepath))
 	{
+		using namespace Constants;
 		LogStream::Initialize();
 
 		RADIANT_VERIFY(Utils::FileSystem::Exists(filepath));
@@ -147,13 +149,13 @@ namespace Radiant
 					if (texture->Loaded())
 					{
 						m_Textures[i] = texture;
-						materialInstance->SetValue("u_AlbedoTexture", texture);
-						materialInstance->SetValue("u_AlbedoTexToggle", true, UniformTarget::Fragment);
+						materialInstance->SetValue(ShaderUniforms::GetAlbedoTexture(), texture);
+						materialInstance->SetValue(ShaderUniforms::GetAlbedoTextureToggle(), true, UniformTarget::Fragment);
 					}
 
 					else
 					{
-						materialInstance->SetValue("u_MaterialUniform.AlbedoColor", albedoColor, UniformTarget::Fragment);
+						materialInstance->SetValue(ShaderUniforms::GetAlbedoColor(), albedoColor, UniformTarget::Fragment);
 						MESH_LOG("		No albedo texture");
 
 					}
@@ -161,8 +163,8 @@ namespace Radiant
 				}
 				else
 				{
-					materialInstance->SetValue("u_AlbedoTexToggle", false, UniformTarget::Fragment);
-					materialInstance->SetValue("u_MaterialUniform.AlbedoColor", albedoColor, UniformTarget::Fragment);
+					materialInstance->SetValue(ShaderUniforms::GetAlbedoTextureToggle(), false, UniformTarget::Fragment);
+					materialInstance->SetValue(ShaderUniforms::GetAlbedoColor(), albedoColor, UniformTarget::Fragment);
 				}
 
 				// Normal texture
@@ -176,8 +178,8 @@ namespace Radiant
 					if (texture->Loaded())
 					{
 						m_Textures[i] = texture;
-						materialInstance->SetValue("u_NormalTexture", texture);
-						materialInstance->SetValue("u_NormalTexToggle", true, UniformTarget::Fragment);
+						materialInstance->SetValue(ShaderUniforms::GetNormalTexture(), texture);
+						materialInstance->SetValue(ShaderUniforms::GetAlbedoTextureToggle(), true, UniformTarget::Fragment);
 					}
 
 					else
@@ -192,20 +194,20 @@ namespace Radiant
 				if (hasShininessTexture)
 				{
 					std::filesystem::path imagePath = Utils::FileSystem::GetFileDirectory(filepath) / std::filesystem::path(aiTexPath.C_Str());
-					MESH_LOG("		Shininess path = {}", imagePath.string());
+					MESH_LOG("		Roughness path = {}", imagePath.string());
 
 					auto texture = Texture2D::Create(imagePath, true);
 					if (texture->Loaded())
 					{
 						m_Textures[i] = texture;
-						materialInstance->SetValue("u_RoughnessTexture", texture);
+						materialInstance->SetValue(ShaderUniforms::GetRoughnessTexture(), texture);
 					}
 
 					else
 					{
 						MESH_LOG("		No Shininess texture");
-						materialInstance->SetValue("u_MaterialUniform.Roughness", 1.0f, UniformTarget::Fragment);
-						materialInstance->SetValue("u_RoughnessTexToggle", true, UniformTarget::Fragment);
+						materialInstance->SetValue(ShaderUniforms::GetRoughness(), 1.0f, UniformTarget::Fragment);
+						materialInstance->SetValue(ShaderUniforms::GetRoughnessTextureToggle(), true, UniformTarget::Fragment);
 					}
 				}
 
@@ -218,15 +220,15 @@ namespace Radiant
 					if (texture->Loaded())
 					{
 						m_Textures[i] = texture;
-						materialInstance->SetValue("u_MetalnessTexture", texture);
-						materialInstance->SetValue("u_MetalnessTexToggle", true, UniformTarget::Fragment);
+						materialInstance->SetValue(ShaderUniforms::GetMetalnessTexture(), texture);
+						materialInstance->SetValue(ShaderUniforms::GetMetalnessTextureToggle(), true, UniformTarget::Fragment);
 					}
 
 					else
 					{
 						MESH_LOG("		No Metalness texture");
-						materialInstance->SetValue("u_MaterialUniform.Metalness", 0.5f, UniformTarget::Fragment);
-						materialInstance->SetValue("u_MetalnessTexToggle", true, UniformTarget::Fragment);
+						materialInstance->SetValue(ShaderUniforms::GetMetalness(), 0.5f, UniformTarget::Fragment);
+						materialInstance->SetValue(ShaderUniforms::GetMetalnessTextureToggle(), true, UniformTarget::Fragment);
 					}
 				}
 

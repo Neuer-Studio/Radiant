@@ -21,6 +21,7 @@ namespace Radiant
 		virtual std::size_t GetWidth() const { return m_Width;  }
 		virtual std::size_t GetHeight() const { return m_Height; }
 		virtual const std::filesystem::path& GetPath() const { return m_FilePath; }
+		virtual const std::string& GetName() const { return m_Name; }
 
 		virtual bool Loaded() const override { return m_Loaded; }
 
@@ -28,6 +29,7 @@ namespace Radiant
 	public:
 		Memory::Shared<Image2D> m_Image;
 		std::filesystem::path m_FilePath;
+		std::string m_Name;
 
 		uint32_t m_MipCount;
 		RendererID m_RenderingID = 0;
@@ -51,13 +53,17 @@ namespace Radiant
 		virtual std::size_t GetWidth() const { return m_Width; }
 		virtual std::size_t GetHeight() const { return m_Height; }
 		virtual const std::filesystem::path& GetPath() const { return m_FilePath; }
+		virtual const std::string& GetName() const { return m_Name; }
 
 		virtual bool Loaded() const override { return m_Loaded; }
 
 		virtual uint32_t GetMipLevelCount() const { return m_MipCount; }
 	public:
 		Memory::Shared<ImageCube> m_Image;
+
 		std::filesystem::path m_FilePath;
+		std::string m_Name;
+
 		uint32_t m_Width;
 		uint32_t m_Height;
 		ImageFormat m_Format;

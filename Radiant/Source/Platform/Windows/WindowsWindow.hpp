@@ -3,16 +3,18 @@
 #include <Windows.h>
 
 #include <Rendering/RenderingContext.hpp>
+#include <Radiant/Core/Application.hpp>
 #include <Core/Window.hpp>
 
 #include <GLFW/glfw3.h>
 
 namespace Radiant
 {
+	struct ApplicationSpecification;
 	class WindowsWindow : public Window
 	{
 	public:
-		WindowsWindow(const WindowSpecification& specification);
+		WindowsWindow(const ApplicationSpecification& specification);
 		~WindowsWindow() override;
 
 		virtual GLFWwindow* GetNativeWindow() const override { return m_Window; }
@@ -29,7 +31,7 @@ namespace Radiant
 
 		virtual void SetEventCallback(const EventCallbackFn& callback) { m_Data.EventCallback = callback; };
 	private:
-		WindowSpecification m_Specification;
+		ApplicationSpecification m_Specification;
 		struct WindowData
 		{
 			std::string Title;

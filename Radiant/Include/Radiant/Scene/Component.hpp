@@ -73,6 +73,9 @@ namespace Radiant
 
 	struct SkyBoxComponent : public Component
 	{
+		std::string Name;
+		std::filesystem::path FilePath;
+
 		Memory::Shared<Environment> Environment;
 	protected:
 		virtual const ComponentType GetType() const override { return ComponentType::SkyBox; }

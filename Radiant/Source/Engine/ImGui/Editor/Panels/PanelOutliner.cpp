@@ -231,8 +231,6 @@ namespace Radiant
 					{
 						Entity* entity = m_Context->CreateEntity("SkyLight");
 						auto skybox = CreateNewComponent<SkyBoxComponent>();
-						auto [radiance, irradiance] = SceneRendering::CreateEnvironmentMap("Resources/Envorement/HDR/birchwood_4k.hdr");
-						skybox->Environment = Memory::Shared<Environment>::Create(radiance, irradiance);
 						entity->AddComponent(skybox);
 					}
 
@@ -375,6 +373,50 @@ namespace Radiant
 			{
 				auto a = component.As<MaterialComponent>()->Material->GetOverridedValuesSize();
 				ImGui::Text("Test Material %u", component.As<MaterialComponent>()->Material->GetOverridedValuesSize());
+			});
+
+		DrawComponentUI(ComponentType::SkyBox, "SkyBox", entity, [=](Memory::Shared<Component>& component) mutable
+			{
+				auto& comp = component.As<SkyBoxComponent>();
+				UI::BeginPropertyGrid();
+
+				ImGui::Text(entity->GetName().c_str());
+				ImGui::NextColumn();
+				ImGui::PushItemWidth(-1);
+
+				ImVec2 originalButtonTextAlign = ImGui::GetStyle().ButtonTextAlign;
+				ImGui::GetStyle().ButtonTextAlign = { 0.0f, 0.5f };
+				float width = ImGui::GetContentRegionAvail().x - 0.0f;
+				UI::PushID();
+
+				float itemHeight = 28.0f;
+
+				std::string buttonName;
+				if (comp->Environment)
+					buttonName = comp->Name;
+				else
+					buttonName = "Null";
+
+				if (ImGui::Button(buttonName.c_str(), { width, itemHeight }))
+				{
+					std::string file = Utils::FileSystem::OpenFileDialog(".hdr").string();
+					if (!file.empty())
+					{
+						auto env = SceneRendering::CreateEnvironmentMap(file);
+						comp->Name = Utils::FileSystem::GetFileName(file);
+						comp->FilePath = file;
+						comp->Environment = Memory::Shared<Environment>::Create(env.RadianceMap, env.IrradianceMap);
+					}
+				}
+
+				UI::PopID();
+				ImGui::GetStyle().ButtonTextAlign = originalButtonTextAlign;
+				ImGui::PopItemWidth();
+
+				UI::EndPropertyGrid();
+
+				UI::BeginPropertyGrid();
+				UI::EndPropertyGrid();
 			});
 
 		/* New Component */
