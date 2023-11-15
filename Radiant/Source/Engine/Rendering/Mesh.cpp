@@ -10,6 +10,7 @@
 #include <assimp/LogStream.hpp>
 
 #include <Radiant/Rendering/Rendering.hpp>
+#include <Radiant/Animation/AssimpAnimationImporter.hpp>
 
 namespace Radiant
 {
@@ -26,12 +27,13 @@ namespace Radiant
 			aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
 			aiProcess_SortByPType |
-			aiProcess_PreTransformVertices |
 			aiProcess_GenNormals |
 			aiProcess_GenUVCoords |
 			aiProcess_OptimizeMeshes |
-			aiProcess_Debone |
-			aiProcess_ValidateDataStructure;
+			aiProcess_JoinIdenticalVertices |
+			aiProcess_LimitBoneWeights | 
+			aiProcess_ValidateDataStructure |
+			aiProcess_GlobalScale;
 	}
 
 	struct LogStream : public Assimp::LogStream
@@ -68,16 +70,17 @@ namespace Radiant
 
 		m_Shader = Rendering::GetShaderLibrary()->Get("Static_Shader.rads");
 
+		auto m_Skeleton = AssimpAnimationImporter::ImportSkeleton(scene);
+
 		uint32_t vertexCount = 0;
 		uint32_t indexCount = 0;
 
 		m_Submeshes.reserve(scene->mNumMeshes);
-		m_Materials.resize(scene->mNumMeshes);
 		m_Textures.resize(scene->mNumMeshes);
 
-		for (int i = 0; i < scene->mNumMeshes; i++)
+		for (int m = 0; m < scene->mNumMeshes; m++)
 		{
-			aiMesh* mesh = scene->mMeshes[i];
+			aiMesh* mesh = scene->mMeshes[m];
 			Submesh submesh;
 			submesh.Vertex = vertexCount;
 			submesh.Index = indexCount;
@@ -120,11 +123,21 @@ namespace Radiant
 			}
 		}
 
+		if (scene->HasAnimations())
+		{
+			for (int i = 0; i < scene->mNumAnimations; i++)
+			{
+
+			}
+		}
+
 		if (scene->HasMaterials())
 		{
 			MESH_LOG("=====================================", filepath);
 			MESH_LOG("====== Materials - {0} ======", filepath);
 			MESH_LOG("=====================================", filepath);
+
+			m_Materials.resize(scene->mNumMaterials);
 
 			for (uint32_t i = 0; i < scene->mNumMaterials; i++)
 			{
