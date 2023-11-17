@@ -91,4 +91,24 @@ namespace Radiant::AssimpAnimationImporter
 		BoneList list(scene);
 		return list.CreaetSkeleton();
 	}
+
+	template<typename T>
+	struct KeyFrame
+	{
+		T value;
+		float FrameTime;
+
+		KeyFrame(const float frameTime, const T& value)
+			: FrameTime(frameTime), Value(value)
+		{
+
+		}
+	};
+
+	struct Channel
+	{
+		std::vector<KeyFrame<glm::vec3>> Translations;
+		std::vector<KeyFrame<glm::quat>> Rotations;
+		std::vector<KeyFrame<glm::vec3>> Scales;
+	};
 }
