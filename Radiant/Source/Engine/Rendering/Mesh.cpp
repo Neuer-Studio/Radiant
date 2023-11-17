@@ -67,10 +67,11 @@ namespace Radiant
 		const aiScene* scene = importer.ReadFile(filepath, ImportFlags);
 		if (!scene || !scene->HasMeshes())
 			RADIANT_VERIFY("Failed to load mesh file: {0}", filepath);
-
+		
 		m_Shader = Rendering::GetShaderLibrary()->Get("Static_Shader.rads");
 
 		auto m_Skeleton = AssimpAnimationImporter::ImportSkeleton(scene);
+		auto m_Animations = AssimpAnimationImporter::ImportAnimation(scene, AssimpAnimationImporter::GetAnimationNames(scene)[0], m_Skeleton);
 
 		uint32_t vertexCount = 0;
 		uint32_t indexCount = 0;

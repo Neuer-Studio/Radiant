@@ -111,4 +111,51 @@ namespace Radiant::AssimpAnimationImporter
 		std::vector<KeyFrame<glm::quat>> Rotations;
 		std::vector<KeyFrame<glm::vec3>> Scales;
 	};
+
+	std::vector<Channel> ImportChannels(const aiAnimation* anim, const Skeleton& skeleton)
+	{
+		std::vector<Channel> channels;
+		std::unordered_map<std::string_view, uint32_t> boneIndices;
+
+		for (uint32_t i = 0; i < skeleton.GetNumBones(); i++)
+		{
+			boneIndices[skeleton.GetBoneName(i)] = i;
+		}
+
+		std::map<uint32_t, aiNodeAnim*> validChannels;
+		for (uint32_t i = 0; i < anim->mNumChannels; i++)
+		{
+			aiNodeAnim* nodeAnim = anim->mChannels[i];
+			auto it = boneIndices.find(nodeAnim->mNodeName.C_Str());
+			if (it != boneIndices.end())
+				validChannels[it->second] = nodeAnim;
+		}
+
+		return {};
+	}
+
+	Animation ImportAnimation(const aiScene* scene, const std::string_view animationName, const Skeleton& skeleton)
+	{
+		for (uint32_t i = 0; i < scene->mNumAnimations; i++)
+		{
+			const aiAnimation* anim = scene->mAnimations[i];
+			if (anim->mName.C_Str() == animationName)
+			{
+				auto channels = ImportChannels(anim, skeleton);
+			}
+		}
+		return Animation(animationName, 2.0f);
+	}
+
+	std::vector<std::string> GetAnimationNames(const aiScene* scene)
+	{
+		std::vector<std::string> names;
+		names.reserve(scene->mNumAnimations);
+		for (uint32_t i = 0; i < scene->mNumAnimations; i++)
+		{
+			names.push_back(scene->mAnimations[i]->mName.C_Str());
+		}
+
+		return names;
+	}
 }

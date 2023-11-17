@@ -15,6 +15,7 @@ namespace Radiant
 		void AddBone(const std::string& name, const glm::mat4& transform);
 
 		uint32_t GetNumBones() const { return static_cast<uint32_t>(m_BoneNames.size()); }
+		const std::string& GetBoneName(uint32_t index) const { return m_BoneNames[index]; }
 
 		const std::vector<glm::vec3>& GetBoneTranslations() const { return m_BoneTranslations; }
 		const std::vector<glm::quat>& GetBoneRotations() const { return m_BoneRotations; }
