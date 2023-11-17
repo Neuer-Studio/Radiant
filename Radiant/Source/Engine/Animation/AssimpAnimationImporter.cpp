@@ -115,6 +115,7 @@ namespace Radiant::AssimpAnimationImporter
 	std::vector<Channel> ImportChannels(const aiAnimation* anim, const Skeleton& skeleton)
 	{
 		std::vector<Channel> channels;
+		channels.reserve(skeleton.GetNumBones());
 		std::unordered_map<std::string_view, uint32_t> boneIndices;
 
 		for (uint32_t i = 0; i < skeleton.GetNumBones(); i++)
@@ -131,7 +132,19 @@ namespace Radiant::AssimpAnimationImporter
 				validChannels[it->second] = nodeAnim;
 		}
 
-		return {};
+		for (uint32_t i = 0; i < skeleton.GetNumBones(); i++)
+		{
+			auto validChannel = validChannels.find(i);
+			if (validChannel != validChannels.end())
+			{
+				auto nodeAnim = validChannel->second;
+				channels[i].Translations.reserve(nodeAnim->mNumPositionKeys);
+				channels[i].Rotations.reserve(nodeAnim->mNumRotationKeys);
+				channels[i].Scales.reserve(nodeAnim->mNumScalingKeys);
+			}
+		}
+
+		return channels;
 	}
 
 	Animation ImportAnimation(const aiScene* scene, const std::string_view animationName, const Skeleton& skeleton)
