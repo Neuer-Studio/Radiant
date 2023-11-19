@@ -8,7 +8,7 @@ namespace Radiant
 	template <typename T>
 	struct AnimationKey
 	{
-		T value;
+		T Value;
 		float FrameTime;
 		uint32_t Track;
 

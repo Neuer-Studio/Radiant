@@ -68,11 +68,18 @@ namespace Radiant
 		if (!scene || !scene->HasMeshes())
 			RADIANT_VERIFY("Failed to load mesh file: {0}", filepath);
 		
-		m_Shader = Rendering::GetShaderLibrary()->Get("Static_Shader.rads");
+		m_Shader = !HasSkeleton() ? Rendering::GetShaderLibrary()->Get("Static_Shader.rads") : Rendering::GetShaderLibrary()->Get("Animated_Shader.rads");
 
-		auto m_Skeleton = AssimpAnimationImporter::ImportSkeleton(scene);
-		auto m_Animations = AssimpAnimationImporter::ImportAnimation(scene, AssimpAnimationImporter::GetAnimationNames(scene)[0], m_Skeleton);
-
+		m_Skeleton = AssimpAnimationImporter::ImportSkeleton(scene);
+		if (HasSkeleton())
+		{
+			const auto animationNames = AssimpAnimationImporter::GetAnimationNames(scene);
+			m_Animations.reserve(std::size(animationNames));
+			for (const auto& animationName : animationNames)
+			{
+				m_Animations.emplace_back(AssimpAnimationImporter::ImportAnimation(scene, animationName, m_Skeleton));
+			}
+		}
 		uint32_t vertexCount = 0;
 		uint32_t indexCount = 0;
 
@@ -254,6 +261,11 @@ namespace Radiant
 		m_VertexBuffer = VertexBuffer::Create("Mesh", buffer);
 
 		m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), m_Indices.size() * sizeof(Index));
+
+	}
+
+	void Mesh::UpdateAnimations(Timestep ts)
+	{
 
 	}
 }

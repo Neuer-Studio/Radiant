@@ -29,6 +29,7 @@ namespace Radiant
 
 		Memory::Shared<RenderingPass> ActiveRenderingPass;
 		Memory::Shared<Pipeline> PiplineStaticMesh;
+		Memory::Shared<Pipeline> PiplineAnimatedMesh;
 		Memory::Shared<Pipeline> PiplineDynamicMesh;
 		Memory::Shared<Texture2D> WhiteTexture;
 
@@ -103,7 +104,20 @@ namespace Radiant
 			{ ShaderDataType::Float3, "a_Binormal" },
 			{ ShaderDataType::Float2, "a_TexCoords" },
 		};
+		
+		PipelineSpecification pipelineSpecificationAnimatedMesh;
+		pipelineSpecificationAnimatedMesh.Layout = {
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float3, "a_Normals" },
+			{ ShaderDataType::Float3, "a_Tangent" },
+			{ ShaderDataType::Float3, "a_Binormal" },
+			{ ShaderDataType::Float2, "a_TexCoords" },
+			{ ShaderDataType::Float4, "a_BoneIndices" },
+			{ ShaderDataType::Float4, "a_BoneWeights" },
+		};
+
 		s_Data->PiplineStaticMesh = Pipeline::Create(pipelineSpecificationStaticMesh);
+		s_Data->PiplineAnimatedMesh = Pipeline::Create(pipelineSpecificationAnimatedMesh);
 
 		{
 			s_Data->RenderingShaders = Memory::Shared<ShaderLibrary>::Create();
@@ -192,7 +206,10 @@ namespace Radiant
 	void Rendering::DrawMesh(Memory::Shared<Mesh> mesh, Memory::Shared<Material> material)
 	{
 		mesh->m_VertexBuffer->Bind();
-		s_Data->PiplineStaticMesh->Bind();
+		if(mesh->HasSkeleton())
+			s_Data->PiplineAnimatedMesh->Bind();
+		else
+			s_Data->PiplineStaticMesh->Bind();
 		mesh->m_IndexBuffer->Bind();
 		material->UpdateForRendering();
 
@@ -202,7 +219,10 @@ namespace Radiant
 	void Rendering::DrawMeshWithShader(Memory::Shared<Mesh> mesh, Memory::Shared<Shader> shader)
 	{
 		mesh->m_VertexBuffer->Bind();
-		s_Data->PiplineStaticMesh->Bind();
+		if (mesh->HasSkeleton())
+			s_Data->PiplineAnimatedMesh->Bind();
+		else
+			s_Data->PiplineStaticMesh->Bind();
 		mesh->m_IndexBuffer->Bind();
 
 		shader->Bind();

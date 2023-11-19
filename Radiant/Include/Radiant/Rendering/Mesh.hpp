@@ -7,6 +7,7 @@
 #include <Radiant/Rendering/IndexBuffer.hpp>
 #include <Radiant/Rendering/Pipeline.hpp>
 #include <Radiant/Rendering/Shader.hpp>
+#include <Radiant/Core/Timestep.hpp>
 #include <Radiant/Rendering/Material.hpp>
 
 namespace Assimp
@@ -56,6 +57,10 @@ namespace Radiant
 		const Memory::Shared<Shader>& GetShader() { return m_Shader; }
 		void SetShader(const Memory::Shared<Shader>& shader) { m_Shader = shader; }
 		Memory::Shared<Material> GetAlbedoMaterial() const { return m_Materials[0]; }
+
+		bool HasSkeleton() const { return (bool)m_Skeleton.GetNumBones() > 0; }
+
+		void UpdateAnimations(Timestep ts); // TODO: Create AnimationController component
 	private:
 		std::string m_FilePath;
 		std::string m_Name;
@@ -63,6 +68,9 @@ namespace Radiant
 		std::vector<Vertex> m_Vertices;
 		std::vector<Submesh> m_Submeshes;
 		std::vector<Index> m_Indices;
+
+		Skeleton m_Skeleton;
+		std::vector<Animation> m_Animations;
 
 		Memory::Shared<VertexBuffer> m_VertexBuffer;
 		Memory::Shared<Shader> m_Shader;
