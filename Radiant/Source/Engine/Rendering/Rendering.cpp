@@ -122,6 +122,7 @@ namespace Radiant
 		{
 			s_Data->RenderingShaders = Memory::Shared<ShaderLibrary>::Create();
 			s_Data->RenderingShaders->Load("Resources/Shaders/Static_Shader.rads");
+			s_Data->RenderingShaders->Load("Resources/Shaders/Animated_Shader.rads");
 			s_Data->RenderingShaders->Load("Resources/Shaders/Quad.rads");
 		}
 
@@ -206,8 +207,11 @@ namespace Radiant
 	void Rendering::DrawMesh(Memory::Shared<Mesh> mesh, Memory::Shared<Material> material)
 	{
 		mesh->m_VertexBuffer->Bind();
-		if(mesh->HasSkeleton())
+		if (mesh->HasSkeleton())
+		{
+			mesh->UpdateAnimations(0.0f);
 			s_Data->PiplineAnimatedMesh->Bind();
+		}
 		else
 			s_Data->PiplineStaticMesh->Bind();
 		mesh->m_IndexBuffer->Bind();
@@ -220,7 +224,10 @@ namespace Radiant
 	{
 		mesh->m_VertexBuffer->Bind();
 		if (mesh->HasSkeleton())
+		{
+			mesh->UpdateAnimations(0.0f);
 			s_Data->PiplineAnimatedMesh->Bind();
+		}
 		else
 			s_Data->PiplineStaticMesh->Bind();
 		mesh->m_IndexBuffer->Bind();

@@ -371,8 +371,8 @@ namespace Radiant
 
 		DrawComponentUI(ComponentType::Material, "Material", entity, [=](Memory::Shared<Component>& component) mutable
 			{
-				auto a = component.As<MaterialComponent>()->Material->GetOverridedValuesSize();
-				ImGui::Text("Test Material %u", component.As<MaterialComponent>()->Material->GetOverridedValuesSize());
+				//auto a = component.As<MaterialComponent>()->Material->GetOverridedValuesSize();
+				//ImGui::Text("Test Material %u", component.As<MaterialComponent>()->Material->GetOverridedValuesSize());
 			});
 
 		DrawComponentUI(ComponentType::SkyBox, "SkyBox", entity, [=](Memory::Shared<Component>& component) mutable

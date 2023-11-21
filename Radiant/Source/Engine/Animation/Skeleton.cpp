@@ -22,4 +22,17 @@ namespace Radiant
 		m_BoneRotations.push_back(rotation);
 		m_BoneScales.push_back(scale);
 	}
+
+	uint32_t Skeleton::GetBoneIndex(const std::string_view name) const
+	{
+		for (size_t i = 0; i < m_BoneNames.size(); ++i)
+		{
+			if (m_BoneNames[i] == name)
+			{
+				return static_cast<uint32_t>(i);
+			}
+		}
+		return -1;
+	}
+
 }

@@ -13,6 +13,7 @@ namespace Radiant
 		Skeleton(uint32_t size);
 
 		void AddBone(const std::string& name, const glm::mat4& transform);
+		uint32_t GetBoneIndex(const std::string_view name) const;
 
 		uint32_t GetNumBones() const { return static_cast<uint32_t>(m_BoneNames.size()); }
 		const std::string& GetBoneName(uint32_t index) const { return m_BoneNames[index]; }

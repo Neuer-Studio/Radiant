@@ -29,6 +29,7 @@ namespace Radiant
 
 		Memory::Shared<Shader> SkyBoxShader;
 		Memory::Shared<Shader> StaticShader;
+		Memory::Shared<Shader> AnimatedShader;
 		std::vector<DrawProperties> MeshDrawList;
 		std::vector<Memory::Shared<Mesh>> MeshDrawListWithShader;
 		Memory::Shared<TextureCube> EnvRadiance;
@@ -60,6 +61,7 @@ namespace Radiant
 	{
 		s_SceneInfo = new SceneInfo();
 		s_SceneInfo->StaticShader = Rendering::GetShaderLibrary()->Get("Static_Shader.rads");
+		s_SceneInfo->AnimatedShader = Rendering::GetShaderLibrary()->Get("Animated_Shader.rads");
 
 		/* Composite Pass */
 

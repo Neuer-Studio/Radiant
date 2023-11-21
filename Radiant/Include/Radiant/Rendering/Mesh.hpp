@@ -10,6 +10,14 @@
 #include <Radiant/Core/Timestep.hpp>
 #include <Radiant/Rendering/Material.hpp>
 
+#include <Radiant/Animation/Animation.hpp>
+#include <Radiant/Animation/Skeleton.hpp>
+
+struct aiNode;
+struct aiAnimation;
+struct aiNodeAnim;
+struct aiScene;
+
 namespace Assimp
 {
 	class Importer;
@@ -20,6 +28,8 @@ namespace Radiant
 	class Rendering;
 	class SceneRendering;
 	class Material;
+
+	const uint32_t BONEINFLUENCES = 4;
 
 	struct Submesh
 	{
@@ -38,6 +48,35 @@ namespace Radiant
 		glm::vec3 Tangent;
 		glm::vec3 Binormal;
 		glm::vec2 TexCoords;
+	};
+
+	struct BoneInfluence
+	{
+		Vertex vertex;
+
+		uint32_t BoneInfoIndices[BONEINFLUENCES] = { 0 };
+		float BoneWeight[BONEINFLUENCES] = { 0.f };
+
+		void AddBoneData(uint32_t bone, float weight)
+		{
+			for(uint32_t i = 0; i < BONEINFLUENCES; i++)
+			{
+				if (!BoneWeight[i])
+				{
+					BoneInfoIndices[i] = bone;
+					BoneWeight[i] = weight;
+					return;
+				}
+			}
+
+			RADIANT_VERIFY(false, "Too bany bones!");
+		}
+	};
+
+	struct BoneInfo
+	{
+		glm::mat4 BoneOffset;
+		glm::mat4 FinalTransformation;
 	};
 
 	struct Index
@@ -62,12 +101,33 @@ namespace Radiant
 
 		void UpdateAnimations(Timestep ts); // TODO: Create AnimationController component
 	private:
+		void BoneTransform(float time);
+		void ReadNodeHierarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform);
+
+		const aiNodeAnim* FindNodeAnim(const aiAnimation* animation, const std::string& nodeName);
+		uint32_t FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
+		uint32_t FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
+		uint32_t FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
+		glm::vec3 InterpolateTranslation(float animationTime, const aiNodeAnim* nodeAnim);
+		glm::quat InterpolateRotation(float animationTime, const aiNodeAnim* nodeAnim);
+		glm::vec3 InterpolateScale(float animationTime, const aiNodeAnim* nodeAnim);
+
+	private:
 		std::string m_FilePath;
 		std::string m_Name;
 
 		std::vector<Vertex> m_Vertices;
+		std::vector<BoneInfluence> m_BoneInfluences;
+		std::vector<BoneInfo> m_BoneInfo;
 		std::vector<Submesh> m_Submeshes;
 		std::vector<Index> m_Indices;
+
+		uint32_t m_BoneCount = 0;
+		std::unordered_map<std::string, uint32_t> m_BoneMapping;
+		glm::mat4 m_InverseTransform;
+		std::vector<glm::mat4> m_BoneTransforms;
+
+		const aiScene* m_Scene;
 
 		Skeleton m_Skeleton;
 		std::vector<Animation> m_Animations;

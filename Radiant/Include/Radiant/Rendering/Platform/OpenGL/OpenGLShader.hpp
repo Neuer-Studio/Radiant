@@ -27,7 +27,7 @@ namespace Radiant
 		void CompileAndUploadShader();
 	private:
 		void Parse();
-	private:
+	public:
 		void UploadUniformInt(int32_t location, int value, UniformTarget type);
 		void UploadUniformUint(int32_t location, int value, UniformTarget type);
 		void UploadUniformBool(int32_t location, bool value, UniformTarget type);
@@ -37,7 +37,7 @@ namespace Radiant
 		void UploadUniformFloat3(int32_t location, const glm::vec3& values, UniformTarget type);
 
 		void UploadUniformMat4(int32_t location, const glm::mat4& values, UniformTarget type);
-	private:
+	//private:
 		int32_t GetExternalUniformPosition(const std::string& uniformName);
 		int32_t GetRadiantUniformPosition(const std::string& uniformName, UniformTarget type);
 	public:
