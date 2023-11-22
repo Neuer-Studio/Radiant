@@ -5,6 +5,7 @@ project "Radiant"
     pchheader "rpch.hpp"
     pchsource "Source/rpch.cpp"
     forceincludes { "rpch.hpp" }
+	staticruntime "off"
 
     LibraryDir = {}
     LibraryDir["assimp"] = "../ThirdParty/assimp/bin/Debug/assimp-vc142-mtd.lib"

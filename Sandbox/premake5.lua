@@ -1,7 +1,7 @@
-local VulkanSDKPath = os.getenv("VULKAN_SDK") .. "/include"
 
 project "Sandbox"
     kind "ConsoleApp"
+    staticruntime "off"
 
     files { 
         -- Engine 
@@ -19,7 +19,6 @@ project "Sandbox"
 
         "../ThirdParty/",
 
-        VulkanSDKPath,
     }
 
     links{
