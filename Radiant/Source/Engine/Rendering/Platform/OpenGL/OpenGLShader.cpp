@@ -3,6 +3,9 @@
 #include <Rendering/Rendering.hpp>	
 #include <glm/gtc/type_ptr.hpp>
 
+#include <shaderc/shaderc.hpp>
+#include <spirv_cross/spirv_glsl.hpp>
+
 namespace Radiant
 {
 #define UNIFORM_LOGGING 1
@@ -376,6 +379,9 @@ namespace Radiant
 		RADIANT_VERIFY(!m_RenderingID);
 
 		m_ShaderSource = PreProcess(source);
+
+		shaderc::Compiler compiler;
+		shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(m_ShaderSource[0], shaderc_vertex_shader, m_AssetPath.string().c_str(), {});
 
 		Memory::Shared<OpenGLShader> instace = this;
 		Rendering::SubmitCommand([instace]() mutable
