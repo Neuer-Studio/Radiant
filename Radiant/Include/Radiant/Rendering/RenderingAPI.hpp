@@ -40,7 +40,7 @@ namespace Radiant
 		virtual void DrawIndexed(uint32_t count, PrimitiveType type, bool depthTest) = 0;
 		virtual void Clear(float r, float g, float b) = 0;
 	private:
-		inline static RenderingAPIType s_RendererAPI = RenderingAPIType::OpenGL;
+		inline static RenderingAPIType s_RendererAPI = RenderingAPIType::Vulkan;
 
 		friend Rendering;
 	};

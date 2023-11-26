@@ -380,24 +380,6 @@ namespace Radiant
 
 		m_ShaderSource = PreProcess(source);
 
-		shaderc::CompileOptions options;
-		options.AddMacroDefinition("OPENGL");
-		shaderc::Compiler compiler;
-		shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(m_ShaderSource[35633], shaderc_vertex_shader, m_AssetPath.string().c_str(), options);
-
-		if (module.GetCompilationStatus() != shaderc_compilation_status_success)
-		{
-			RA_ERROR(module.GetErrorMessage());
-			RADIANT_VERIFY(false);
-		}
-
-		const uint8_t* begin = (const uint8_t*)module.cbegin();
-		const uint8_t* end = (const uint8_t*)module.cend();
-		const ptrdiff_t size = end - begin;
-
-		auto outputBinary = std::vector<uint32_t>(module.cbegin(), module.cend());
-
-
 		Memory::Shared<OpenGLShader> instace = this;
 		Rendering::SubmitCommand([instace]() mutable
 			{

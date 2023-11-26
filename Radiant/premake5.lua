@@ -15,8 +15,8 @@ project "Radiant"
     LibraryDir["spirv_cross_core_Debug"] = "../ThirdParty/VulkanSDK/spirv_cross/Lib/spirv-cross-cored.lib"
     LibraryDir["spirv_cross_glsl_Debug"] = "../ThirdParty/VulkanSDK/spirv_cross/Lib/spirv-cross-glsld.lib"
     LibraryDir["vulkan1"] = "../ThirdParty/VulkanSDK/Lib/vulkan-1.lib"
-    LibraryDir["shaderc_combined_Debug"] = "../ThirdParty/VulkanSDK/Lib/shaderc_combinedd.lib"
-    LibraryDir["shaderc_util_Debug"] = "../ThirdParty/VulkanSDK/Lib/shaderc_utild.lib"
+    LibraryDir["shaderc_combined_Debug"] = "../ThirdParty/VulkanSDK/shaderc/Lib/shaderc_combinedd.lib"
+    LibraryDir["shaderc_util_Debug"] = "../ThirdParty/VulkanSDK/shaderc/Lib/shaderc_utild.lib"
 
     files { 
         -- Precompiled header
@@ -49,6 +49,7 @@ project "Radiant"
         "../ThirdParty/stb/include/",
         "../ThirdParty/VulkanSDK/shaderc/Include",
         "../ThirdParty/VulkanSDK/spirv_cross/Include",
+        "../ThirdParty/VulkanSDK/include",
         
         "../ThirdParty/",
 
@@ -64,6 +65,7 @@ project "Radiant"
         "%{LibraryDir.shaderc_shared_Debug}",
         "%{LibraryDir.shaderc_combined_Debug}",
         "%{LibraryDir.shaderc_util_Debug}",
+        "%{LibraryDir.vulkan1}",
     }
 
     filter "configurations:Debug"
