@@ -107,4 +107,11 @@ namespace Radiant
 			}
 		}
 	}
+
+	VulkanContext::~VulkanContext()
+	{
+		vkDestroyInstance(s_VulkanInstance, nullptr);
+		s_VulkanInstance = nullptr;
+	}
+
 }

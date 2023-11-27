@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vulkan/vulkan.h>
+
 namespace Radiant
 {
 	/*
@@ -10,6 +12,8 @@ namespace Radiant
 	{
 	public:
 		VulkanPhysicalDevice();
+	private:
+		VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
 	};
 
 	/*

@@ -10,7 +10,9 @@ namespace Radiant
 	{
 	public:
 		VulkanContext(GLFWwindow* windowHandle);
-		virtual ~VulkanContext() override = default;
+		virtual ~VulkanContext() override;
+
+		static VkInstance GetInstance() { return s_VulkanInstance; }
 
 		virtual void Init() override;
 		virtual void SwapBuffers() const override {}
@@ -18,6 +20,5 @@ namespace Radiant
 		GLFWwindow* m_Window;
 		inline static VkInstance s_VulkanInstance;
 		VkDebugReportCallbackEXT m_DebugReportCallback = VK_NULL_HANDLE;
-
 	};
 }
