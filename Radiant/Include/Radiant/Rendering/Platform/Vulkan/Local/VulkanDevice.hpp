@@ -11,6 +11,10 @@ namespace Radiant
 	class VulkanPhysicalDevice : public Memory::RefCounted
 	{
 	public:
+		struct QueueFamilyIndices {
+			uint32_t GraphicsFamily = -1;
+		};
+
 		VulkanPhysicalDevice();
 	private:
 		VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;

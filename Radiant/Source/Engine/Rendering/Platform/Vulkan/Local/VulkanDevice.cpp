@@ -40,6 +40,33 @@ namespace Radiant
 
 		}
 
+		if (!selectedPhysicalDevice)
+		{
+			RADIANT_VERIFY("Could not find discrete GPU.");
+			selectedPhysicalDevice = devices.back();
+		}
+
+		RADIANT_VERIFY(selectedPhysicalDevice, "Could not find any physical devices!");
+
+		m_PhysicalDevice = selectedPhysicalDevice;
+
+		uint32_t QueueFamilyCount = 0u;
+		vkGetPhysicalDeviceQueueFamilyProperties(m_PhysicalDevice, &QueueFamilyCount, nullptr);
+		RADIANT_VERIFY(QueueFamilyCount > 0, "");
+
+		std::vector<VkQueueFamilyProperties> queueFamilies(QueueFamilyCount);
+		vkGetPhysicalDeviceQueueFamilyProperties(m_PhysicalDevice, &QueueFamilyCount, queueFamilies.data());
+
+		QueueFamilyIndices indices;
+
+		int i = 0;
+		for (const auto& queueFamily : queueFamilies) {
+			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+				indices.GraphicsFamily = i;
+			}
+
+			i++;
+		}
 	}
 
 	/*
