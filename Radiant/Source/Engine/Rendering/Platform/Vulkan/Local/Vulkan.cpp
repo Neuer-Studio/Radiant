@@ -1,0 +1,1 @@
+#include <Radiant/Rendering/Platform/Vulkan/Local/Vulkan.hpp>

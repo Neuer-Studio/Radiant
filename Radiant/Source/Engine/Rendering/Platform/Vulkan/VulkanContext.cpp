@@ -1,6 +1,7 @@
 #include <Radiant/Rendering/Platform/Vulkan/VulkanContext.hpp>
 
 #include <GLFW/glfw3.h>
+#include <Rendering/Platform/Vulkan/Local/Vulkan.hpp>
 
 namespace Radiant
 {
@@ -87,11 +88,7 @@ namespace Radiant
 			}
 		}
 
-		if (vkCreateInstance(&createInfo, nullptr, &s_VulkanInstance) != VK_SUCCESS)
-		{
-			RADIANT_VERIFY(false);
-		}
-
+		VK_CHECK_RESULT(vkCreateInstance(&createInfo, nullptr, &s_VulkanInstance));
 		if (s_DebugValidation)
 		{
 			auto vkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(s_VulkanInstance, "vkCreateDebugReportCallbackEXT");
@@ -101,15 +98,17 @@ namespace Radiant
 			debug_report_ci.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
 			debug_report_ci.pfnCallback = VulkanDebugReportCallback;
 			debug_report_ci.pUserData = NULL;
-			if (vkCreateDebugReportCallbackEXT(s_VulkanInstance, &debug_report_ci, nullptr, &m_DebugReportCallback) != VK_SUCCESS)
-			{
-				RADIANT_VERIFY(false);
-			}
+			VK_CHECK_RESULT(vkCreateDebugReportCallbackEXT(s_VulkanInstance, &debug_report_ci, nullptr, &m_DebugReportCallback));
 		}
+
+		m_PhysicalDevice = VulkanPhysicalDevice::Create();
+		m_Device = VulkanDevice::Create(m_PhysicalDevice);
 	}
 
 	VulkanContext::~VulkanContext()
 	{
+		m_Device->Destroy();
+
 		vkDestroyInstance(s_VulkanInstance, nullptr);
 		s_VulkanInstance = nullptr;
 	}

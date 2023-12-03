@@ -3,6 +3,7 @@
 #include <Radiant/Rendering/RenderingContext.hpp>
 
 #include <vulkan/vulkan.h>
+#include <Rendering/Platform/Vulkan/Local/VulkanDevice.hpp>
 
 namespace Radiant
 {
@@ -20,5 +21,9 @@ namespace Radiant
 		GLFWwindow* m_Window;
 		inline static VkInstance s_VulkanInstance;
 		VkDebugReportCallbackEXT m_DebugReportCallback = VK_NULL_HANDLE;
+
+		// Devices
+		Memory::Shared<VulkanPhysicalDevice> m_PhysicalDevice;
+		Memory::Shared<VulkanDevice> m_Device;
 	};
 }
